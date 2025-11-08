@@ -1743,6 +1743,4 @@
 
   $('select:not(.ignore)').niceSelect();
 
-
-
 })(jQuery);
