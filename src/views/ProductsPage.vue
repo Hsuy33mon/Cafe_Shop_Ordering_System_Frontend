@@ -129,8 +129,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <!--Product All Single End-->
-                                                        <!--Product All Single Start-->
+
                                                         <div class="col-xl-4 col-lg-6 col-md-6">
                                                             <div class="single-product-style1">
                                                                 <div class="single-product-style1__img">
@@ -179,8 +178,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <!--Product All Single End-->
-                                                        <!--Product All Single Start-->
+
                                                         <div class="col-xl-4 col-lg-6 col-md-6">
                                                             <div class="single-product-style1">
                                                                 <div class="single-product-style1__img">
@@ -1689,18 +1687,6 @@
                                     <input type="text" placeholder="Search">
                                     <button type="submit"><i class="fa fa-search"></i></button>
                                 </form>
-                            </div>
-                            <div class="product__price-ranger product__sidebar-single">
-                                <h3 class="product__sidebar-title">Price</h3>
-                                <div class="price-ranger">
-                                    <div id="slider-range"></div>
-                                    <div class="ranger-min-max-block">
-                                        <input type="text" readonly class="min">
-                                        <span>-</span>
-                                        <input type="text" readonly class="max">
-                                        <input type="submit" value="Filter">
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="shop-category product__sidebar-single">
