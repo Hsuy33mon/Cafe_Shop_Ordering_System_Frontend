@@ -1,17 +1,6 @@
 <script setup lang="ts">
 </script>
-<template>
-<!DOCTYPE html>
-<html lang="en">
-<body class="custom-cursor">
-    <!--Start Preloader-->
-    <!-- <div class="loader js-preloader">
-        <div></div>
-        <div></div>
-        <div></div>
-    </div> -->
-    <!--End Preloader-->
-       
+  <template>
         <section class="page-header">
             <div class="page-header__bg" style="background-image: url(assets/images/backgrounds/page-header-bg.jpg);">
             </div>
@@ -212,11 +201,7 @@
                 </div>
             </div>
         </section>
-<!-- 
-    -->
-</body>
+  </template>
 
-</html>
-</template>
 <style scoped>
 </style>

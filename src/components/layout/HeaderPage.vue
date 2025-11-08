@@ -63,6 +63,8 @@
     <link rel="stylesheet" href="/assets/css/module-css/why-choose.css" />
     <link rel="stylesheet" href="/assets/css/module-css/gallery.css" />
     <link rel="stylesheet" href="/assets/css/module-css/page-header.css" />
+    <link rel="stylesheet" href="/assets/css/module-css/shop.css" />
+    <link rel="stylesheet" href="/assets/css/module-css/error.css" />
 
     <!-- template styles -->
     <link rel="stylesheet" href="/assets/css/style.css" />
