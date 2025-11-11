@@ -30,19 +30,14 @@
                             </div>
                         </li>
                     </ul>
-                    <div class="main-menu__top-right">
-                        <div class="main-menu__top-login-reg-box">
-                            <a href="login.html">Login</a>
-                            <p>or</p>
-                            <a href="sign-up.html">Register</a>
-                        </div>
+                    <!-- <div class="main-menu__top-right">
                         <div class="main-menu__social">
                             <a href="#"><i class="icon-facebook"></i></a>
                             <a href="#"><i class="icon-twitter"></i></a>
                             <a href="#"><i class="icon-instagram"></i></a>
                             <a href="#"><i class="icon-youtube"></i></a>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <nav class="main-menu">
@@ -162,51 +157,10 @@
                                         </ul>
                                     </li>
                                     <li>
+                                        <a href="/products">Products</a>
+                                    </li>
+                                    <li>
                                         <a href="about.html">About Us</a>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#">Pages</a>
-                                        <ul class="shadow-box">
-                                            <li><a href="services.html">Services</a></li>
-                                            <li><a href="drivers.html">Drivers</a></li>
-                                            <li><a href="driver-details.html">Driver Details</a></li>
-                                            <li><a href="testimonials.html">Testimonials</a></li>
-                                            <li><a href="pricing.html">Pricing</a></li>
-                                            <li><a href="faq.html">FAQs</a></li>
-                                            <li><a href="404.html">404 Error</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#">Cars</a>
-                                        <ul class="shadow-box">
-                                            <li><a href="cars.html">Cars</a></li>
-                                            <li><a href="car-list-v-1.html">Car Listing V-1</a></li>
-                                            <li><a href="car-list-v-2.html">Car Listing V-2</a></li>
-                                            <li><a href="car-list-v-3.html">Car Listing V-3</a></li>
-                                            <li><a href="listing-single.html">Car Listing Single</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#">Shop</a>
-                                        <ul class="shadow-box">
-                                            <li><a href="products.html">Products</a></li>
-                                            <li><a href="product-details.html">Product Details</a></li>
-                                            <li><a href="cart.html">Cart</a></li>
-                                            <li><a href="checkout.html">Checkout</a></li>
-                                            <li><a href="wishlist.html">Wishlist</a></li>
-                                            <li><a href="sign-up.html">Sign Up</a></li>
-                                            <li><a href="login.html">Login</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="dropdown">
-                                        <a href="#">Blog</a>
-                                        <ul class="shadow-box">
-                                            <li><a href="blog.html">Blog</a></li>
-                                            <li><a href="blog-standard.html">Blog Standard</a></li>
-                                            <li><a href="blog-left-sidebar.html">Blog Left Sidebar</a></li>
-                                            <li><a href="blog-right-sidebar.html">Blog Right Sidebar</a></li>
-                                            <li><a href="blog-details.html">Blog Details</a></li>
-                                        </ul>
                                     </li>
                                     <li>
                                         <a href="contact.html">Contact</a>

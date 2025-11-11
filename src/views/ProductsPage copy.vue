@@ -1959,11 +1959,6 @@
                 <!--Gallery One Single End-->
             </div>
         </section>
-       
-     
-
-
-
 
     </div>
 </template>
