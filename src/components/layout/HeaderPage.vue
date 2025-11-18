@@ -3,9 +3,11 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
 const goToCart = () => {
   router.push('/cart')
 }
+
 const isMobileMenuOpen = ref(false)
 const cartCount = ref(5)
 
@@ -18,54 +20,39 @@ function closeMobile() {
   <!-- NAVBAR -->
   <header class="navbar">
     <div class="cs-container navbar-inner">
-      <div class="navbar-left">
-        <div class="logo">
-          <div class="logo-icon">☕</div>
-          <div class="logo-text">CafeShop</div>
-        </div>
-
-        <!-- Desktop nav links -->
-        <nav class="nav-links">
-          <RouterLink
-            to="/"
-            class="nav-link"
-            active-class="nav-link--active"
-          >
-            Home
-          </RouterLink>
-          <RouterLink
-            to="/about"
-            class="nav-link"
-            active-class="nav-link--active"
-          >
-            About
-          </RouterLink>
-          <RouterLink
-            to="/products"
-            class="nav-link"
-            active-class="nav-link--active"
-          >
-            Products
-          </RouterLink>
-          <RouterLink
-            to="/contact"
-            class="nav-link"
-            active-class="nav-link--active"
-          >
-            Contact
-          </RouterLink>
-        </nav>
+      <!-- LEFT: LOGO -->
+      <div class="navbar-logo">
+        <div class="logo-icon">☕</div>
+        <div class="logo-text">CafeShop</div>
       </div>
 
-      <div class="navbar-right">
-        <!-- Shopping bag -->
-        <button type="button" class="bag-btn" @click="goToCart">
-          <span class="bag-icon">🛍</span>
-          <span class="bag-label">Bag</span>
-          <span v-if="cartCount > 0" class="bag-count">{{ cartCount }}</span>
+      <!-- CENTER: NAV LINKS -->
+      <nav class="nav-links">
+        <RouterLink to="/" class="nav-link" active-class="nav-link--active">
+          Home
+        </RouterLink>
+        <RouterLink to="/about" class="nav-link" active-class="nav-link--active">
+          About
+        </RouterLink>
+        <RouterLink to="/products" class="nav-link" active-class="nav-link--active">
+          Menu
+        </RouterLink>
+        <RouterLink to="/shop" class="nav-link" active-class="nav-link--active">
+          Shop
+        </RouterLink>
+        <RouterLink to="/contact" class="nav-link" active-class="nav-link--active">
+          Contact
+        </RouterLink>
+      </nav>
+
+      <!-- RIGHT: PURCHASE / BAG + HAMBURGER -->
+      <div class="navbar-actions">
+        <button type="button" class="purchase-btn" @click="goToCart">
+          <span class="purchase-icon">🛍</span>
+          <span class="purchase-label">Purchase</span>
+          <span v-if="cartCount > 0" class="purchase-count">{{ cartCount }}</span>
         </button>
 
-        <!-- Mobile hamburger -->
         <button
           type="button"
           class="menu-btn"
@@ -83,229 +70,181 @@ function closeMobile() {
       <nav v-if="isMobileMenuOpen" class="mobile-menu">
         <RouterLink to="/" class="mobile-link" @click="closeMobile">Home</RouterLink>
         <RouterLink to="/about" class="mobile-link" @click="closeMobile">About</RouterLink>
-        <RouterLink to="/products" class="mobile-link" @click="closeMobile">Products</RouterLink>
+        <RouterLink to="/products" class="mobile-link" @click="closeMobile">Menu</RouterLink>
+        <RouterLink to="/shop" class="mobile-link" @click="closeMobile">Shop</RouterLink>
         <RouterLink to="/contact" class="mobile-link" @click="closeMobile">Contact</RouterLink>
-        <RouterLink to="/cart" class="mobile-link" @click="closeMobile">Shopping Bag</RouterLink>
+        <RouterLink to="/cart" class="mobile-link" @click="closeMobile">Purchase</RouterLink>
       </nav>
     </transition>
   </header>
 </template>
 
 <style scoped>
-.page {
-  background-color: var(--cs-bg);
-  min-height: 100vh;
-}
-
-/* ---------- NAVBAR ---------- */
+/* ---------- NAVBAR WRAPPER ---------- */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(16px);
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.92),
-    rgba(255, 255, 255, 0.85)
-  );
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  background-color: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .navbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 0.7rem;
+  height: 68px;
 }
 
-/* LEFT SIDE */
-.navbar-left {
+/* ---------- LEFT: LOGO ---------- */
+.navbar-logo {
   display: flex;
   align-items: center;
-  gap: 2.4rem;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .logo-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 14px;
-  background: radial-gradient(circle at 20% 0, #fef3c7, #facc15);
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background-color: #facc15;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: 0 10px 22px rgba(234, 179, 8, 0.7);
+  font-size: 1rem;
 }
 
 .logo-text {
-  font-weight: 800;
-  font-size: 1.1rem;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+  color: #0f172a;
 }
 
-/* NAV LINKS */
+/* ---------- CENTER: LINKS ---------- */
 .nav-links {
+  flex: 1;
   display: flex;
-  gap: 1.4rem;
-  font-size: 0.94rem;
+  justify-content: center;
+  gap: 2.5rem;
+  font-size: 0.92rem;
 }
 
 .nav-link {
   position: relative;
   text-decoration: none;
-  color: var(--cs-text-muted);
-  padding: 0.25rem 0;
+  color: #111827;
+  opacity: 0.7;
+  padding-left: 0; /* will shift when active */
   transition:
+    opacity 0.16s ease,
     color 0.16s ease,
-    transform 0.12s ease;
+    padding-left 0.16s ease;
 }
 
-.nav-link::after {
+/* yellow dot bullet when active (Starbelly style) */
+.nav-link--active {
+  opacity: 1;
+  color: #111827;
+  padding-left: 0.8rem;
+  font-weight: 500;
+}
+
+.nav-link--active::before {
   content: '';
   position: absolute;
-  left: 50%;
-  bottom: -0.35rem;
-  width: 0;
-  height: 2px;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #facc15, #f97316);
-  transform: translateX(-50%);
-  transition: width 0.18s ease;
+  background-color: #facc15;
+  transform: translateY(-50%);
 }
 
+/* small hover emphasis for desktop */
 .nav-link:hover {
-  color: var(--cs-text-main);
-  transform: translateY(-1px);
+  opacity: 1;
 }
 
-.nav-link:hover::after {
-  width: 100%;
-}
-
-.nav-link--active {
-  color: var(--cs-text-main);
-  font-weight: 600;
-}
-
-.nav-link--active::after {
-  width: 100%;
-}
-
-/* RIGHT SIDE */
-.navbar-right {
+/* ---------- RIGHT: PURCHASE BUTTON + HAMBURGER ---------- */
+.navbar-actions {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
-/* Bag button */
-.bag-btn {
-  position: relative;
+/* big yellow rectangle button */
+.purchase-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: radial-gradient(circle at 0 0, #fefce8, #ffffff);
+  gap: 0.45rem;
+  padding: 0.6rem 1.3rem;
+  border-radius: 0;
+  border: none;
+  background-color: #facc15;
   cursor: pointer;
-  font-size: 0.86rem;
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
 }
 
-.bag-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
-  border-color: rgba(234, 179, 8, 0.7);
-  background: radial-gradient(circle at 0 0, #fef3c7, #ffffff);
-}
-
-.bag-icon {
+.purchase-icon {
   font-size: 1rem;
 }
 
-.bag-label {
-  font-size: 0.85rem;
-}
-
-.bag-count {
-  min-width: 1.3rem;
-  height: 1.3rem;
+.purchase-count {
+  min-width: 1.25rem;
+  height: 1.25rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #f97316, #ef4444);
+  background-color: #111827;
+  color: #f9fafb;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #f9fafb;
-  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.65);
+  font-size: 0.75rem;
 }
 
-/* Hamburger */
+/* hamburger */
 .menu-btn {
   display: none;
   border: none;
-  background: transparent;
-  padding: 0.3rem;
+  background: none;
+  padding: 0.25rem;
   flex-direction: column;
   gap: 0.22rem;
   cursor: pointer;
-  border-radius: 999px;
-  transition:
-    background-color 0.16s ease,
-    box-shadow 0.16s ease,
-    transform 0.12s ease;
-}
-
-.menu-btn:hover {
-  background-color: rgba(15, 23, 42, 0.03);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-  transform: translateY(-1px);
 }
 
 .menu-bar {
   width: 18px;
   height: 2px;
   border-radius: 999px;
-  background-color: var(--cs-text-main);
+  background-color: #111827;
   transition:
     transform 0.18s ease,
-    opacity 0.18s ease,
-    width 0.18s ease;
+    opacity 0.18s ease;
 }
 
-/* hamburger animation when open */
+/* turn into "X" when open */
 .menu-btn--open .menu-bar:nth-child(1) {
   transform: translateY(3px) rotate(45deg);
-  width: 18px;
 }
-
 .menu-btn--open .menu-bar:nth-child(2) {
   transform: translateY(-3px) rotate(-45deg);
-  width: 18px;
 }
 
-/* mobile menu */
+/* ---------- MOBILE MENU ---------- */
 .mobile-menu {
   display: none;
 }
 
-/* ---------- MOBILE BEHAVIOUR ---------- */
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .nav-links {
+    display: none;
+  }
+
+  .purchase-btn {
     display: none;
   }
 
@@ -316,18 +255,16 @@ function closeMobile() {
   .mobile-menu {
     display: flex;
     flex-direction: column;
-    background-color: rgba(255, 255, 255, 0.98);
-    border-top: 1px solid rgba(148, 163, 184, 0.3);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-    backdrop-filter: blur(12px);
+    background-color: #ffffff;
+    border-top: 1px solid #f3f4f6;
   }
 
   .mobile-link {
     padding: 0.9rem 1.5rem;
     text-decoration: none;
     font-size: 0.95rem;
-    color: var(--cs-text-main);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    color: #111827;
+    border-bottom: 1px solid #f3f4f6;
   }
 
   .mobile-link:last-child {
@@ -335,14 +272,13 @@ function closeMobile() {
   }
 }
 
-/* ---------- TRANSITIONS (for <transition name="fade-down">) ---------- */
+/* transition for <transition name="fade-down"> */
 .fade-down-enter-active,
 .fade-down-leave-active {
   transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
-
 .fade-down-enter-from,
 .fade-down-leave-to {
   opacity: 0;
