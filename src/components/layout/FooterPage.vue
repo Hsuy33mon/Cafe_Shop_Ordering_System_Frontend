@@ -1,111 +1,228 @@
 <template>
-  <footer class="site-footer">
-    <div
-      class="site-footer__bg"
-      style="background-image: url(/assets/images/backgrounds/site-footer-bg.jpg)"
-    ></div>
-    <div class="site-footer__top">
-      <div class="container">
-        <div class="site-footer__top-inner">
-          <div class="row">
-            <div class="col-xl-4 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="100ms">
-              <div class="footer-widget__about">
-                <div class="footer-widget__about-logo">
-                  <a href="index.html"
-                    ><img src="/assets/images/resources/footer-logo.png" alt=""
-                  /></a>
-                </div>
-                <p class="footer-widget__about-text">
-                  Car Is Where Early Adopters And Innovation Seekers Find Lively Imaginative Tech.
-                </p>
-                <form class="footer-widget__form">
-                  <div class="footer-widget__input">
-                    <input type="email" placeholder="Your Email" />
-                  </div>
-                  <button type="submit" class="footer-widget__btn">
-                    <i class="icon-right-arrow"></i>
-                  </button>
-                </form>
-              </div>
-            </div>
-            <div class="col-xl-2 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="200ms">
-              <div class="footer-widget__links">
-                <h4 class="footer-widget__title">Quick links</h4>
-                <ul class="footer-widget__links-list list-unstyled">
-                  <li><a href="about.html">About Us</a></li>
-                  <li><a href="services.html">Our Services</a></li>
-                  <li><a href="drivers.html">Our Drivers</a></li>
-                  <li><a href="blog.html">Our Blog</a></li>
-                  <li><a href="contact.html">Contact Us</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="400ms">
-              <div class="footer-widget__services">
-                <h4 class="footer-widget__title">Services</h4>
-                <ul class="footer-widget__links-list list-unstyled">
-                  <li><a href="car-list-v-1.html">Your Reliable Ride</a></li>
-                  <li><a href="car-list-v-2.html">Express Shuttle</a></li>
-                  <li><a href="car-list-v-3.html">Travel in Style</a></li>
-                  <li><a href="cars.html">Rental List</a></li>
-                  <li><a href="listing-single.html">Dash Transport</a></li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="300ms">
-              <div class="footer-widget__contact">
-                <h3 class="footer-widget__title">Contact Us</h3>
-                <ul class="footer-widget__contact-list list-unstyled">
-                  <li>
-                    <div class="icon">
-                      <span class="icon-pin"></span>
-                    </div>
-                    <p>
-                      4140 Parker Rd. Allentown, New <br />
-                      Mexico 31134
-                    </p>
-                  </li>
-                  <li>
-                    <div class="icon">
-                      <span class="icon-call"></span>
-                    </div>
-                    <p><a href="tel:2195550114">(219) 555-0114</a></p>
-                  </li>
-                  <li>
-                    <div class="icon">
-                      <span class="icon-envelope"></span>
-                    </div>
-                    <p><a href="mailto:gorent@gmail.com">gorent@gmail.com</a></p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+  <footer class="footer">
+    <div class="cs-container footer-inner">
+      <!-- Brand / intro -->
+      <div class="footer-col footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">☕</div>
+          <div class="logo-text">CafeShop</div>
+        </div>
+        <p class="footer-text">
+          Feel-good food, cozy coffee and late-night snacks – made for food lovers staying in or
+          hanging out.
+        </p>
+
+        <div class="footer-badges">
+          <span class="badge">Fresh daily</span>
+          <span class="badge">Room delivery</span>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="footer-col">
+        <h3 class="footer-title">Explore</h3>
+        <nav class="footer-links">
+          <RouterLink to="/" class="footer-link">Home</RouterLink>
+          <RouterLink to="/about" class="footer-link">About</RouterLink>
+          <RouterLink to="/products" class="footer-link">Menu</RouterLink>
+          <RouterLink to="/cart" class="footer-link">Your Cart</RouterLink>
+          <RouterLink to="/contact" class="footer-link">Contact</RouterLink>
+        </nav>
+      </div>
+
+      <!-- Contact + hours -->
+      <div class="footer-col">
+        <h3 class="footer-title">Visit &amp; hours</h3>
+        <p class="footer-text">
+          Ground floor, hotel lobby<br />
+          (Cafe corner)
+        </p>
+        <p class="footer-text">Daily: <strong>7:00 – 22:00</strong></p>
+
+        <div class="footer-contact">
+          <p class="footer-text">
+            Phone: <a href="tel:+66000000000" class="footer-link-inline">+66 00 000 0000</a>
+          </p>
+          <p class="footer-text">Line / Chat: <span class="footer-link-inline">@cafeshop</span></p>
         </div>
       </div>
     </div>
-    <div class="site-footer__bottom">
-      <div class="container">
-        <div class="row">
-          <div class="col-xl-12">
-            <div class="site-footer__bottom-inner">
-              <div class="site-footer__copyright">
-                <p class="site-footer__copyright-text">
-                  © 2025 Gorent By
-                  <a href="https://themeforest.net/user/dreamlayout">Dreamlayout.</a> All Rights
-                  Reserved.
-                </p>
-              </div>
-              <div class="site-footer__bottom-menu-box">
-                <ul class="list-unstyled site-footer__bottom-menu">
-                  <li><a href="about.html">Terms of Service</a></li>
-                  <li><a href="about.html">Privacy policy</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <div class="cs-container footer-bottom-inner">
+        <p class="footer-copy">© {{ new Date().getFullYear() }} CafeShop. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#" class="footer-bottom-link">Privacy</a>
+          <a href="#" class="footer-bottom-link">Terms</a>
         </div>
       </div>
     </div>
   </footer>
 </template>
+
+<script lang="ts" setup>
+import { RouterLink } from 'vue-router'
+</script>
+
+<style scoped>
+.footer {
+  margin-top: 2rem;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding-top: 2.4rem;
+}
+
+/* main area */
+.footer-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 2rem;
+  padding-bottom: 1.8rem;
+}
+
+.footer-col {
+  font-size: 0.85rem;
+}
+
+.footer-brand {
+  max-width: 340px;
+}
+
+/* logo */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background-color: var(--cs-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.03em;
+}
+
+/* text */
+.footer-text {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+}
+
+.footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background-color: rgba(248, 250, 252, 0.08);
+  border: 1px solid rgba(248, 250, 252, 0.14);
+}
+
+/* column titles */
+.footer-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+/* nav links */
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.footer-link {
+  text-decoration: none;
+  font-size: 0.82rem;
+  color: #e5e7eb;
+  opacity: 0.78;
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+.footer-link:hover {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+.footer-link-inline {
+  color: #e5e7eb;
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(248, 250, 252, 0.3);
+}
+
+/* contact */
+.footer-contact {
+  margin-top: 0.4rem;
+}
+
+/* bottom bar */
+.footer-bottom {
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  margin-top: 0.4rem;
+  background-color: #020617;
+}
+
+.footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.8rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.footer-bottom-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer-copy {
+  margin: 0;
+}
+
+/* responsive */
+@media (max-width: 960px) {
+  .footer-inner {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+</style>

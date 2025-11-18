@@ -1,9 +1,14 @@
 <template>
   <div class="page">
+    <!-- soft floating background shapes -->
+    <div class="bg-shape bg-shape--one"></div>
+    <div class="bg-shape bg-shape--two"></div>
+
     <!-- MAIN CONTENT -->
     <main class="main">
       <section class="cs-container hero">
-        <div class="cs-text-center">
+        <div class="hero-header cs-text-center">
+          <span class="hero-pill">CafeShop · Starters</span>
           <h1 class="cs-heading-xl">Starters</h1>
           <p class="cs-body-muted hero-subtitle">
             Discover our curated cafe menu – fresh bowls, sushi plates and gourmet burgers to start
@@ -13,14 +18,25 @@
 
         <!-- search + category -->
         <div class="filters">
-          <input v-model="searchText" type="text" class="search-input" placeholder="Search menu…" />
+          <div class="input-wrapper">
+            <span class="input-icon">🔍</span>
+            <input
+              v-model="searchText"
+              type="text"
+              class="search-input"
+              placeholder="Search menu…"
+            />
+          </div>
 
-          <select v-model="selectedCategory" class="category-select">
-            <option value="">All categories</option>
-            <option v-for="category in categories" :key="category" :value="category">
-              {{ category }}
-            </option>
-          </select>
+          <div class="input-wrapper select-wrapper">
+            <span class="input-icon">☕</span>
+            <select v-model="selectedCategory" class="category-select">
+              <option value="">All categories</option>
+              <option v-for="category in categories" :key="category" :value="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
         </div>
 
         <!-- category quick pills -->
@@ -49,13 +65,22 @@
       <!-- PRODUCTS GRID -->
       <section class="cs-container">
         <div class="products-grid">
-          <article v-for="product in filteredProducts" :key="product.id" class="product-card">
+          <article
+            v-for="(product, index) in filteredProducts"
+            :key="product.id"
+            class="product-card"
+            :style="{ '--stagger': index }"
+          >
             <div class="product-media">
               <img :src="product.imageUrl" :alt="product.name" class="product-image" />
 
               <div v-if="product.label" class="label-badge" :class="labelClass(product.label)">
                 <span class="label-dot" />
                 <span class="label-text">{{ product.label }}</span>
+              </div>
+
+              <div class="media-overlay">
+                <span class="overlay-chip">Tap for details</span>
               </div>
             </div>
 
@@ -79,7 +104,7 @@
                       ★
                     </span>
                   </div>
-                  <span class="rating-count"> ({{ product.ratingCount }} ratings) </span>
+                  <span class="rating-count"> {{ product.rating.toFixed(1) }} · {{ product.ratingCount }} ratings </span>
                 </div>
               </div>
 
@@ -89,9 +114,11 @@
               </div>
             </div>
 
-            <!-- NEW: actions row -->
+            <!-- actions row -->
             <div class="card-actions">
-              <button type="button" class="circle-btn" @click="showDetails(product)">⟳</button>
+              <button type="button" class="circle-btn" @click="showDetails(product)">
+                ⟳
+              </button>
 
               <button
                 type="button"
@@ -99,7 +126,7 @@
                 :class="{ 'add-cart-btn--added': isInCart(product.id) }"
                 @click="toggleCart(product)"
               >
-                <span>
+                <span class="add-cart-label">
                   {{ isInCart(product.id) ? 'Added' : 'Add to cart' }}
                 </span>
               </button>
@@ -107,7 +134,7 @@
           </article>
 
           <p v-if="filteredProducts.length === 0" class="empty-state">
-            No menu items found. Adjust category or search keyword.
+            No menu items found. Try another keyword or category.
           </p>
         </div>
       </section>
@@ -230,6 +257,7 @@ function closeMobile() {
 function labelClass(label: string) {
   if (label.toLowerCase() === 'vegan') return 'label--vegan'
   if (label.toLowerCase() === 'hot') return 'label--hot'
+  if (label.toLowerCase() === 'new') return 'label--new'
   return 'label--neutral'
 }
 
@@ -254,80 +282,180 @@ function showDetails(product: Product) {
 
 <style scoped>
 .page {
-  background-color: var(--cs-bg);
+  position: relative;
+  background: radial-gradient(circle at top left, #fff7d6 0, #f9fafb 40%, #eef2ff 100%);
   min-height: 100vh;
+  overflow: hidden;
+}
+
+/* floating blurred shapes */
+.bg-shape {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-shape--one {
+  width: 260px;
+  height: 260px;
+  background: #fff7d6 0;
+  top: -60px;
+  right: 8%;
+  animation: floatShape 18s ease-in-out infinite;
+}
+
+
+
+/* ---------- MAIN LAYOUT ---------- */
+.main {
+  padding-block: 2.8rem 3.2rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- HERO + FILTERS ---------- */
-.main {
-  padding-block: 2.5rem 3rem;
-}
-
 .hero {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.1rem;
+}
+
+.hero-header {
+  position: relative;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.hero-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #22c55e;
 }
 
 .hero-subtitle {
-  max-width: 480px;
-  margin: 0.5rem auto 0;
+  max-width: 520px;
+  margin: 0.6rem auto 0;
+  font-size: 0.95rem;
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem;
+  gap: 0.9rem;
   justify-content: center;
+}
+
+.input-wrapper {
+  position: relative;
+  min-width: 240px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  opacity: 0.65;
 }
 
 .search-input,
 .category-select {
-  padding: 0.6rem 0.9rem;
+  width: 100%;
+  padding: 0.6rem 0.9rem 0.6rem 2.1rem;
   border-radius: 999px;
-  border: 1px solid var(--cs-border-soft);
-  background-color: #ffffff;
+  border: 1px solid var(--cs-border-soft, #e5e7eb);
+  background: rgba(255, 255, 255, 0.85);
   font-size: 0.9rem;
-  min-width: 220px;
   outline: none;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.12s ease,
+    background 0.16s ease;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
 }
 
 .search-input:focus,
 .category-select:focus {
-  border-color: var(--cs-primary);
+  border-color: var(--cs-primary, #facc15);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.98);
 }
 
-.category-select {
-  max-width: 210px;
+.select-wrapper .category-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position: calc(100% - 16px) 55%, calc(100% - 12px) 55%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
 }
 
 .category-pills {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .pill {
   border-radius: 999px;
-  padding: 0.35rem 0.9rem;
-  border: 1px solid var(--cs-border-soft);
-  background-color: #ffffff;
-  font-size: 0.8rem;
+  padding: 0.3rem 0.95rem;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 0.78rem;
   cursor: pointer;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  backdrop-filter: blur(10px);
+}
+
+.pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
 .pill--active {
-  background-color: var(--cs-primary);
-  border-color: var(--cs-primary);
+  background: linear-gradient(135deg, #facc15, #f97316);
+  border-color: transparent;
+  color: #111827;
 }
 
 /* ---------- PRODUCT GRID ---------- */
 .products-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.75rem;
+  gap: 1.9rem;
 }
 
 /* 3 cards per row on tablet/desktop */
@@ -338,17 +466,43 @@ function showDetails(product: Product) {
 }
 
 .product-card {
-  background-color: #ffffff;
-  border-radius: var(--cs-radius-lg);
+  position: relative;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: var(--cs-radius-lg, 22px);
   overflow: hidden;
-  box-shadow: var(--cs-shadow-soft);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
   display: flex;
   flex-direction: column;
+  border: 1px solid rgba(248, 250, 252, 0.9);
+  transform: translateY(20px);
+  opacity: 0;
+  animation: cardIn 0.65s ease-out forwards;
+  animation-delay: calc(0.03s * var(--stagger));
 }
 
+.product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.12), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+
+.product-card:hover::before {
+  opacity: 1;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.16);
+}
+
+/* media */
 .product-media {
   position: relative;
-  padding-top: 80%;
+  padding-top: 78%;
   overflow: hidden;
 }
 
@@ -358,13 +512,38 @@ function showDetails(product: Product) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 180ms ease-out;
+  transition: transform 0.2s ease-out;
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
 
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.55), transparent 55%);
+  opacity: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0.7rem 0.8rem;
+  transition: opacity 0.18s ease-out;
+}
+
+.product-card:hover .media-overlay {
+  opacity: 1;
+}
+
+.overlay-chip {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f9fafb;
+}
+
+/* label badge */
 .label-badge {
   position: absolute;
   top: 0.9rem;
@@ -389,7 +568,7 @@ function showDetails(product: Product) {
   text-transform: capitalize;
 }
 
-/* label color variants */
+/* label variants */
 .label--vegan {
   background-color: #dcfce7;
   color: #166534;
@@ -400,45 +579,51 @@ function showDetails(product: Product) {
   color: #b91c1c;
 }
 
+.label--new {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
 .label--neutral {
   background-color: #e5e7eb;
   color: #111827;
 }
 
+/* content */
 .product-bottom {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  padding: 0.9rem 1rem 0.95rem;
-  background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #fff4d6 50%, #fffbeb 100%);
+  padding: 0.95rem 1rem 0.85rem;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #fffbeb 100%);
 }
 
 .product-info {
-  max-width: 74%;
+  max-width: 75%;
 }
 
 .product-name {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .product-description {
   font-size: 0.8rem;
-  color: var(--cs-text-muted);
-  margin-bottom: 0.4rem;
+  color: var(--cs-text-muted, #6b7280);
+  margin-bottom: 0.45rem;
 }
 
 .rating-row {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.75rem;
-  color: var(--cs-text-muted);
+  font-size: 0.76rem;
+  color: var(--cs-text-muted, #6b7280);
 }
 
 .star {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .rating-count {
@@ -448,11 +633,13 @@ function showDetails(product: Product) {
 .price-tag {
   display: flex;
   align-items: flex-end;
-  background-color: var(--cs-primary);
-  padding: 0.45rem 0.7rem;
-  border-radius: 10px 10px 0 10px;
-  min-width: 56px;
+  background: linear-gradient(135deg, #facc15, #f97316);
+  padding: 0.45rem 0.75rem;
+  border-radius: 12px;
+  min-width: 60px;
   justify-content: center;
+  color: #111827;
+  box-shadow: 0 12px 26px rgba(234, 179, 8, 0.8);
 }
 
 .currency {
@@ -461,31 +648,25 @@ function showDetails(product: Product) {
 }
 
 .amount {
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
 }
 
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: var(--cs-text-muted);
-  font-size: 0.9rem;
-  padding-block: 1.5rem;
-}
+/* footer actions */
 .card-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem 1rem;
   background-color: #ffffff;
-  border-radius: 0 0 var(--cs-radius-lg) var(--cs-radius-lg);
+  border-radius: 0 0 var(--cs-radius-lg, 22px) 22px;
 }
 
 .circle-btn {
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid var(--cs-border-soft);
+  border: 1px solid var(--cs-border-soft, #e5e7eb);
   background-color: #ffffff;
   display: flex;
   align-items: center;
@@ -493,9 +674,9 @@ function showDetails(product: Product) {
   font-size: 1rem;
   cursor: pointer;
   transition:
-    background-color 120ms ease-out,
-    transform 120ms ease-out,
-    box-shadow 120ms ease-out;
+    background-color 0.12s ease-out,
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out;
 }
 
 .circle-btn:hover {
@@ -513,32 +694,78 @@ function showDetails(product: Product) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
   font-size: 0.85rem;
   font-weight: 600;
-  background-color: var(--cs-primary);
+  background: linear-gradient(135deg, #facc15, #f97316);
   color: #111827;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(252, 211, 77, 0.55);
+  box-shadow: 0 10px 24px rgba(252, 211, 77, 0.7);
   transition:
-    background-color 120ms ease-out,
-    box-shadow 120ms ease-out,
-    transform 120ms ease-out;
+    background 0.16s ease-out,
+    box-shadow 0.16s ease-out,
+    transform 0.12s ease-out;
 }
 
 .add-cart-btn:hover {
-  background-color: var(--cs-primary-dark);
-  box-shadow: 0 12px 28px rgba(252, 211, 77, 0.75);
+  box-shadow: 0 14px 34px rgba(252, 211, 77, 0.9);
   transform: translateY(-1px);
 }
 
 .add-cart-btn--added {
-  background-color: #111827;
+  background: #111827;
   color: #f9fafb;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.6);
 }
 
-.add-cart-icon {
-  font-size: 1rem;
+.add-cart-btn--added .add-cart-label::after {
+  content: '✓';
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+}
+
+/* empty state */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--cs-text-muted, #6b7280);
+  font-size: 0.9rem;
+  padding-block: 1.5rem;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes floatShape {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(12px, -16px, 0);
+  }
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .products-grid {
+    gap: 1.4rem;
+  }
+
+  .product-card {
+    border-radius: 20px;
+  }
 }
 </style>

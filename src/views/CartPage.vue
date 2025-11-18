@@ -74,85 +74,49 @@
         <!-- RIGHT: SUMMARY CARD -->
         <aside class="cart-summary">
           <div class="summary-card">
-            <h2 class="summary-title">Payment</h2>
+            <h2 class="summary-title">Order Type</h2>
 
-            <!-- payment method tabs -->
+            <!-- order type toggle -->
             <div class="payment-toggle">
               <button
                 type="button"
                 class="payment-tab"
-                :class="{ 'payment-tab--active': selectedPayment === 'card' }"
-                @click="setPayment('card')"
+                :class="{ 'payment-tab--active': orderType === 'shop' }"
+                @click="setOrderType('shop')"
               >
-                <span class="payment-icon">💳</span>
-                <span>Visa / MasterCard</span>
+                <span class="payment-icon">☕</span>
+                <span>Take in shop</span>
               </button>
 
               <button
                 type="button"
                 class="payment-tab"
-                :class="{ 'payment-tab--active': selectedPayment === 'promptpay' }"
-                @click="setPayment('promptpay')"
+                :class="{ 'payment-tab--active': orderType === 'room' }"
+                @click="setOrderType('room')"
               >
-                <span class="payment-icon">📱</span>
-                <span>PromptPay</span>
+                <span class="payment-icon">🏨</span>
+                <span>Room delivery</span>
               </button>
             </div>
 
-            <!-- card payment panel -->
-            <div v-if="selectedPayment === 'card'" class="payment-panel">
-              <div class="field">
-                <label class="field-label">Card holder name</label>
-                <input type="text" class="field-input" placeholder="Name on card" />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Card number</label>
-                <input type="text" class="field-input" placeholder="XXXX XXXX XXXX XXXX" />
-              </div>
-
-              <div class="field-row">
-                <div class="field">
-                  <label class="field-label">Expiry date</label>
-                  <input type="text" class="field-input" placeholder="MM / YY" />
-                </div>
-                <div class="field">
-                  <label class="field-label">CVV</label>
-                  <input type="password" class="field-input" placeholder="***" />
-                </div>
-              </div>
-            </div>
-
-            <!-- PromptPay panel -->
-            <div v-else class="payment-panel promptpay-panel">
-              <div class="qr-box">
-                <div class="qr-inner">
-                  <span>QR</span>
-                </div>
-              </div>
-              <p class="promptpay-text">
-                Use your banking app to scan this PromptPay QR code and complete the payment
-                instantly.
+            <!-- content for Take in shop -->
+            <div v-if="orderType === 'shop'" class="payment-panel">
+              <p class="order-text">
+                We&apos;ll prepare your order and serve it at the cafe counter.
               </p>
             </div>
-            <hr class="summary-divider" />
 
-            <h3 class="summary-title">Coupon Code</h3>
-            <p class="summary-text">
-              Enter your coupon below to enjoy special offers on your cafe order.
-            </p>
-
-            <input
-              class="summary-input full"
-              type="text"
-              placeholder="Enter Coupon Code"
-              v-model="couponCode"
-            />
-
-            <button type="button" class="summary-btn primary full">
-              <span>Apply Coupon</span>
-              <span class="arrow">→</span>
-            </button>
+            <!-- content for Room delivery -->
+            <div v-else class="payment-panel">
+              <div class="field">
+                <label class="field-label">Room number</label>
+                <input v-model="roomNo" type="text" class="field-input" placeholder="Eg. 1205" />
+              </div>
+              <p class="order-text">
+                Please make sure your room number is correct. We&apos;ll deliver your food directly
+                to your room.
+              </p>
+            </div>
 
             <hr class="summary-divider" />
 
@@ -182,7 +146,7 @@
                 <span>Update</span>
                 <span class="arrow">→</span>
               </button>
-              <button type="button" class="summary-btn primary">
+              <button type="button" class="summary-btn primary" @click="goToPayment">
                 <span>Checkout</span>
                 <span class="arrow">→</span>
               </button>
@@ -196,6 +160,13 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+function goToPayment() {
+  router.push('/payment')
+}
 
 type CartItem = {
   id: number
@@ -277,6 +248,17 @@ const selectedPayment = ref<PaymentMethod>('card')
 function setPayment(method: PaymentMethod) {
   selectedPayment.value = method
 }
+type OrderType = 'shop' | 'room'
+
+const orderType = ref<OrderType>('shop')
+const roomNo = ref('')
+
+function setOrderType(type: OrderType) {
+  orderType.value = type
+  if (type === 'shop') {
+    roomNo.value = '' // clear when user goes back to take in shop
+  }
+}
 </script>
 
 <style scoped>
@@ -341,6 +323,9 @@ function setPayment(method: PaymentMethod) {
 /* -------- LEFT: TABLE -------- */
 .cart-items {
   background-color: #ffffff;
+  border-radius: 24px; /* same feeling as Order Type card */
+  box-shadow: var(--cs-shadow-soft); /* same shadow as summary-card      */
+  padding: 1.3rem 1.5rem 1.4rem; /* space between border & content   */
 }
 
 .cart-head-row {
@@ -724,5 +709,4 @@ function setPayment(method: PaymentMethod) {
   font-size: 0.8rem;
   color: var(--cs-text-muted);
 }
-
 </style>

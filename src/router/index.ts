@@ -4,12 +4,14 @@ import ProductsPage from '@/views/ProductsPage.vue'
 import CartPage from '@/views/CartPage.vue'
 import Homepage from '@/views/Homepage.vue'
 import ContactPage from '@/views/ContactPage.vue'
+import PaymentPage from '@/views/PaymentPage.vue'
 const routes = [
   { path: '/', name: 'home', component: Homepage },
   { path: '/contact', name: 'contact', component: ContactPage },
   { path: '/about', name: 'about', component: aboutPage },
   { path: '/products', name: 'products', component: ProductsPage },
   { path: '/cart', name: 'cart', component: CartPage },
+  { path: '/payment', name: 'payment', component: PaymentPage },
 ]
 const router = createRouter({
   history: createWebHistory(),
