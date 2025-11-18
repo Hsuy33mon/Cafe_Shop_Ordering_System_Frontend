@@ -99,7 +99,6 @@
                 :class="{ 'add-cart-btn--added': isInCart(product.id) }"
                 @click="toggleCart(product)"
               >
-                <span class="add-cart-icon">🛍</span>
                 <span>
                   {{ isInCart(product.id) ? 'Added' : 'Add to cart' }}
                 </span>

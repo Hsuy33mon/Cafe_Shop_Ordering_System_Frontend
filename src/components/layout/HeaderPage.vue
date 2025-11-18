@@ -1,5 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const goToCart = () => {
+  router.push('/cart')
+}
 const isMobileMenuOpen = ref(false)
 const cartCount = ref(5)
 
@@ -22,18 +28,19 @@ function closeMobile() {
           <RouterLink to="/" class="nav-link">Home</RouterLink>
           <RouterLink to="/about" class="nav-link">About</RouterLink>
           <RouterLink to="/products" class="nav-link active">Products</RouterLink>
-          <RouterLink to="/shop" class="nav-link">Shop</RouterLink>
           <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
         </nav>
       </div>
 
       <div class="navbar-right">
         <!-- Shopping bag -->
-        <button type="button" class="bag-btn">
-          <span class="bag-icon">🛍</span>
-          <span class="bag-label">Bag</span>
-          <span v-if="cartCount > 0" class="bag-count">{{ cartCount }}</span>
-        </button>
+        <div class="navbar-right">
+          <button type="button" class="bag-btn" @click="goToCart">
+            <span class="bag-icon">🛍</span>
+            <span class="bag-label">Bag</span>
+            <span v-if="cartCount > 0" class="bag-count">{{ cartCount }}</span>
+          </button>
+        </div>
 
         <!-- Mobile hamburger -->
         <button type="button" class="menu-btn" @click="isMobileMenuOpen = !isMobileMenuOpen">
@@ -49,7 +56,7 @@ function closeMobile() {
         <RouterLink to="/" class="mobile-link" @click="closeMobile"> Home </RouterLink>
         <RouterLink to="/about" class="mobile-link" @click="closeMobile"> About </RouterLink>
         <RouterLink to="/products" class="mobile-link" @click="closeMobile"> Products </RouterLink>
-        <RouterLink to="/shop" class="mobile-link" @click="closeMobile"> Shop </RouterLink>
+        <RouterLink to="/contact" class="mobile-link" @click="closeMobile">Contact</RouterLink>
         <RouterLink to="/cart" class="mobile-link" @click="closeMobile"> Shopping Bag </RouterLink>
       </nav>
     </transition>
