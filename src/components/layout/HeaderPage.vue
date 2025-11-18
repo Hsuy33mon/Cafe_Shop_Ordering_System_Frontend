@@ -1,75 +1,300 @@
+<script lang="ts" setup>
+import { ref } from 'vue'
+const isMobileMenuOpen = ref(false)
+const cartCount = ref(5)
+
+function closeMobile() {
+  isMobileMenuOpen.value = false
+}
+</script>
 <template>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title> About Us || Gorent || Gorent HTML 5 Template </title>
-    <!-- favicons Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicons/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicons/favicon-16x16.png" />
-    <link rel="manifest" href="/assets/images/favicons/site.webmanifest" />
-    <meta name="description" content="Gorent HTML 5 Template " />
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="cs-container navbar-inner">
+      <div class="navbar-left">
+        <div class="logo">
+          <div class="logo-icon">☕</div>
+          <div class="logo-text">CafeShop</div>
+        </div>
 
-    <!-- fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-        rel="stylesheet">
+        <!-- Desktop nav links -->
+        <nav class="nav-links">
+          <RouterLink to="/" class="nav-link">Home</RouterLink>
+          <RouterLink to="/about" class="nav-link">About</RouterLink>
+          <RouterLink to="/products" class="nav-link active">Products</RouterLink>
+          <RouterLink to="/shop" class="nav-link">Shop</RouterLink>
+          <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
+        </nav>
+      </div>
 
+      <div class="navbar-right">
+        <!-- Shopping bag -->
+        <button type="button" class="bag-btn">
+          <span class="bag-icon">🛍</span>
+          <span class="bag-label">Bag</span>
+          <span v-if="cartCount > 0" class="bag-count">{{ cartCount }}</span>
+        </button>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-        rel="stylesheet">
+        <!-- Mobile hamburger -->
+        <button type="button" class="menu-btn" @click="isMobileMenuOpen = !isMobileMenuOpen">
+          <span class="menu-bar" />
+          <span class="menu-bar" />
+        </button>
+      </div>
+    </div>
 
-
-  
-  
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/assets/css/animate.min.css" />
-    <link rel="stylesheet" href="/assets/css/custom-animate.css" />
-    <link rel="stylesheet" href="/assets/css/swiper.min.css" />
-    <link rel="stylesheet" href="/assets/css/font-awesome-all.css" />
-    <link rel="stylesheet" href="/assets/css/jarallax.css" />
-    <link rel="stylesheet" href="/assets/css/jquery.magnific-popup.css" />
-    <link rel="stylesheet" href="/assets/css/flaticon.css">
-    <link rel="stylesheet" href="/assets/css/owl.carousel.min.css" />
-    <link rel="stylesheet" href="/assets/css/owl.theme.default.min.css" />
-    <link rel="stylesheet" href="/assets/css/nice-select.css" />
-    <link rel="stylesheet" href="/assets/css/jquery-ui.css" />
-    <link rel="stylesheet" href="/assets/css/aos.css" />
-    <link rel="stylesheet" href="/assets/css/odometer.min.css" />
-    <link rel="stylesheet" href="/assets/css/timePicker.css" />
-
-
-    <link rel="stylesheet" href="/assets/css/module-css/slider.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/footer.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/sliding-text.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/services.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/about.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/booking.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/counter.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/listing.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/video.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/pricing.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/popular-car.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/testimonial.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/faq.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/team.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/call.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/download-app.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/brand.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/blog.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/lets-talk.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/process.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/why-choose.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/gallery.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/page-header.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/shop.css" />
-    <link rel="stylesheet" href="/assets/css/module-css/error.css" />
-
-    <!-- template styles -->
-    <link rel="stylesheet" href="/assets/css/style.css" />
-    <link rel="stylesheet" href="/assets/css/responsive.css" />
-  </head>
+    <!-- Mobile dropdown menu -->
+    <transition name="fade-down">
+      <nav v-if="isMobileMenuOpen" class="mobile-menu">
+        <RouterLink to="/" class="mobile-link" @click="closeMobile"> Home </RouterLink>
+        <RouterLink to="/about" class="mobile-link" @click="closeMobile"> About </RouterLink>
+        <RouterLink to="/products" class="mobile-link" @click="closeMobile"> Products </RouterLink>
+        <RouterLink to="/shop" class="mobile-link" @click="closeMobile"> Shop </RouterLink>
+        <RouterLink to="/cart" class="mobile-link" @click="closeMobile"> Shopping Bag </RouterLink>
+      </nav>
+    </transition>
+  </header>
 </template>
+<style scoped>
+.page {
+  background-color: var(--cs-bg);
+  min-height: 100vh;
+}
+
+/* ---------- NAVBAR ---------- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--cs-border-soft);
+}
+
+.navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.9rem;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background-color: var(--cs-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.03em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.6rem;
+  font-size: 0.95rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--cs-text-muted);
+  position: relative;
+  padding-block: 0.15rem;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.25rem;
+  width: 0;
+  height: 2px;
+  border-radius: 999px;
+  background-color: var(--cs-primary);
+  transition: width 160ms ease-out;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link.active {
+  color: var(--cs-text-main);
+}
+
+.nav-link.active::after {
+  width: 100%;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--cs-surface-alt);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--cs-border-soft);
+  cursor: pointer;
+}
+
+.bag-label {
+  font-size: 0.85rem;
+}
+
+.bag-count {
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background-color: var(--cs-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* hamburger */
+.menu-btn {
+  display: none;
+  border: none;
+  background: none;
+  padding: 0.25rem;
+  flex-direction: column;
+  gap: 0.22rem;
+  cursor: pointer;
+}
+
+.menu-bar {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background-color: var(--cs-text-main);
+}
+
+/* mobile menu */
+.mobile-menu {
+  display: none;
+}
+
+/* ---------- HERO + FILTERS ---------- */
+.main {
+  padding-block: 2.5rem 3rem;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.hero-subtitle {
+  max-width: 480px;
+  margin: 0.5rem auto 0;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: center;
+}
+
+.search-input,
+.category-select {
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--cs-border-soft);
+  background-color: #ffffff;
+  font-size: 0.9rem;
+  min-width: 220px;
+  outline: none;
+}
+
+.search-input:focus,
+.category-select:focus {
+  border-color: var(--cs-primary);
+}
+
+.category-select {
+  max-width: 210px;
+}
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--cs-border-soft);
+  background-color: #ffffff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.pill--active {
+  background-color: var(--cs-primary);
+  border-color: var(--cs-primary);
+}
+
+/* ---------- MOBILE BEHAVIOUR ---------- */
+@media (max-width: 767px) {
+  .nav-links {
+    display: none;
+  }
+
+  .menu-btn {
+    display: inline-flex;
+  }
+
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-top: 1px solid var(--cs-border-soft);
+  }
+
+  .mobile-link {
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: var(--cs-text-main);
+    border-bottom: 1px solid var(--cs-border-soft);
+  }
+
+  .mobile-link:last-child {
+    border-bottom: none;
+  }
+
+  .hero {
+    margin-top: 0.75rem;
+  }
+}
+</style>

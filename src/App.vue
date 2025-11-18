@@ -1,16 +1,10 @@
 <script setup lang="ts">
-
 import { RouterView } from 'vue-router'
-
-
-
-
+import HeaderPage from './components/layout/HeaderPage.vue'
 </script>
 
-
 <template>
-
-<RouterView></RouterView>
-      
+  <HeaderPage></HeaderPage>
+  <RouterView></RouterView>
 </template>
 <style scoped></style>

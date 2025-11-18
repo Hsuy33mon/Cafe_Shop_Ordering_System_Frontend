@@ -1,93 +1,23 @@
 <template>
   <div class="page">
-    <!-- NAVBAR -->
-    <header class="navbar">
-      <div class="cs-container navbar-inner">
-        <div class="navbar-left">
-          <div class="logo">
-            <div class="logo-icon">☕</div>
-            <div class="logo-text">CafeShop</div>
-          </div>
-
-          <!-- Desktop nav links -->
-          <nav class="nav-links">
-            <RouterLink to="/" class="nav-link">Home</RouterLink>
-            <RouterLink to="/about" class="nav-link">About</RouterLink>
-            <RouterLink to="/products" class="nav-link active">Products</RouterLink>
-            <RouterLink to="/shop" class="nav-link">Shop</RouterLink>
-            <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
-          </nav>
-        </div>
-
-        <div class="navbar-right">
-          <!-- Shopping bag -->
-          <button type="button" class="bag-btn">
-            <span class="bag-icon">🛍</span>
-            <span class="bag-label">Bag</span>
-            <span v-if="cartCount > 0" class="bag-count">{{ cartCount }}</span>
-          </button>
-
-          <!-- Mobile hamburger -->
-          <button
-            type="button"
-            class="menu-btn"
-            @click="isMobileMenuOpen = !isMobileMenuOpen"
-          >
-            <span class="menu-bar" />
-            <span class="menu-bar" />
-          </button>
-        </div>
-      </div>
-
-      <!-- Mobile dropdown menu -->
-      <transition name="fade-down">
-        <nav v-if="isMobileMenuOpen" class="mobile-menu">
-          <RouterLink to="/" class="mobile-link" @click="closeMobile">
-            Home
-          </RouterLink>
-          <RouterLink to="/about" class="mobile-link" @click="closeMobile">
-            About
-          </RouterLink>
-          <RouterLink to="/products" class="mobile-link" @click="closeMobile">
-            Products
-          </RouterLink>
-          <RouterLink to="/shop" class="mobile-link" @click="closeMobile">
-            Shop
-          </RouterLink>
-          <RouterLink to="/cart" class="mobile-link" @click="closeMobile">
-            Shopping Bag
-          </RouterLink>
-        </nav>
-      </transition>
-    </header>
-
     <!-- MAIN CONTENT -->
     <main class="main">
       <section class="cs-container hero">
         <div class="cs-text-center">
           <h1 class="cs-heading-xl">Starters</h1>
           <p class="cs-body-muted hero-subtitle">
-            Discover our curated cafe menu – fresh bowls, sushi plates and
-            gourmet burgers to start your day.
+            Discover our curated cafe menu – fresh bowls, sushi plates and gourmet burgers to start
+            your day.
           </p>
         </div>
 
         <!-- search + category -->
         <div class="filters">
-          <input
-            v-model="searchText"
-            type="text"
-            class="search-input"
-            placeholder="Search menu…"
-          />
+          <input v-model="searchText" type="text" class="search-input" placeholder="Search menu…" />
 
           <select v-model="selectedCategory" class="category-select">
             <option value="">All categories</option>
-            <option
-              v-for="category in categories"
-              :key="category"
-              :value="category"
-            >
+            <option v-for="category in categories" :key="category" :value="category">
               {{ category }}
             </option>
           </select>
@@ -119,17 +49,9 @@
       <!-- PRODUCTS GRID -->
       <section class="cs-container">
         <div class="products-grid">
-          <article
-            v-for="product in filteredProducts"
-            :key="product.id"
-            class="product-card"
-          >
+          <article v-for="product in filteredProducts" :key="product.id" class="product-card">
             <div class="product-media">
-              <img
-                :src="product.imageUrl"
-                :alt="product.name"
-                class="product-image"
-              />
+              <img :src="product.imageUrl" :alt="product.name" class="product-image" />
 
               <div v-if="product.label" class="label-badge" :class="labelClass(product.label)">
                 <span class="label-dot" />
@@ -137,6 +59,7 @@
               </div>
             </div>
 
+            <!-- name / description / rating / price -->
             <div class="product-bottom">
               <div class="product-info">
                 <h3 class="product-name">{{ product.name }}</h3>
@@ -149,16 +72,14 @@
                       v-for="n in 5"
                       :key="n"
                       :class="{
-                        'star': true,
-                        'cs-stars-muted': n > product.rating
+                        star: true,
+                        'cs-stars-muted': n > product.rating,
                       }"
                     >
                       ★
                     </span>
                   </div>
-                  <span class="rating-count">
-                    ({{ product.ratingCount }} ratings)
-                  </span>
+                  <span class="rating-count"> ({{ product.ratingCount }} ratings) </span>
                 </div>
               </div>
 
@@ -166,6 +87,23 @@
                 <span class="currency">฿</span>
                 <span class="amount">{{ product.price }}</span>
               </div>
+            </div>
+
+            <!-- NEW: actions row -->
+            <div class="card-actions">
+              <button type="button" class="circle-btn" @click="showDetails(product)">⟳</button>
+
+              <button
+                type="button"
+                class="add-cart-btn"
+                :class="{ 'add-cart-btn--added': isInCart(product.id) }"
+                @click="toggleCart(product)"
+              >
+                <span class="add-cart-icon">🛍</span>
+                <span>
+                  {{ isInCart(product.id) ? 'Added' : 'Add to cart' }}
+                </span>
+              </button>
             </div>
           </article>
 
@@ -194,7 +132,9 @@ type Product = {
 }
 
 const isMobileMenuOpen = ref(false)
-const cartCount = ref(5) // demo value
+
+// cart will store product ids
+const cartIds = ref<number[]>([])
 
 const products = ref<Product[]>([
   {
@@ -202,39 +142,33 @@ const products = ref<Product[]>([
     name: 'Chevrefrit Bowl',
     category: 'Bowls',
     price: 14,
-    description:
-      'Tomatoes, nori, feta cheese, mushrooms, rice noodles, corn, shrimp.',
-    imageUrl:
-      'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg',
+    description: 'Tomatoes, nori, feta cheese, mushrooms, rice noodles, corn, shrimp.',
+    imageUrl: 'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg',
     label: 'Vegan',
     rating: 5,
-    ratingCount: 4
+    ratingCount: 4,
   },
   {
     id: 2,
     name: 'Saumon Gravlax',
     category: 'Sushi & Rolls',
     price: 9,
-    description:
-      'Salmon, avocado, cucumber, sushi rice, house special sauces.',
-    imageUrl:
-      'https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg',
+    description: 'Salmon, avocado, cucumber, sushi rice, house special sauces.',
+    imageUrl: 'https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg',
     label: 'Vegan',
     rating: 4,
-    ratingCount: 1
+    ratingCount: 1,
   },
   {
     id: 3,
     name: 'Gourmet Burger',
     category: 'Burgers',
     price: 4,
-    description:
-      'Beef patty, cheddar, lettuce, tomato, brioche bun, cafe sauce.',
-    imageUrl:
-      'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+    description: 'Beef patty, cheddar, lettuce, tomato, brioche bun, cafe sauce.',
+    imageUrl: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
     label: 'Hot',
     rating: 4,
-    ratingCount: 4
+    ratingCount: 4,
   },
   {
     id: 4,
@@ -242,11 +176,10 @@ const products = ref<Product[]>([
     category: 'Coffee',
     price: 69,
     description: 'Espresso, caramel, cold milk, ice cubes.',
-    imageUrl:
-      'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
+    imageUrl: 'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
     label: 'New',
     rating: 5,
-    ratingCount: 10
+    ratingCount: 10,
   },
   {
     id: 5,
@@ -254,11 +187,10 @@ const products = ref<Product[]>([
     category: 'Tea',
     price: 5,
     description: 'Creamy matcha latte with soft milk foam.',
-    imageUrl:
-      'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
+    imageUrl: 'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
     label: 'Vegan',
     rating: 5,
-    ratingCount: 7
+    ratingCount: 7,
   },
   {
     id: 6,
@@ -266,19 +198,16 @@ const products = ref<Product[]>([
     category: 'Desserts',
     price: 7,
     description: 'Rich dark chocolate layered cake with ganache.',
-    imageUrl:
-      'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg',
+    imageUrl: 'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg',
     rating: 4,
-    ratingCount: 12
-  }
+    ratingCount: 12,
+  },
 ])
 
 const searchText = ref('')
 const selectedCategory = ref<string>('')
 
-const categories = computed(() =>
-  Array.from(new Set(products.value.map((p) => p.category)))
-)
+const categories = computed(() => Array.from(new Set(products.value.map((p) => p.category))))
 
 const filteredProducts = computed(() => {
   const text = searchText.value.trim().toLowerCase()
@@ -286,13 +215,14 @@ const filteredProducts = computed(() => {
 
   return products.value.filter((p) => {
     const byText =
-      !text ||
-      p.name.toLowerCase().includes(text) ||
-      p.description.toLowerCase().includes(text)
+      !text || p.name.toLowerCase().includes(text) || p.description.toLowerCase().includes(text)
     const byCategory = !cat || p.category === cat
     return byText && byCategory
   })
 })
+
+// bag count in navbar
+const cartCount = computed(() => cartIds.value.length)
 
 function closeMobile() {
   isMobileMenuOpen.value = false
@@ -303,150 +233,30 @@ function labelClass(label: string) {
   if (label.toLowerCase() === 'hot') return 'label--hot'
   return 'label--neutral'
 }
+
+function isInCart(id: number): boolean {
+  return cartIds.value.includes(id)
+}
+
+function toggleCart(product: Product) {
+  const index = cartIds.value.indexOf(product.id)
+  if (index === -1) {
+    cartIds.value.push(product.id)
+  } else {
+    cartIds.value.splice(index, 1)
+  }
+}
+
+function showDetails(product: Product) {
+  // later you can open a modal or navigate
+  alert(`Show details for: ${product.name}`)
+}
 </script>
 
 <style scoped>
 .page {
   background-color: var(--cs-bg);
   min-height: 100vh;
-}
-
-/* ---------- NAVBAR ---------- */
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--cs-border-soft);
-}
-
-.navbar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-block: 0.9rem;
-}
-
-.navbar-left {
-  display: flex;
-  align-items: center;
-  gap: 2.5rem;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.logo-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background-color: var(--cs-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.logo-text {
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.03em;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.6rem;
-  font-size: 0.95rem;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: var(--cs-text-muted);
-  position: relative;
-  padding-block: 0.15rem;
-}
-
-.nav-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -0.25rem;
-  width: 0;
-  height: 2px;
-  border-radius: 999px;
-  background-color: var(--cs-primary);
-  transition: width 160ms ease-out;
-}
-
-.nav-link:hover::after {
-  width: 100%;
-}
-
-.nav-link.active {
-  color: var(--cs-text-main);
-}
-
-.nav-link.active::after {
-  width: 100%;
-}
-
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.bag-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background-color: var(--cs-surface-alt);
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--cs-border-soft);
-  cursor: pointer;
-}
-
-.bag-label {
-  font-size: 0.85rem;
-}
-
-.bag-count {
-  min-width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 999px;
-  background-color: var(--cs-primary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* hamburger */
-.menu-btn {
-  display: none;
-  border: none;
-  background: none;
-  padding: 0.25rem;
-  flex-direction: column;
-  gap: 0.22rem;
-  cursor: pointer;
-}
-
-.menu-bar {
-  width: 18px;
-  height: 2px;
-  border-radius: 999px;
-  background-color: var(--cs-text-main);
-}
-
-/* mobile menu */
-.mobile-menu {
-  display: none;
 }
 
 /* ---------- HERO + FILTERS ---------- */
@@ -601,13 +411,7 @@ function labelClass(label: string) {
   justify-content: space-between;
   align-items: stretch;
   padding: 0.9rem 1rem 0.95rem;
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #ffffff 50%,
-    #fff4d6 50%,
-    #fffbeb 100%
-  );
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #fff4d6 50%, #fffbeb 100%);
 }
 
 .product-info {
@@ -669,50 +473,73 @@ function labelClass(label: string) {
   font-size: 0.9rem;
   padding-block: 1.5rem;
 }
-
-/* ---------- MOBILE BEHAVIOUR ---------- */
-@media (max-width: 767px) {
-  .nav-links {
-    display: none;
-  }
-
-  .menu-btn {
-    display: inline-flex;
-  }
-
-  .mobile-menu {
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-    border-top: 1px solid var(--cs-border-soft);
-  }
-
-  .mobile-link {
-    padding: 0.75rem 1.5rem;
-    text-decoration: none;
-    font-size: 0.9rem;
-    color: var(--cs-text-main);
-    border-bottom: 1px solid var(--cs-border-soft);
-  }
-
-  .mobile-link:last-child {
-    border-bottom: none;
-  }
-
-  .hero {
-    margin-top: 0.75rem;
-  }
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 1rem;
+  background-color: #ffffff;
+  border-radius: 0 0 var(--cs-radius-lg) var(--cs-radius-lg);
 }
 
-/* dropdown animation */
-.fade-down-enter-active,
-.fade-down-leave-active {
-  transition: opacity 150ms ease-out, transform 150ms ease-out;
+.circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--cs-border-soft);
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    transform 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
-.fade-down-enter-from,
-.fade-down-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
+.circle-btn:hover {
+  background-color: #f9fafb;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.add-cart-btn {
+  flex: 1;
+  margin-left: 0.75rem;
+  border-radius: 999px;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: var(--cs-primary);
+  color: #111827;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(252, 211, 77, 0.55);
+  transition:
+    background-color 120ms ease-out,
+    box-shadow 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+.add-cart-btn:hover {
+  background-color: var(--cs-primary-dark);
+  box-shadow: 0 12px 28px rgba(252, 211, 77, 0.75);
+  transform: translateY(-1px);
+}
+
+.add-cart-btn--added {
+  background-color: #111827;
+  color: #f9fafb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
+}
+
+.add-cart-icon {
+  font-size: 1rem;
 }
 </style>

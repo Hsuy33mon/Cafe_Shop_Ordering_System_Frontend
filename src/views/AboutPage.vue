@@ -1,8 +1,4 @@
-<script setup lang="ts">
-</script>
-  <template>
-    About Page
-  </template>
+<script setup lang="ts"></script>
+<template>About Page</template>
 
-<style scoped>
-</style>
+<style scoped></style>
