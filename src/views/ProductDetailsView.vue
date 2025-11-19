@@ -280,15 +280,17 @@
 
         <div class="pd-bought-row">
           <article v-for="item in boughtTogether" :key="item.id" class="pd-bought-card">
-            <div class="pd-bought-media">
+            <div class="pd-bought-media" @click="goToDetails(item.id)">
               <img :src="item.imageUrl" :alt="item.name" />
             </div>
+
             <div class="pd-bought-body">
               <p class="pd-bought-name">{{ item.name }}</p>
               <p class="pd-bought-desc">
                 {{ item.description }}
               </p>
             </div>
+
             <div class="pd-bought-footer">
               <span class="pd-bought-price">฿{{ item.price }}</span>
               <button type="button" class="pd-bought-btn">Add to cart</button>
@@ -302,7 +304,8 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+const router = useRouter()
 
 type Product = {
   id: number
@@ -323,6 +326,10 @@ type IngredientRow = {
 
 const route = useRoute()
 const productId = Number(route.params.id || 1)
+
+function goToDetails(id: number) {
+  router.push({ name: 'product-details', params: { id } })
+}
 
 // Mock product – replace with API / Pinia later
 const allProducts: Product[] = [
@@ -1138,5 +1145,16 @@ function goToImage(index: number) {
 .pd-review-success {
   font-size: 0.78rem;
   color: #16a34a;
+}
+.pd-bought-media {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  cursor: pointer; /* 👈 */
+}
+.pd-bought-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>
