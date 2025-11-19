@@ -9,6 +9,7 @@ import ShopPage from '@/views/ShopPage.vue'
 import AdminHomePage from '@/views/admin/HomePage.vue'
 import OrderStatusPage from '@/views/OrderStatusPage.vue'
 import OrdersPage from '@/views/OrdersPage.vue'
+import ProductDetailsView from '@/views/ProductDetailsView.vue'
 const routes = [
   { path: '/', name: 'home', component: Homepage },
   { path: '/orders', name: 'orders', component: OrdersPage },
@@ -19,6 +20,7 @@ const routes = [
   { path: '/products', name: 'products', component: ProductsPage },
   { path: '/cart', name: 'cart', component: CartPage },
   { path: '/payment', name: 'payment', component: PaymentPage },
+  { path: '/products/:id', name: 'product-details', component: ProductDetailsView },
 
   { path: '/admin', name: 'adminHome', component: AdminHomePage },
 ]

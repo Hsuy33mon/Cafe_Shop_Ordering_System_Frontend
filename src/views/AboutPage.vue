@@ -69,8 +69,8 @@
 
             <p class="story-body">
               Whether you're grabbing a quick take-away before class, hosting a casual meeting, or
-              winding down with dessert in the evening, our team aims to make every visit feel
-              easy, friendly and just a little bit special.
+              winding down with dessert in the evening, our team aims to make every visit feel easy,
+              friendly and just a little bit special.
             </p>
 
             <ul class="story-list">
@@ -127,8 +127,8 @@
           <div class="visit-left">
             <h2 class="visit-title">Come say hi at CafeShop</h2>
             <p class="visit-text">
-              We’re on the ground floor, right next to the lobby entrance. Drop by with your
-              laptop, your friends or just your coffee cravings.
+              We’re on the ground floor, right next to the lobby entrance. Drop by with your laptop,
+              your friends or just your coffee cravings.
             </p>
           </div>
           <div class="visit-right">
@@ -136,7 +136,9 @@
               <span class="visit-dot"></span>
               <span>Open daily · 7:00 – 22:00</span>
             </div>
-            <p class="visit-small">Follow the “CafeShop” signs from reception – you’ll smell the coffee.</p>
+            <p class="visit-small">
+              Follow the “CafeShop” signs from reception – you’ll smell the coffee.
+            </p>
           </div>
         </div>
       </section>
@@ -178,18 +180,28 @@ const highlights: Highlight[] = [
 const values: Value[] = [
   {
     title: 'Freshness first',
-    description: 'We prioritize ingredients and prep that taste just as good at 7 p.m. as at 7 a.m.',
+    description:
+      'We prioritize ingredients and prep that taste just as good at 7 p.m. as at 7 a.m.',
     points: ['Brew-to-order coffee', 'Daily baked sweets', 'Simple, honest plates'],
   },
   {
     title: 'Comfort & calm',
-    description: 'Soft lighting, comfortable seating and a layout that fits laptops and long talks.',
-    points: ['Plenty of plugs and seating', 'Warm, neutral interior tones', 'Ambient playlists, not noise'],
+    description:
+      'Soft lighting, comfortable seating and a layout that fits laptops and long talks.',
+    points: [
+      'Plenty of plugs and seating',
+      'Warm, neutral interior tones',
+      'Ambient playlists, not noise',
+    ],
   },
   {
     title: 'Friendly service',
     description: 'Our team is here to help – whether you’re rushing or settling in for hours.',
-    points: ['Quick order-at-counter flow', 'Smiles, not scripts', 'Happy to customize when we can'],
+    points: [
+      'Quick order-at-counter flow',
+      'Smiles, not scripts',
+      'Happy to customize when we can',
+    ],
   },
 ]
 </script>

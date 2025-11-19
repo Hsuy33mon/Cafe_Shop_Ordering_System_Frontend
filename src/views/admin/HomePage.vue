@@ -310,7 +310,7 @@ const topCategories = [
   { name: 'Desserts', orders: 18 },
 ]
 
-const todaySummary = "128 orders · ฿18,420 revenue"
+const todaySummary = '128 orders · ฿18,420 revenue'
 
 function statusClass(status: OrderStatus) {
   return {

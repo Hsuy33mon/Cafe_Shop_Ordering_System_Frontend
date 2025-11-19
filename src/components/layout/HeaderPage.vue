@@ -28,20 +28,16 @@ function closeMobile() {
 
       <!-- CENTER: NAV LINKS -->
       <nav class="nav-links">
-        <RouterLink to="/" class="nav-link" active-class="nav-link--active">
-          Home
-        </RouterLink>
+        <RouterLink to="/" class="nav-link" active-class="nav-link--active"> Home </RouterLink>
         <RouterLink to="/about" class="nav-link" active-class="nav-link--active">
           About
         </RouterLink>
         <RouterLink to="/products" class="nav-link" active-class="nav-link--active">
           Menu
         </RouterLink>
-        <RouterLink to="/shop" class="nav-link" active-class="nav-link--active">
-          Shop
-        </RouterLink>
-         <RouterLink to="/orders" class="nav-link" active-class="nav-link--active">
-           Orders
+        <RouterLink to="/shop" class="nav-link" active-class="nav-link--active"> Shop </RouterLink>
+        <RouterLink to="/orders" class="nav-link" active-class="nav-link--active">
+          Orders
         </RouterLink>
         <RouterLink to="/contact" class="nav-link" active-class="nav-link--active">
           Contact

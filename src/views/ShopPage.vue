@@ -11,8 +11,8 @@
           <span class="hero-pill">CafeShop Store</span>
           <h1 class="cs-heading-xl hero-title">Take a piece of CafeShop home.</h1>
           <p class="cs-body-muted hero-subtitle">
-            Beans, bottles, gift cards and cozy merch inspired by our cafe – perfect for yourself
-            or someone you like a latte.
+            Beans, bottles, gift cards and cozy merch inspired by our cafe – perfect for yourself or
+            someone you like a latte.
           </p>
         </div>
 
@@ -98,12 +98,12 @@
       <transition name="fade-up">
         <div v-if="cartCount > 0" class="cart-summary">
           <div class="cart-summary-info">
-            <span class="cart-summary-count">{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span>
+            <span class="cart-summary-count"
+              >{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span
+            >
             <span class="cart-summary-text">in your bag</span>
           </div>
-          <button type="button" class="cart-summary-btn" @click="goToCart">
-            View bag
-          </button>
+          <button type="button" class="cart-summary-btn" @click="goToCart">View bag</button>
         </div>
       </transition>
     </main>

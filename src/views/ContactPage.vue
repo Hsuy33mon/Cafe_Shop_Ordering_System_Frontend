@@ -227,7 +227,6 @@ function handleSubmit() {
   animation: floatShape 14s ease-in-out infinite;
 }
 
-
 /* ---------- HEADER / COVER ---------- */
 .contact-hero {
   position: relative;
@@ -383,7 +382,10 @@ function handleSubmit() {
   font-size: 0.85rem;
   background: linear-gradient(135deg, #f9fafb, #f3f4f6);
   outline: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 }
 
 .field-input::placeholder {
@@ -392,7 +394,9 @@ function handleSubmit() {
 
 .field-input:focus {
   border-color: var(--cs-primary);
-  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6), 0 14px 28px rgba(15, 23, 42, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.6),
+    0 14px 28px rgba(15, 23, 42, 0.1);
   transform: translateY(-1px);
   background: #ffffff;
 }
@@ -400,10 +404,15 @@ function handleSubmit() {
 .select-input {
   -webkit-appearance: none;
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
     linear-gradient(135deg, #6b7280 50%, transparent 50%);
-  background-position: calc(100% - 14px) 55%, calc(100% - 10px) 55%;
-  background-size: 4px 4px, 4px 4px;
+  background-position:
+    calc(100% - 14px) 55%,
+    calc(100% - 10px) 55%;
+  background-size:
+    4px 4px,
+    4px 4px;
   background-repeat: no-repeat;
 }
 
@@ -431,7 +440,9 @@ function handleSubmit() {
   background: linear-gradient(135deg, #facc15, #f97316);
   color: #111827;
   box-shadow: 0 14px 32px rgba(234, 179, 8, 0.7);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .btn.primary:hover {
@@ -497,7 +508,9 @@ function handleSubmit() {
   color: #111827;
   text-decoration: none;
   border-bottom: 1px dotted rgba(15, 23, 42, 0.5);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .link-inline:hover {

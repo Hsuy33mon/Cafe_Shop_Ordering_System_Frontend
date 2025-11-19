@@ -11,7 +11,8 @@
           <span class="hero-pill">My orders</span>
           <h1 class="hero-title">Order overview</h1>
           <p class="hero-subtitle cs-body-muted">
-            View your in-progress and completed CafeShop orders. Tap an order to see detailed status.
+            View your in-progress and completed CafeShop orders. Tap an order to see detailed
+            status.
           </p>
         </div>
 
@@ -112,9 +113,7 @@
               <div class="order-card-top">
                 <div>
                   <p class="order-id">#{{ order.id }}</p>
-                  <p class="order-meta">
-                    {{ order.date }} · {{ order.time }}
-                  </p>
+                  <p class="order-meta">{{ order.date }} · {{ order.time }}</p>
                 </div>
                 <span class="status-pill" :class="statusClass(order.status)">
                   {{ displayStatus(order.status) }}
@@ -122,14 +121,10 @@
               </div>
 
               <div class="order-card-middle">
-                <p class="order-room">
-                  {{ order.roomOrTable }} · {{ displayType(order.type) }}
-                </p>
+                <p class="order-room">{{ order.roomOrTable }} · {{ displayType(order.type) }}</p>
                 <p class="order-items">
                   {{ order.items[0] }}
-                  <span v-if="order.items.length > 1">
-                    + {{ order.items.length - 1 }} more
-                  </span>
+                  <span v-if="order.items.length > 1"> + {{ order.items.length - 1 }} more </span>
                 </p>
               </div>
 

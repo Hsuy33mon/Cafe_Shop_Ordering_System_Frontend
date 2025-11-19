@@ -11,8 +11,8 @@
           <span class="hero-pill">Order status</span>
           <h1 class="hero-title">Your order is on its way ☕</h1>
           <p class="hero-subtitle cs-body-muted">
-            We’ve received your payment and our team is preparing your items.
-            You can relax — we’ll bring everything straight to your room.
+            We’ve received your payment and our team is preparing your items. You can relax — we’ll
+            bring everything straight to your room.
           </p>
         </div>
 
@@ -122,17 +122,13 @@
           <div>
             <h3 class="help-title">Need to update your order?</h3>
             <p class="help-text">
-              If you need to change room number, add cutlery or adjust anything, please contact
-              our team immediately.
+              If you need to change room number, add cutlery or adjust anything, please contact our
+              team immediately.
             </p>
           </div>
           <div class="help-actions">
-            <a href="tel:+66000000000" class="help-btn help-btn--primary">
-              Call CafeShop
-            </a>
-            <a href="mailto:hello@cafeshop.local" class="help-btn help-btn--ghost">
-              Message us
-            </a>
+            <a href="tel:+66000000000" class="help-btn help-btn--primary"> Call CafeShop </a>
+            <a href="mailto:hello@cafeshop.local" class="help-btn help-btn--ghost"> Message us </a>
           </div>
         </div>
       </section>
@@ -170,39 +166,43 @@ const order = ref<OrderInfo>({
 const currentStatus = ref<OrderStatusKey>('cooking')
 
 const steps = computed(() => {
-  const orderOfSteps: { key: OrderStatusKey; label: string; description: string; extra?: string }[] =
-    [
-      {
-        key: 'approved',
-        label: 'Payment approved',
-        description: 'Your order and payment have been received successfully.',
-        extra: 'If you made a mistake, please contact us as soon as possible.',
-      },
-      {
-        key: 'cooking',
-        label: 'Start cooking',
-        description: 'Our kitchen is preparing your food and drinks fresh to order.',
-        extra: 'Typical prep time is 10–20 minutes depending on the queue.',
-      },
-      {
-        key: 'finished',
-        label: 'Finished & packed',
-        description: 'Your order is ready and being checked before leaving the counter.',
-        extra: 'Hot and cold items are packed separately to keep everything fresh.',
-      },
-      {
-        key: 'delivering',
-        label: 'Delivering to your room',
-        description: 'Our staff is on the way to the room number you provided.',
-        extra: 'Please keep your phone nearby in case we need to contact you.',
-      },
-      {
-        key: 'picked',
-        label: 'Picked at room',
-        description: 'Order has been delivered and picked up at your room.',
-        extra: 'Enjoy your meal and feel free to tag @cafeshop if you share a photo!',
-      },
-    ]
+  const orderOfSteps: {
+    key: OrderStatusKey
+    label: string
+    description: string
+    extra?: string
+  }[] = [
+    {
+      key: 'approved',
+      label: 'Payment approved',
+      description: 'Your order and payment have been received successfully.',
+      extra: 'If you made a mistake, please contact us as soon as possible.',
+    },
+    {
+      key: 'cooking',
+      label: 'Start cooking',
+      description: 'Our kitchen is preparing your food and drinks fresh to order.',
+      extra: 'Typical prep time is 10–20 minutes depending on the queue.',
+    },
+    {
+      key: 'finished',
+      label: 'Finished & packed',
+      description: 'Your order is ready and being checked before leaving the counter.',
+      extra: 'Hot and cold items are packed separately to keep everything fresh.',
+    },
+    {
+      key: 'delivering',
+      label: 'Delivering to your room',
+      description: 'Our staff is on the way to the room number you provided.',
+      extra: 'Please keep your phone nearby in case we need to contact you.',
+    },
+    {
+      key: 'picked',
+      label: 'Picked at room',
+      description: 'Order has been delivered and picked up at your room.',
+      extra: 'Enjoy your meal and feel free to tag @cafeshop if you share a photo!',
+    },
+  ]
 
   const currentIndex = orderOfSteps.findIndex((s) => s.key === currentStatus.value)
 

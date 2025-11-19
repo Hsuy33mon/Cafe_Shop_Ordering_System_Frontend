@@ -71,7 +71,7 @@
             class="product-card"
             :style="{ '--stagger': index }"
           >
-            <div class="product-media">
+            <div class="product-media" @click="goToDetails(product.id)">
               <img :src="product.imageUrl" :alt="product.name" class="product-image" />
 
               <div v-if="product.label" class="label-badge" :class="labelClass(product.label)">
@@ -104,7 +104,9 @@
                       ★
                     </span>
                   </div>
-                  <span class="rating-count"> {{ product.rating.toFixed(1) }} · {{ product.ratingCount }} ratings </span>
+                  <span class="rating-count">
+                    {{ product.rating.toFixed(1) }} · {{ product.ratingCount }} ratings
+                  </span>
                 </div>
               </div>
 
@@ -116,9 +118,7 @@
 
             <!-- actions row -->
             <div class="card-actions">
-              <button type="button" class="circle-btn" @click="showDetails(product)">
-                ⟳
-              </button>
+              <button type="button" class="circle-btn" @click="showDetails(product)">⟳</button>
 
               <button
                 type="button"
@@ -144,6 +144,16 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
+function goToDetails(id: number) {
+  router.push({ name: 'product-details', params: { id } })
+}
+
+function showDetails(product: Product) {
+  goToDetails(product.id)
+}
 
 type Product = {
   id: number
@@ -273,11 +283,6 @@ function toggleCart(product: Product) {
     cartIds.value.splice(index, 1)
   }
 }
-
-function showDetails(product: Product) {
-  // later you can open a modal or navigate
-  alert(`Show details for: ${product.name}`)
-}
 </script>
 
 <style scoped>
@@ -306,8 +311,6 @@ function showDetails(product: Product) {
   right: 8%;
   animation: floatShape 18s ease-in-out infinite;
 }
-
-
 
 /* ---------- MAIN LAYOUT ---------- */
 .main {
@@ -410,10 +413,15 @@ function showDetails(product: Product) {
 .select-wrapper .category-select {
   -webkit-appearance: none;
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6b7280 50%),
     linear-gradient(135deg, #6b7280 50%, transparent 50%);
-  background-position: calc(100% - 16px) 55%, calc(100% - 12px) 55%;
-  background-size: 4px 4px, 4px 4px;
+  background-position:
+    calc(100% - 16px) 55%,
+    calc(100% - 12px) 55%;
+  background-size:
+    4px 4px,
+    4px 4px;
   background-repeat: no-repeat;
 }
 
