@@ -40,6 +40,9 @@ function closeMobile() {
         <RouterLink to="/shop" class="nav-link" active-class="nav-link--active">
           Shop
         </RouterLink>
+         <RouterLink to="/orders" class="nav-link" active-class="nav-link--active">
+           Orders
+        </RouterLink>
         <RouterLink to="/contact" class="nav-link" active-class="nav-link--active">
           Contact
         </RouterLink>
@@ -72,6 +75,7 @@ function closeMobile() {
         <RouterLink to="/about" class="mobile-link" @click="closeMobile">About</RouterLink>
         <RouterLink to="/products" class="mobile-link" @click="closeMobile">Menu</RouterLink>
         <RouterLink to="/shop" class="mobile-link" @click="closeMobile">Shop</RouterLink>
+        <RouterLink to="/orders" class="mobile-link" @click="closeMobile">Orders</RouterLink>
         <RouterLink to="/contact" class="mobile-link" @click="closeMobile">Contact</RouterLink>
         <RouterLink to="/cart" class="mobile-link" @click="closeMobile">Purchase</RouterLink>
       </nav>

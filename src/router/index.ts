@@ -7,15 +7,20 @@ import ContactPage from '@/views/ContactPage.vue'
 import PaymentPage from '@/views/PaymentPage.vue'
 import ShopPage from '@/views/ShopPage.vue'
 import AdminHomePage from '@/views/admin/HomePage.vue'
+import OrderStatusPage from '@/views/OrderStatusPage.vue'
+import OrdersPage from '@/views/OrdersPage.vue'
 const routes = [
   { path: '/', name: 'home', component: Homepage },
-  { path: '/admin', name: 'adminHome', component: AdminHomePage },
+  { path: '/orders', name: 'orders', component: OrdersPage },
+  { path: '/orders/:id', name: 'order-status', component: OrderStatusPage },
   { path: '/shop', name: 'shop', component: ShopPage },
   { path: '/contact', name: 'contact', component: ContactPage },
   { path: '/about', name: 'about', component: aboutPage },
   { path: '/products', name: 'products', component: ProductsPage },
   { path: '/cart', name: 'cart', component: CartPage },
   { path: '/payment', name: 'payment', component: PaymentPage },
+
+  { path: '/admin', name: 'adminHome', component: AdminHomePage },
 ]
 const router = createRouter({
   history: createWebHistory(),
