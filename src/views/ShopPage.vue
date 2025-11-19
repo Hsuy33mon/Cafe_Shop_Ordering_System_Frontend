@@ -52,7 +52,7 @@
             class="item-card"
             :style="{ '--stagger': index }"
           >
-            <div class="item-media">
+            <div class="item-media" @click="goToDetails(item.id)">
               <img :src="item.imageUrl" :alt="item.name" class="item-image" />
               <div v-if="item.badge" class="item-badge">
                 {{ item.badge }}
@@ -126,6 +126,10 @@ type ShopItem = {
 }
 
 const router = useRouter()
+
+function goToDetails(id: number) {
+  router.push({ name: 'product-details', params: { id } })
+}
 
 const items = ref<ShopItem[]>([
   {

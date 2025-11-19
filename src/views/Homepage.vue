@@ -88,12 +88,13 @@
 
         <div class="specials-grid">
           <article v-for="item in specials" :key="item.id" class="special-card">
-            <div class="special-media">
+            <div class="special-media" @click="goToDetails(item.id)">
               <img :src="item.imageUrl" :alt="item.name" />
               <span v-if="item.badge" class="badge">
                 {{ item.badge }}
               </span>
             </div>
+
             <div class="special-body">
               <div class="special-top">
                 <h3 class="special-name">{{ item.name }}</h3>
@@ -161,6 +162,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+function goToDetails(id: number) {
+  router.push({ name: 'product-details', params: { id } })
+}
 
 const featuredCategories = ref([
   {
