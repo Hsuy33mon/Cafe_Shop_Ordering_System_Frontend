@@ -13,13 +13,47 @@
       <section class="cs-container pd-top">
         <!-- LEFT: SINGLE IMAGE -->
         <div class="pd-image-card">
-          <div class="pd-image-label" v-if="product.label">
-            <span class="pd-label-dot"></span>
-            <span>{{ product.label }}</span>
+          <!-- MAIN SLIDE -->
+          <div class="pd-image-main">
+            <div class="pd-image-label" v-if="product.label">
+              <span class="pd-label-dot"></span>
+              <span>{{ product.label }}</span>
+            </div>
+            <img :src="currentImage" :alt="product.name" class="pd-image" />
+
+            <!-- arrows -->
+            <button
+              v-if="productImages.length > 1"
+              type="button"
+              class="pd-image-nav-btn pd-image-nav-btn--left"
+              @click="prevImage"
+              aria-label="Previous image"
+            >
+              ‹
+            </button>
+            <button
+              v-if="productImages.length > 1"
+              type="button"
+              class="pd-image-nav-btn pd-image-nav-btn--right"
+              @click="nextImage"
+              aria-label="Next image"
+            >
+              ›
+            </button>
           </div>
 
-          <div class="pd-image-wrapper">
-            <img :src="product.imageUrl" :alt="product.name" class="pd-image" />
+          <!-- THUMBNAILS -->
+          <div v-if="productImages.length > 1" class="pd-thumb-row">
+            <button
+              v-for="(img, idx) in productImages"
+              :key="img + idx"
+              type="button"
+              class="pd-thumb"
+              :class="{ 'pd-thumb--active': idx === currentImageIndex }"
+              @click="goToImage(idx)"
+            >
+              <img :src="img" :alt="`${product.name} ${idx + 1}`" />
+            </button>
           </div>
 
           <button type="button" class="pd-zoom-btn" aria-label="View larger">⤢</button>
@@ -276,6 +310,7 @@ type Product = {
   price: number
   description: string
   imageUrl: string
+  images?: string[]
   label?: string
   rating: number
   ratingCount: number
@@ -298,6 +333,11 @@ const allProducts: Product[] = [
     description: 'Tomatoes, nori, feta cheese, mushrooms, rice noodles, corn, shrimp.',
     imageUrl:
       'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
+    images: [
+      'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
+      'https://images.pexels.com/photos/3731477/pexels-photo-3731477.jpeg?auto=compress&w=800',
+      'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&w=800',
+    ],
     label: 'Vegan',
     rating: 5,
     ratingCount: 4,
@@ -445,6 +485,39 @@ function submitReview() {
   }, 3000)
 }
 
+// --- IMAGE SLIDER ---
+const currentImageIndex = ref(0)
+
+const productImages = computed<string[]>(() => {
+  const p = product.value
+  if (!p) return []
+  if (p.images && p.images.length > 0) return p.images
+  return [p.imageUrl]
+})
+
+const currentImage = computed(() => {
+  const imgs = productImages.value
+  if (!imgs.length) return ''
+  const idx = Math.min(currentImageIndex.value, imgs.length - 1)
+  return imgs[idx]
+})
+
+function nextImage() {
+  const total = productImages.value.length
+  if (total === 0) return
+  currentImageIndex.value = (currentImageIndex.value + 1) % total
+}
+
+function prevImage() {
+  const total = productImages.value.length
+  if (total === 0) return
+  currentImageIndex.value = (currentImageIndex.value - 1 + total) % total
+}
+
+function goToImage(index: number) {
+  if (index < 0 || index >= productImages.value.length) return
+  currentImageIndex.value = index
+}
 </script>
 
 <style scoped>
@@ -483,25 +556,11 @@ function submitReview() {
   position: relative;
   border-radius: 4px;
   background-color: #ffffff;
-  padding: 1.5rem 1.8rem;
+  padding: 1.5rem 1.8rem 1.1rem;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
 }
 
-.pd-image-wrapper {
-  border-radius: 2px;
-  overflow: hidden;
-  background-color: #f3f4f6;
-  aspect-ratio: 4 / 3;
-}
-
-.pd-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Vegan label */
+/* label stays same */
 .pd-image-label {
   position: absolute;
   top: 1.2rem;
@@ -522,11 +581,79 @@ function submitReview() {
   background-color: #bbf7d0;
 }
 
-/* zoom button */
+/* fixed-size main image */
+.pd-image-main {
+  border-radius: 2px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  aspect-ratio: 4 / 3; /* 👈 same size for all slides */
+  position: relative;
+}
+
+.pd-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* arrows */
+.pd-image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background-color: rgba(15, 23, 42, 0.55);
+  color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+.pd-image-nav-btn--left {
+  left: 0.6rem;
+}
+.pd-image-nav-btn--right {
+  right: 0.6rem;
+}
+
+/* thumbnails row */
+.pd-thumb-row {
+  margin-top: 0.65rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.pd-thumb {
+  flex: 0 0 70px;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.pd-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pd-thumb--active {
+  border-color: #facc15;
+}
+
+/* zoom button (same as before, but sits above thumbs) */
 .pd-zoom-btn {
   position: absolute;
   right: 1.8rem;
-  bottom: 1.7rem;
+  bottom: 1.5rem;
   width: 32px;
   height: 32px;
   border-radius: 999px;
@@ -1012,5 +1139,4 @@ function submitReview() {
   font-size: 0.78rem;
   color: #16a34a;
 }
-
 </style>
