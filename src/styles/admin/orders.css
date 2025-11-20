@@ -66,38 +66,6 @@
   color: #9ca3af;
 }
 
-/* TABLE */
-.table-wrapper {
-  max-height: 540px;
-  overflow: auto;
-}
-
-.orders-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8rem;
-}
-
-.orders-table th,
-.orders-table td {
-  padding: 0.4rem 0.45rem;
-  text-align: left;
-}
-
-.orders-table thead {
-  background-color: #f9fafb;
-}
-
-.orders-table th {
-  font-weight: 600;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.orders-table tbody tr:nth-child(even) {
-  background-color: #f9fafb;
-}
-
 /* STATUS PILL (same as dashboard) */
 .status-pill {
   padding: 0.1rem 0.5rem;
@@ -160,35 +128,6 @@
     width: 100%;
   }
 }
-/* PAGINATION */
-.pagination {
-  margin-top: 0.75rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.pagination-btn {
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.pagination-btn--active {
-  background: linear-gradient(135deg, #facc15, #f97316);
-  color: #111827;
-  border-color: transparent;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
 /* payment pill (clickable) */
 .payment-pill {
   border-radius: 999px;
@@ -276,4 +215,29 @@
   background: linear-gradient(135deg, #facc15, #f97316);
   border-color: transparent;
   color: #111827;
+}
+
+/* date range group inside filters bar */
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.date-input {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.78rem;
+  min-width: 140px;
+  outline: none;
+}
+
+.date-input:focus {
+  border-color: #facc15;
+}
+
+.date-separator {
+  font-size: 0.8rem;
+  color: #6b7280;
 }

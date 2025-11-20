@@ -19,6 +19,7 @@ import AdminMenu from '@/views/admin/AdminMenu.vue'
 import AdminTables from '@/views/admin/AdminTables.vue'
 import AdminCustomers from '@/views/admin/AdminCustomers.vue'
 import AdminSettings from '@/views/admin/AdminSettings.vue'
+import AdminOrderDetails from '@/views/admin/AdminOrderDetails.vue'
 
 const routes = [
   {
@@ -60,6 +61,7 @@ const routes = [
       { path: 'tables', name: 'admin-tables', component: AdminTables },
       { path: 'customers', name: 'admin-customers', component: AdminCustomers },
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
+      { path: 'orders/:id', name: 'admin-order-details', component: AdminOrderDetails },
     ],
   },
 ]
