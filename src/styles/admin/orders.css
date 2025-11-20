@@ -1,0 +1,279 @@
+/* src/styles/admin/orders.css */
+
+/* FILTER PANEL */
+.panel--filters {
+  margin-bottom: 0.9rem;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+/* reuse look similar to topbar search */
+.filters-row .search-input {
+  flex: 1 1 220px;
+  padding: 0.45rem 0.7rem 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.filters-row .search-input:focus {
+  border-color: #facc15;
+}
+
+/* select filters */
+.filter-select {
+  min-width: 150px;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.filter-select:focus {
+  border-color: #facc15;
+}
+
+/* PANEL SHARED LOOK (if not already in dashboard.css) */
+.panel {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 0.9rem 1rem;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.05);
+}
+
+.panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.panel-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.panel-caption {
+  font-size: 0.74rem;
+  color: #9ca3af;
+}
+
+/* TABLE */
+.table-wrapper {
+  max-height: 540px;
+  overflow: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 0.4rem 0.45rem;
+  text-align: left;
+}
+
+.orders-table thead {
+  background-color: #f9fafb;
+}
+
+.orders-table th {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.orders-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* STATUS PILL (same as dashboard) */
+.status-pill {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.status-pill--new {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.status-pill--prep {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+.status-pill--ready {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-pill--paid {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+/* ACTION BUTTONS */
+.table-actions {
+  white-space: nowrap;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-right: 0.45rem;
+  font-size: 0.75rem;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.btn-link:last-child {
+  margin-right: 0;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+/* small responsive tweak */
+@media (max-width: 900px) {
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-row .search-input,
+  .filter-select {
+    width: 100%;
+  }
+}
+/* PAGINATION */
+.pagination {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pagination-btn {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.pagination-btn--active {
+  background: linear-gradient(135deg, #facc15, #f97316);
+  color: #111827;
+  border-color: transparent;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* payment pill (clickable) */
+.payment-pill {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+/* small danger variant for cancel button */
+.btn-link--danger {
+  color: #b91c1c;
+}
+
+/* MODAL / DIALOG */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.modal {
+  width: 320px;
+  max-width: 90vw;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  padding: 1rem 1.1rem;
+  font-size: 0.85rem;
+}
+
+.modal-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.modal-text {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.6rem;
+}
+
+.modal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.modal-select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.modal-select:focus {
+  border-color: #facc15;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.modal-btn {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.modal-btn--primary {
+  background: linear-gradient(135deg, #facc15, #f97316);
+  border-color: transparent;
+  color: #111827;
+}

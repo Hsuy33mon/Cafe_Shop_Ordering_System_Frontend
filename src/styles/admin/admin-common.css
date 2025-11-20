@@ -1,0 +1,37 @@
+/* src/styles/admin/admin-common.css */
+
+.admin-page {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+/* make admin-main fill height and behave like a page layout */
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* <--- add this */
+}
+
+/* let content take all remaining space so footer goes to bottom */
+.content {
+  padding: 1.2rem 1.5rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  flex: 1; /* <--- add this */
+}
+
+/* RESPONSIVE LAYOUT ONLY */
+@media (max-width: 1024px) {
+  .admin-page {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

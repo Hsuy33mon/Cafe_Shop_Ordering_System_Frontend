@@ -1,0 +1,11 @@
+.admin-footer {
+  background-color: #ffffff; /* footer bar */
+  border-top: 1px solid #e5e7eb; /* subtle line */
+  padding: 0.6rem 1.5rem 0.8rem;
+}
+
+.admin-footer-text {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: right; /* change to left/center if you prefer */
+}
