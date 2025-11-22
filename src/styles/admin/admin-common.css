@@ -119,22 +119,49 @@
   color: #111827;
 }
 
-/* Text buttons (Edit / Update / Cancel link style) */
+/* Small pill buttons used in tables: Update, View order, Edit, Disable, etc. */
 .btn-link {
-  background: transparent;
-  border: none;
-  padding: 0;
-  font-size: 0.8rem;
-  color: #2563eb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.18rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #bfdbfe;
+
+  background-color: #eff6ff;
+  color: #1d4ed8;
+
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+
   cursor: pointer;
+  text-decoration: none;
 }
 
+/* distance between buttons */
+.btn-link + .btn-link {
+  margin-left: 0.35rem;
+}
+
+/* hover */
 .btn-link:hover {
-  text-decoration: underline;
+  background-color: #dbeafe;
+  border-color: #93c5fd;
 }
 
+/* red variant for Cancel / Disable */
 .btn-link--danger {
-  color: #dc2626;
+  border-color: #fecaca;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.btn-link--danger:hover {
+  background-color: #fee2e2;
+  border-color: #fecaca;
 }
 
 /* Primary pill buttons (Add product, Update order, etc.) */

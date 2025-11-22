@@ -97,25 +97,6 @@
 .table-actions {
   white-space: nowrap;
 }
-
-.btn-link {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin-right: 0.45rem;
-  font-size: 0.75rem;
-  color: #2563eb;
-  cursor: pointer;
-}
-
-.btn-link:last-child {
-  margin-right: 0;
-}
-
-.btn-link:hover {
-  text-decoration: underline;
-}
-
 /* small responsive tweak */
 @media (max-width: 900px) {
   .filters-row {
