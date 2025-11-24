@@ -4,18 +4,12 @@
     <section class="panel panel--filters tables-header">
       <div class="tables-header-left">
         <h1 class="tables-title">Tables</h1>
-        <p class="tables-subtitle">
-          Live overview of cafe tables, rooms and their current status.
-        </p>
+        <p class="tables-subtitle">Live overview of cafe tables, rooms and their current status.</p>
       </div>
 
       <div class="tables-header-right">
-        <span class="tables-pill tables-pill--free">
-          {{ availableCount }} available
-        </span>
-        <span class="tables-pill tables-pill--occupied">
-          {{ occupiedCount }} occupied
-        </span>
+        <span class="tables-pill tables-pill--free"> {{ availableCount }} available </span>
+        <span class="tables-pill tables-pill--occupied"> {{ occupiedCount }} occupied </span>
       </div>
     </section>
 
@@ -70,31 +64,19 @@
       <!-- Actions -->
       <template #cell-actions="{ row }">
         <div class="table-actions">
-          <button
-            class="btn-link btn-link--primary"
-            @click="openStatusDialog(row)"
-          >
-            Update
-          </button>
+          <button class="btn-link btn-link--primary" @click="openStatusDialog(row)">Update</button>
 
-          <button
-            v-if="row.currentOrder"
-            class="btn-link"
-            @click="goToOrder(row)"
-          >
+          <button v-if="row.currentOrder" class="btn-link" @click="goToOrder(row)">
             View order
           </button>
         </div>
       </template>
-
     </AdminTable>
 
     <!-- STATUS UPDATE DIALOG -->
     <div v-if="statusDialogVisible" class="modal-backdrop">
       <div class="modal">
-        <h3 class="modal-title">
-          Update table · {{ statusTarget?.name }}
-        </h3>
+        <h3 class="modal-title">Update table · {{ statusTarget?.name }}</h3>
 
         <p class="modal-text">
           Current status:
@@ -111,12 +93,8 @@
         </label>
 
         <div class="modal-actions">
-          <button class="modal-btn modal-btn--primary" @click="confirmStatusUpdate">
-            Update
-          </button>
-          <button class="modal-btn" @click="closeStatusDialog">
-            Cancel
-          </button>
+          <button class="modal-btn modal-btn--primary" @click="confirmStatusUpdate">Update</button>
+          <button class="modal-btn" @click="closeStatusDialog">Cancel</button>
         </div>
       </div>
     </div>
@@ -282,12 +260,8 @@ const filteredTables = computed(() => {
 })
 
 // counts for header pills
-const availableCount = computed(
-  () => tables.value.filter((t) => t.status === 'Available').length,
-)
-const occupiedCount = computed(
-  () => tables.value.filter((t) => t.status === 'Occupied').length,
-)
+const availableCount = computed(() => tables.value.filter((t) => t.status === 'Available').length)
+const occupiedCount = computed(() => tables.value.filter((t) => t.status === 'Occupied').length)
 
 // page-change hook (for analytics / later API pagination)
 function onPageChange(page: number) {
@@ -330,7 +304,10 @@ function statusClass(status: TableStatus) {
 // navigate to order (if you have admin order route)
 function goToOrder(row: TableRow) {
   if (!row.currentOrder) return
-  router.push({ name: 'admin-orders' /* or order details route */, query: { focus: row.currentOrder } })
+  router.push({
+    name: 'admin-orders' /* or order details route */,
+    query: { focus: row.currentOrder },
+  })
 }
 </script>
 

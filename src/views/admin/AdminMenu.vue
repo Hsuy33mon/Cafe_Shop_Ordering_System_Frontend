@@ -7,7 +7,7 @@
         <p class="menu-subtitle">Manage all products available in CafeShop menu.</p>
       </div>
 
-      <button class="menu-btn-primary">+ Add product</button>
+      <button class="menu-btn-primary" @click="goToAddProduct">+ Add product</button>
     </section>
 
     <!-- FILTER BAR -->
@@ -84,6 +84,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 type ProductStatus = 'Active' | 'Hidden' | 'Out of stock'
 type Availability = 'Cafe' | 'Room' | 'Both'
@@ -239,6 +241,9 @@ function statusClass(status: ProductStatus) {
     'status-pill--prep': status === 'Hidden',
     'status-pill--ready': status === 'Out of stock',
   }
+}
+function goToAddProduct() {
+  router.push({ name: 'admin-menu-new' })
 }
 </script>
 

@@ -60,3 +60,24 @@
   gap: 0.35rem;
 }
 
+.btn-link--update {
+  border-color: transparent;
+  background: linear-gradient(135deg, #facc15, #f97316); /* orange */
+  color: #111827;
+}
+
+.btn-link--update:hover {
+  filter: brightness(0.97);
+}
+
+/* View order = softer blue pill */
+.btn-link--view {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.btn-link--view:hover {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}

@@ -46,7 +46,16 @@
         </select>
       </div>
     </section>
+    <div class="orders-new-banner" v-if="hasNewOrders">
+      <div class="orders-new-left">
+        <span class="orders-new-dot"></span>
+        <span class="orders-new-text">
+          {{ newOrderCount }} new order{{ newOrderCount > 1 ? 's' : '' }} just arrived
+        </span>
+      </div>
 
+      <button class="orders-new-btn" @click="onViewLatest">View latest</button>
+    </div>
     <!-- ORDERS TABLE -->
     <AdminTable
       :columns="orderColumns"
@@ -104,6 +113,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
+const hasNewOrders = ref(true)
+const newOrderCount = ref(3)
+const currentPage = ref(1)
 
 type OrderStatus = 'New' | 'Preparing' | 'Ready' | 'Completed' | 'Canceled'
 type Channel = 'Cafe' | 'Room' | 'Take-away'
@@ -420,6 +432,16 @@ function cancelOrder(order: OrderRow) {
   if (order.status === 'Completed') return
   order.status = 'Canceled'
   order.paymentStatus = 'Unpaid'
+}
+function onViewLatest() {
+  // show only "New" orders
+  statusFilter.value = 'New'
+
+  // go to first page, where newest orders are
+  currentPage.value = 1
+
+  // optional: hide the green banner after user clicks
+  hasNewOrders.value = false
 }
 </script>
 

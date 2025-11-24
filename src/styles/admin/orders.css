@@ -98,15 +98,15 @@
   white-space: nowrap;
 }
 /* small responsive tweak */
+/* --- Responsive tweaks for new-orders banner --- */
 @media (max-width: 900px) {
-  .filters-row {
+  .orders-new-banner {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
-  .filters-row .search-input,
-  .filter-select {
-    width: 100%;
+  .orders-new-btn {
+    align-self: flex-end;
   }
 }
 /* payment pill (clickable) */
@@ -122,80 +122,6 @@
 /* small danger variant for cancel button */
 .btn-link--danger {
   color: #b91c1c;
-}
-
-/* MODAL / DIALOG */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(15, 23, 42, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 40;
-}
-
-.modal {
-  width: 320px;
-  max-width: 90vw;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
-  padding: 1rem 1.1rem;
-  font-size: 0.85rem;
-}
-
-.modal-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-}
-
-.modal-text {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-bottom: 0.6rem;
-}
-
-.modal-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  margin-bottom: 0.9rem;
-}
-
-.modal-select {
-  padding: 0.4rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.8rem;
-  outline: none;
-}
-
-.modal-select:focus {
-  border-color: #facc15;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.modal-btn {
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.modal-btn--primary {
-  background: linear-gradient(135deg, #facc15, #f97316);
-  border-color: transparent;
-  color: #111827;
 }
 
 /* date range group inside filters bar */
@@ -221,4 +147,55 @@
 .date-separator {
   font-size: 0.8rem;
   color: #6b7280;
+}
+/* ===== New orders notification banner ===== */
+
+.orders-new-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+
+  margin-bottom: 0.7rem;
+  padding: 0.45rem 0.9rem;
+
+  border-radius: 999px;
+  background-color: #ecfdf5;
+  color: #166534;
+  font-size: 0.8rem;
+}
+
+.orders-new-left {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.orders-new-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #22c55e;
+}
+
+.orders-new-text {
+  font-weight: 500;
+}
+
+/* call-to-action button on the right */
+.orders-new-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 0.25rem 0.9rem;
+
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  background: linear-gradient(135deg, #facc15, #f97316);
+  color: #111827;
+}
+
+.orders-new-btn:hover {
+  filter: brightness(0.97);
 }
