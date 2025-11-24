@@ -9,8 +9,9 @@
     <section class="page-header">
       <div class="page-header__bg" style="background-image: url(assets/images/backgrounds/page-header-bg.jpg);">
       </div>
-      <div class="page-header__shape-1" style="background-image: url(assets/images/shapes/page-header-shape-1.png);">
-      </div>
+      <!-- Moving Shape -->
+      <!-- <div class="page-header__shape-1" style="background-image: url(assets/images/shapes/kitty.png);">
+      </div> -->
       <div class="container">
         <div class="page-header__inner">
           <h3>Products</h3>
@@ -26,34 +27,31 @@
     </section>
 
     <section class="product">
+      <div class="product__topbar">
+                  <!-- Search Section -->
+                  <div class="shop-search">
+                    <form action="#">
+                      <input type="text" placeholder="Search">
+                      <button type="submit"><i class="fa fa-search"></i></button>
+                    </form>
+                  </div>
+
+                  <!-- Categories Section -->
+                  <div class="shop-category">
+                    <h3 class="product__sidebar-title">Categories</h3>
+                    <ul>
+                      <li><a href="#">Special Coffee</a></li>
+                      <li><a href="#">Breakfast</a></li>
+                      <li><a href="#">Drink</a></li>
+                      <li><a href="#">Coffee</a></li>
+                    </ul>
+                  </div>
+      </div>
       <div class="container">
         <div class="row">
-
           <div class="col-xl-9 col-lg-12">
             <div class="product__items">
               <div class="row">
-                <div class="product__topbar">
-  <div class="product__sidebar">
-    <div class="shop-search product__sidebar-single">
-      <form action="#">
-        <input type="text" placeholder="Search">
-        <button type="submit"><i class="fa fa-search"></i></button>
-      </form>
-    </div>
-
-    <div class="shop-category product__sidebar-single">
-      <h3 class="product__sidebar-title">Categories</h3>
-      <ul class="list-unstyled">
-        <li><a href="#">PC Repair</a></li>
-        <li><a href="#">Phone Repair</a></li>
-        <li><a href="#">A/C Installation</a></li>
-        <li><a href="#">Electrical Wire</a></li>
-        <li><a href="#">Laptop Repair</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
                 <div class="col-xl-12">
                   <div class="product__showing-result">
                     <div class="product__showing-text-box">
@@ -72,24 +70,8 @@
                   </div>
                 </div>
               </div>
-
               <div class="product__all">
                 <div class="product__all-tab">
-                  <div class="product__all-tab-button">
-                    <ul class="tabs-button-box clearfix">
-                      <li data-tab="#grid" class="tab-btn-item active-btn-item">
-                        <div class="product__all-tab-button-icon one">
-                          <i class="fa fa-solid fa-bars"></i>
-                        </div>
-                      </li>
-                      <li data-tab="#list" class="tab-btn-item">
-                        <div class="product__all-tab-button-icon">
-                          <i class="fa fa-solid fa-list-ul"></i>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-
                   <!--Start Tabs Content Box-->
                   <div class="tabs-content-box">
                     <!--Start Tab-->
@@ -102,18 +84,18 @@
                             <div class="col-xl-4 col-lg-6 col-md-6">
                               <div class="single-product-style1">
                                 <div class="single-product-style1__img">
-                                  <img src="/assets/images/shop/shop-product-1-2.jpg" alt="">
-                                  <img src="/assets/images/shop/shop-product-1-2.jpg" alt="">
+                                  <img src="/assets/images/products/orange-black.jpeg" alt="">
+                                  <img src="/assets/images/products/orange-black.jpeg" alt="">
 
                                 </div>
                                 <div class="single-product-style1__content">
                                   <div class="single-product-style1__content-left">
                                     <h4>
                                       <a href="product-details.html">
-                                        Pliers | Cutting, Gripping
+                                        Orange Black
                                       </a>
                                     </h4>
-                                    <p>$50.00</p>
+                                    <p>$120.00</p>
                                   </div>
 
                                   <ul>
@@ -129,8 +111,8 @@
                             <div class="col-xl-4 col-lg-6 col-md-6">
                               <div class="single-product-style1">
                                 <div class="single-product-style1__img">
-                                  <img src="/assets/images/shop/shop-product-1-3.jpg" alt="">
-                                  <img src="/assets/images/shop/shop-product-1-3.jpg" alt="">
+                                  <img src="/assets/images/products/matcha-latte.jpeg" alt="">
+                                  <img src="/assets/images/products/matcha-latte.jpeg" alt="">
                                   <ul class="single-product-style1__overlay">
                                     <li>
                                       <p>5% Off</p>
@@ -141,10 +123,10 @@
                                   <div class="single-product-style1__content-left">
                                     <h4>
                                       <a href="product-details.html">
-                                        Gear and wrench
+                                        Matcha Latte
                                       </a>
                                     </h4>
-                                    <p><del>$33.00</del> $28.00</p>
+                                    <p><del>$110.00</del> $99.00</p>
                                   </div>
                                   <ul>
                                     <a href="#" title="Add to cart">
@@ -180,10 +162,7 @@
                 </ul>
               </div>
             </div>
-
           </div>
-
-
         </div>
       </div>
     </section>

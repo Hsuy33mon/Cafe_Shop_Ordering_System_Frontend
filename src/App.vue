@@ -5,7 +5,6 @@ import MobileNav from './components/layout/MobileNav.vue'
 import SliderNav from './components/layout/SliderNav.vue'
 import NavBar from './components/layout/NavBar.vue'
 import Header from './components/layout/HeaderPage.vue'
-
 </script>
 
 

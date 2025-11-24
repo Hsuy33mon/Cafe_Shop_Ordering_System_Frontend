@@ -8,7 +8,7 @@
                                 <i class="icon-call-2"></i>
                             </div>
                             <div class="text">
-                                <p><a href="tel:9288006780">+92 ( 8800 ) - 6780</a>
+                                <p><a href="tel:9288006780">0831936982</a>
                                 </p>
                             </div>
                         </li>
@@ -26,18 +26,18 @@
                                 <i class="icon-pin-2"></i>
                             </div>
                             <div class="text">
-                                <p>55 Main Street, 2nd block, Malborne ,Australia</p>
+                                <p> 49/6 Soi 25 Thong Lo Rd, Bangkok, Thailand</p>
                             </div>
                         </li>
                     </ul>
-                    <!-- <div class="main-menu__top-right">
+                    <div class="main-menu__top-right">
                         <div class="main-menu__social">
-                            <a href="#"><i class="icon-facebook"></i></a>
-                            <a href="#"><i class="icon-twitter"></i></a>
-                            <a href="#"><i class="icon-instagram"></i></a>
-                            <a href="#"><i class="icon-youtube"></i></a>
+                            <!-- <a href="#"><i class="icon-facebook"></i></a>
+                            <a href="#"><i class="icon-twitter"></i></a> -->
+                            <a href="https://www.instagram.com/521cafe?igsh=MXN3dmkxMHNvZ3RoMg=="><i class="icon-instagram"></i></a>
+                            <!-- <a href="#"><i class="icon-youtube"></i></a> -->
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
             <nav class="main-menu">
@@ -45,7 +45,7 @@
                     <div class="main-menu__wrapper-inner">
                         <div class="main-menu__left">
                             <div class="main-menu__logo">
-                                <a href="index.html"><img src="/assets/images/resources/logo-1.png" alt=""></a>
+                                <a href="index.html"><img src="/assets/images/resources/logo.png" alt=""></a>
                             </div>
                         </div>
                         <div class="main-menu__middle-box">
@@ -186,7 +186,7 @@
                                 </div>
                                 <div class="main-menu__call-content">
                                     <p class="main-menu__call-sub-title">Call Anytime</p>
-                                    <h5 class="main-menu__call-number"><a href="tel:23645689622">+236 (456) 896 22</a>
+                                    <h5 class="main-menu__call-number"><a href="tel:0831936982">0831936982</a>
                                     </h5>
                                 </div>
                             </div>

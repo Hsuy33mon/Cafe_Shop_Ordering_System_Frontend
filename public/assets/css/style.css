@@ -3046,9 +3046,99 @@ xs sidebar
 
 
 
+/* Products Page */
+.product__topbar {
+  width: 100%;
+  background-color: #fff;
+  padding: 20px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 
+/* Search Bar */
+.shop-search form {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
 
+.shop-search input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px 0 0 8px;
+  font-size: 16px;
+}
 
+.shop-search button {
+  background-color: #ffcc00;
+  border: none;
+  padding: 0 20px;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+}
+
+.shop-search button i {
+  color: #000;
+  font-size: 18px;
+}
+
+/* Categories Section */
+.shop-category {
+  width: 100%;
+  background-color: #f7f7f7;
+  border-radius: 12px;
+  padding: 20px 30px;
+  text-align: center;
+}
+
+.shop-category .product__sidebar-title {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Category List */
+.shop-category ul {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Category Buttons */
+.shop-category li {
+  flex: 1 1 150px; /* Each item minimum 150px, flexible on larger screens */
+  max-width: 200px; /* Prevent stretching too wide */
+}
+
+.shop-category li a {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #ffcc00;
+  padding: 12px 10px;
+  border-radius: 8px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.shop-category li a:hover {
+  background-color: #ffcc00;
+  color: #000;
+}
 
 
 /*--------------------------------------------------------------
