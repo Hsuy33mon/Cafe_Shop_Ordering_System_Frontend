@@ -85,7 +85,7 @@
                 @click="setOrderType('shop')"
               >
                 <span class="payment-icon">☕</span>
-                <span>Take in shop</span>
+                <span>Dine at the Café</span>
               </button>
 
               <button
@@ -101,6 +101,10 @@
 
             <!-- content for Take in shop -->
             <div v-if="orderType === 'shop'" class="payment-panel">
+              <div class="field">
+                <label class="field-label">Table number</label>
+                <input v-model="roomNo" type="text" class="field-input" placeholder="T-2" />
+              </div>
               <p class="order-text">
                 We&apos;ll prepare your order and serve it at the cafe counter.
               </p>

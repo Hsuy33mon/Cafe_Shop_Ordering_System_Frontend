@@ -49,21 +49,23 @@
 
 .filters-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: center;
+  align-items: center;      /* vertical alignment */
+  justify-content: flex-end;/* ⬅️ push all children to the right */
+  gap: 0.5rem;
 }
-
 /* common search input in filter bars */
 .filters-row .search-input,
 .search-input {
-  flex: 1 1 220px;
-  padding: 0.45rem 0.7rem 0.45rem 0.9rem;
+  flex: 0 0 auto;              /* don’t stretch full width */
+  width: 100%;
+  max-width: 480px;            /* control the size */
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
   font-size: 0.82rem;
   outline: none;
   background-color: #f9fafb;
+  box-sizing: border-box;
 }
 
 .filters-row .search-input::placeholder,
@@ -322,12 +324,7 @@
   }
 }
 
-/* NOTE:
-   Filters, panel card look, status pill, and btn-link come from
-   orders-menu-common.css now.
-*/
 
-/* Responsive behaviour for filter rows */
 @media (max-width: 900px) {
   .filters-row {
     flex-direction: column;

@@ -1,46 +1,5 @@
 /* src/styles/admin/orders.css */
 
-/* FILTER PANEL */
-.panel--filters {
-  margin-bottom: 0.9rem;
-}
-
-.filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: center;
-}
-
-/* reuse look similar to topbar search */
-.filters-row .search-input {
-  flex: 1 1 220px;
-  padding: 0.45rem 0.7rem 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.82rem;
-  outline: none;
-}
-
-.filters-row .search-input:focus {
-  border-color: #facc15;
-}
-
-/* select filters */
-.filter-select {
-  min-width: 150px;
-  padding: 0.4rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  font-size: 0.8rem;
-  background-color: #ffffff;
-  outline: none;
-}
-
-.filter-select:focus {
-  border-color: #facc15;
-}
-
 /* PANEL SHARED LOOK (if not already in dashboard.css) */
 .panel {
   background-color: #ffffff;

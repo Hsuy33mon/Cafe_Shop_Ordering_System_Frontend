@@ -2,8 +2,19 @@
 <template>
   <header class="topbar">
     <div class="topbar-left">
-      <h1 class="topbar-title">Dashboard</h1>
-      <p class="topbar-subtitle">Overview of today’s activity at CafeShop.</p>
+      <!-- HAMBURGER: visible only on tablet/mobile by CSS -->
+      <button
+        class="topbar-menu-btn"
+        @click="$emit('toggle-sidebar')"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+      <div class="topbar-text">
+        <h1 class="topbar-title">Dashboard</h1>
+        <p class="topbar-subtitle">Overview of today’s activity at CafeShop.</p>
+      </div>
     </div>
 
     <div class="topbar-right">
@@ -36,6 +47,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:search', value: string): void
+  (e: 'toggle-sidebar'): void
 }>()
 
 function onInput(event: Event) {
@@ -43,5 +55,4 @@ function onInput(event: Event) {
   emit('update:search', target.value)
 }
 </script>
-
 <style scoped src="@/styles/admin/topbar.css"></style>

@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   padding: 1.1rem 1rem;
+  width: 240px;
 }
 
 .sidebar-logo {
@@ -100,19 +101,17 @@ sidebar-link:hover {
   color: #e5e7eb;
 }
 
-/* responsive bits related to sidebar text */
 @media (max-width: 1024px) {
-  .sidebar-logo .logo-text {
-    display: none;
-  }
-
-  .sidebar-link span:not(.sidebar-link-icon) {
-    display: none;
-  }
-}
-
-@media (max-width: 800px) {
   .sidebar {
-    display: none;
+    position: fixed;
+    inset: 0 auto 0 0;       /* top:0; left:0; bottom:0 */
+    transform: translateX(-100%); /* hidden off-screen */
+    transition: transform 0.25s ease;
+    z-index: 40;
+  }
+
+  /* when open (class added from parent) */
+  .sidebar.sidebar--open {
+    transform: translateX(0);
   }
 }

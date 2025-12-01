@@ -12,7 +12,21 @@
 
 .topbar-left {
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.topbar-text {
+  display: flex;
   flex-direction: column;
+}
+.topbar-menu-btn {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: none; /* default: hidden on desktop */
 }
 
 .topbar-title {
@@ -82,9 +96,19 @@
 .user-name {
   font-size: 0.8rem;
   font-weight: 600;
-}
+} 
 
 .user-role {
   font-size: 0.72rem;
   color: #6b7280;
+}
+
+
+/* show hamburger on tablet + mobile, can tweak breakpoint */
+@media (max-width: 1024px) {
+  .topbar-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
