@@ -17,7 +17,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit", 
     "lint": "eslint . --fix --cache",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "start": "vite preview --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
     "pinia": "^3.0.3",
