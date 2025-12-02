@@ -3,11 +3,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <!-- HAMBURGER: visible only on tablet/mobile by CSS -->
-      <button
-        class="topbar-menu-btn"
-        @click="$emit('toggle-sidebar')"
-        aria-label="Open menu"
-      >
+      <button class="topbar-menu-btn" @click="$emit('toggle-sidebar')" aria-label="Open menu">
         ☰
       </button>
 
@@ -41,10 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
-  search: string
-}>()
-
 const emit = defineEmits<{
   (e: 'update:search', value: string): void
   (e: 'toggle-sidebar'): void

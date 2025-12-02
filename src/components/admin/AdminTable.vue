@@ -70,7 +70,6 @@
     </div>
   </section>
 </template>
-
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
@@ -81,13 +80,19 @@ export type TableColumn = {
   align?: 'left' | 'center' | 'right'
 }
 
+// generic-ish row shape: must be an object, may have "id"
+export type TableRow = {
+  id?: string | number
+  [key: string]: unknown
+}
+
 const props = defineProps<{
   columns: TableColumn[]
-  rows: any[]
+  rows: TableRow[]
   title?: string
   pageSize?: number
   enablePagination?: boolean
-  rowKey?: string | ((row: any) => string | number)
+  rowKey?: string | ((row: TableRow) => string | number)
 }>()
 
 const emit = defineEmits<{
@@ -101,7 +106,6 @@ const totalItems = computed(() => props.rows.length)
 const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / pageSize.value)))
 
 const pagedRows = computed(() => {
-  // (same logic as debug version)
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return props.rows.slice(start, end)
@@ -126,11 +130,12 @@ function goToPage(page: number) {
   emit('page-change', page)
 }
 
-function getRowKey(row: any): string | number {
+function getRowKey(row: TableRow): string | number {
   if (typeof props.rowKey === 'function') return props.rowKey(row)
-  if (typeof props.rowKey === 'string') return row[props.rowKey] ?? JSON.stringify(row)
+  if (typeof props.rowKey === 'string') return (row[props.rowKey] as string | number | undefined) ?? JSON.stringify(row)
   return row.id ?? JSON.stringify(row)
 }
 </script>
+
 
 <style scoped src="@/styles/admin/admin-table.css"></style>

@@ -11,18 +11,11 @@
     />
 
     <!-- BACKDROP (for tablet/mobile) -->
-    <div
-      v-if="isSidebarOpen"
-      class="sidebar-backdrop"
-      @click="isSidebarOpen = false"
-    ></div>
+    <div v-if="isSidebarOpen" class="sidebar-backdrop" @click="isSidebarOpen = false"></div>
 
     <!-- MAIN AREA -->
     <div class="admin-main">
-      <AdminTopbar
-        v-model:search="search"
-        @toggle-sidebar="isSidebarOpen = !isSidebarOpen"
-      />
+      <AdminTopbar v-model:search="search" @toggle-sidebar="isSidebarOpen = !isSidebarOpen" />
 
       <main class="content">
         <!-- Here we render admin pages like Dashboard, Orders, etc -->

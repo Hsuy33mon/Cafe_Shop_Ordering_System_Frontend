@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
 type SidebarItem = {
   key: string
@@ -42,8 +42,6 @@ defineProps<{
   sidebarItems: SidebarItem[]
   todaySummary: string
 }>()
-
-const route = useRoute()
 </script>
 
 <style scoped src="@/styles/admin/sidebar.css"></style>

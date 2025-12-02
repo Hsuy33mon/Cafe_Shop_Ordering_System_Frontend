@@ -96,13 +96,12 @@
 .user-name {
   font-size: 0.8rem;
   font-weight: 600;
-} 
+}
 
 .user-role {
   font-size: 0.72rem;
   color: #6b7280;
 }
-
 
 /* show hamburger on tablet + mobile, can tweak breakpoint */
 @media (max-width: 1024px) {

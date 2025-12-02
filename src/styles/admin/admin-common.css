@@ -49,16 +49,16 @@
 
 .filters-row {
   display: flex;
-  align-items: center;      /* vertical alignment */
-  justify-content: flex-end;/* ⬅️ push all children to the right */
+  align-items: center; /* vertical alignment */
+  justify-content: flex-end; /* ⬅️ push all children to the right */
   gap: 0.5rem;
 }
 /* common search input in filter bars */
 .filters-row .search-input,
 .search-input {
-  flex: 0 0 auto;              /* don’t stretch full width */
+  flex: 0 0 auto; /* don’t stretch full width */
   width: 100%;
-  max-width: 480px;            /* control the size */
+  max-width: 480px; /* control the size */
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
@@ -323,7 +323,6 @@
     gap: 0.5rem;
   }
 }
-
 
 @media (max-width: 900px) {
   .filters-row {

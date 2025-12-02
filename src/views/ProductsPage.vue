@@ -167,8 +167,6 @@ type Product = {
   ratingCount: number
 }
 
-const isMobileMenuOpen = ref(false)
-
 // cart will store product ids
 const cartIds = ref<number[]>([])
 
@@ -256,13 +254,6 @@ const filteredProducts = computed(() => {
     return byText && byCategory
   })
 })
-
-// bag count in navbar
-const cartCount = computed(() => cartIds.value.length)
-
-function closeMobile() {
-  isMobileMenuOpen.value = false
-}
 
 function labelClass(label: string) {
   if (label.toLowerCase() === 'vegan') return 'label--vegan'

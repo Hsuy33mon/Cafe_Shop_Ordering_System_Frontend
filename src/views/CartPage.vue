@@ -217,8 +217,6 @@ const items = ref<CartItem[]>([
   },
 ])
 
-const couponCode = ref('')
-
 const subtotal = computed(() =>
   items.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
 )
@@ -246,12 +244,6 @@ function formatMoney(value: number): string {
   return `฿${value.toFixed(0)}`
 }
 
-type PaymentMethod = 'card' | 'promptpay'
-
-const selectedPayment = ref<PaymentMethod>('card')
-function setPayment(method: PaymentMethod) {
-  selectedPayment.value = method
-}
 type OrderType = 'shop' | 'room'
 
 const orderType = ref<OrderType>('shop')
