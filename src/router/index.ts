@@ -3,7 +3,7 @@ import UserLayout from '@/components/layout/UserLayout.vue'
 import aboutPage from '@/views/AboutPage.vue'
 import ProductsPage from '@/views/ProductsPage.vue'
 import CartPage from '@/views/CartPage.vue'
-import Homepage from '../views/HomePage.vue'
+import HomePage from '../views/HomePage.vue'
 import ContactPage from '@/views/ContactPage.vue'
 import PaymentPage from '@/views/PaymentPage.vue'
 import ShopPage from '@/views/ShopPage.vue'
@@ -27,7 +27,7 @@ const routes = [
     path: '/',
     component: UserLayout,
     children: [
-      { path: '', name: 'home', component: Homepage },
+      { path: '', name: 'home', component: HomePage },
       { path: 'orders', name: 'orders', component: OrdersPage },
       { path: 'orders/:id', name: 'order-status', component: OrderStatusPage },
       { path: 'shop', name: 'shop', component: ShopPage },
