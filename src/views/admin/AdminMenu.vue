@@ -77,6 +77,7 @@
           {{ row.status === 'Active' ? 'Disable' : 'Activate' }}
         </button>
       </template>
+      
     </AdminTable>
   </main>
 </template>
