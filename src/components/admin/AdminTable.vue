@@ -132,10 +132,10 @@ function goToPage(page: number) {
 
 function getRowKey(row: TableRow): string | number {
   if (typeof props.rowKey === 'function') return props.rowKey(row)
-  if (typeof props.rowKey === 'string') return (row[props.rowKey] as string | number | undefined) ?? JSON.stringify(row)
+  if (typeof props.rowKey === 'string')
+    return (row[props.rowKey] as string | number | undefined) ?? JSON.stringify(row)
   return row.id ?? JSON.stringify(row)
 }
 </script>
-
 
 <style scoped src="@/styles/admin/admin-table.css"></style>
