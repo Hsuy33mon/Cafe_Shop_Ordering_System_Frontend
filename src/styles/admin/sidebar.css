@@ -73,7 +73,7 @@
   text-align: center;
 }
 
-sidebar-link:hover {
+.sidebar-link:hover {
   background-color: rgba(148, 163, 184, 0.25);
   text-decoration: none;
 }

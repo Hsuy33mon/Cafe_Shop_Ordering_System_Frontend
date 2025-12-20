@@ -88,7 +88,6 @@
 
 /* Orders table */
 .table-wrapper {
-  max-height: 310px;
   overflow: auto;
 }
 
@@ -248,14 +247,14 @@
 @media (max-width: 640px) {
   .admin-page {
     grid-template-columns: minmax(0, 1fr);
-  }
+  } 
 
   .sidebar {
     display: none;
   }
 
   .kpi-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
   .middle-grid {
@@ -266,3 +265,4 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
