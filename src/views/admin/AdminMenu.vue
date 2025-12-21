@@ -82,25 +82,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { useRouter } from 'vue-router'
+import { useMenuItemsStore, type MenuItem, type ProductStatus } from '@/stores/useMenuItemStore'
+
 const router = useRouter()
+const menuItemsStore = useMenuItemsStore()
 
-type ProductStatus = 'Active' | 'Hidden' | 'Out of stock'
-type Availability = 'Cafe' | 'Room' | 'Both'
-
-type ProductRow = {
-  id: number
-  sku: string
-  name: string
-  category: string
-  price: number
-  status: ProductStatus
-  availability: Availability
-  tags: string[]
-  updatedAt: string
-}
+onMounted(() => {
+  menuItemsStore.fetchAll()
+})
 
 const productColumns: TableColumn[] = [
   { key: 'sku', label: 'SKU', width: '90px' },
@@ -114,93 +106,18 @@ const productColumns: TableColumn[] = [
   { key: 'actions', label: '', align: 'right', width: '140px' },
 ]
 
-// demo data – later replace with API
-const products = ref<ProductRow[]>([
-  {
-    id: 1,
-    sku: 'DRK-001',
-    name: 'Iced Caramel Latte',
-    category: 'Coffee & drinks',
-    price: 95,
-    status: 'Active',
-    availability: 'Both',
-    tags: ['signature', 'sweet'],
-    updatedAt: '2025-11-18 10:32',
-  },
-  {
-    id: 2,
-    sku: 'DRK-002',
-    name: 'Americano',
-    category: 'Coffee & drinks',
-    price: 80,
-    status: 'Active',
-    availability: 'Both',
-    tags: ['classic'],
-    updatedAt: '2025-11-18 09:10',
-  },
-  {
-    id: 3,
-    sku: 'FOD-010',
-    name: 'Gourmet Burger set',
-    category: 'Burgers & mains',
-    price: 260,
-    status: 'Active',
-    availability: 'Cafe',
-    tags: ['popular', 'lunch'],
-    updatedAt: '2025-11-17 18:45',
-  },
-  {
-    id: 4,
-    sku: 'DES-003',
-    name: 'Chocolate Cake',
-    category: 'Desserts',
-    price: 140,
-    status: 'Active',
-    availability: 'Both',
-    tags: ['sweet'],
-    updatedAt: '2025-11-17 16:21',
-  },
-  {
-    id: 5,
-    sku: 'DRK-005',
-    name: 'Matcha Latte',
-    category: 'Coffee & drinks',
-    price: 90,
-    status: 'Out of stock',
-    availability: 'Both',
-    tags: ['matcha'],
-    updatedAt: '2025-11-16 14:05',
-  },
-  {
-    id: 6,
-    sku: 'FOD-020',
-    name: 'Saumon Gravlax',
-    category: 'Burgers & mains',
-    price: 260,
-    status: 'Hidden',
-    availability: 'Cafe',
-    tags: ['special'],
-    updatedAt: '2025-11-15 20:00',
-  },
-])
-
 // filters
 const search = ref('')
 const categoryFilter = ref<string>('')
 const statusFilter = ref<string>('')
 const availabilityFilter = ref<string>('')
 
-const categoryOptions = computed(() => {
-  const set = new Set<string>()
-  products.value.forEach((p) => set.add(p.category))
-  return Array.from(set)
-})
+const categoryOptions = computed(() => menuItemsStore.categoryOptions)
 
-// filtered rows (AdminTable will handle pagination)
 const filteredProducts = computed(() => {
   const s = search.value.trim().toLowerCase()
 
-  return products.value.filter((p) => {
+  return menuItemsStore.items.filter((p) => {
     const matchesSearch =
       !s ||
       p.name.toLowerCase().includes(s) ||
@@ -221,17 +138,18 @@ function onPageChange(page: number) {
   console.log('Menu items page ->', page)
 }
 
-// UI actions – demo only
-function editProduct(row: ProductRow) {
-  // later: navigate to edit page or open drawer
-  console.log('Edit product', row.id)
+function editProduct(row: MenuItem) {
+  // example route name – adjust to your routes
+  router.push({ name: 'admin-menu-edit', params: { id: row.id } })
 }
 
-function toggleActive(row: ProductRow) {
-  if (row.status === 'Active') {
-    row.status = 'Hidden'
-  } else {
-    row.status = 'Active'
+async function toggleActive(row: MenuItem) {
+  // flow decision: Active -> Hidden, otherwise -> Active
+  const next: ProductStatus = row.status === 'Active' ? 'Hidden' : 'Active'
+  try {
+    await menuItemsStore.updateStatus(row.id, next)
+  } catch {
+    // store.error already set
   }
 }
 
@@ -242,9 +160,11 @@ function statusClass(status: ProductStatus) {
     'status-pill--ready': status === 'Out of stock',
   }
 }
+
 function goToAddProduct() {
   router.push({ name: 'admin-menu-new' })
 }
 </script>
+
 
 <style scoped src="@/styles/admin/menu-items.css"></style>

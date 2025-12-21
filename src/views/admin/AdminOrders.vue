@@ -46,6 +46,7 @@
         </select>
       </div>
     </section>
+
     <div class="orders-new-banner" v-if="hasNewOrders">
       <div class="orders-new-left">
         <span class="orders-new-dot"></span>
@@ -56,20 +57,16 @@
 
       <button class="orders-new-btn" @click="onViewLatest">View latest</button>
     </div>
+
     <!-- ORDERS TABLE -->
-    <AdminTable
-      :columns="orderColumns"
-      :rows="filteredOrders"
-      title="All orders"
-      :page-size="10"
-      @page-change="onPageChange"
-    >
+    <AdminTable :columns="orderColumns" :rows="filteredOrders" title="All orders" :page-size="5">
       <!-- Details link -->
       <template #cell-details="{ row }">
         <RouterLink :to="{ name: 'admin-order-details', params: { id: row.id } }" class="btn-link">
           Details
         </RouterLink>
       </template>
+
       <template #cell-status="{ value }">
         <span class="status-pill" :class="statusClass(value)">
           {{ value }}
@@ -388,11 +385,6 @@ const filteredOrders = computed(() => {
     return matchesSearch && matchesStatus && matchesChannel && matchesPayment && matchesDate
   })
 })
-
-function onPageChange(page: number) {
-  // optional: track page or sync with URL
-  console.log('page changed to', page)
-}
 
 function statusClass(status: OrderStatus) {
   return {

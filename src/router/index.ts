@@ -22,7 +22,15 @@ import AdminSettings from '@/views/admin/AdminSettings.vue'
 import AdminOrderDetails from '@/views/admin/AdminOrderDetails.vue'
 import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
 
+import AuthLayout from '@/components/layout/AuthLayout.vue'
+import LoginView from '@/views/admin/LoginView.vue'
+
 const routes = [
+  {
+    path: '/login',
+    component: AuthLayout,
+    children: [{ path: '', name: 'login', component: LoginView }],
+  },
   {
     path: '/',
     component: UserLayout,
@@ -44,21 +52,9 @@ const routes = [
     path: '/admin',
     component: AdminLayout,
     children: [
-      {
-        path: '',
-        name: 'admin-dashboard',
-        component: AdminDashboard,
-      },
-      {
-        path: 'orders',
-        name: 'admin-orders',
-        component: AdminOrders,
-      },
-      {
-        path: 'menu',
-        name: 'admin-menu',
-        component: AdminMenu,
-      },
+      { path: '', name: 'admin-dashboard', component: AdminDashboard },
+      { path: 'orders', name: 'admin-orders', component: AdminOrders },
+      { path: 'menu', name: 'admin-menu', component: AdminMenu },
       { path: 'tables', name: 'admin-tables', component: AdminTables },
       { path: 'customers', name: 'admin-customers', component: AdminCustomers },
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
@@ -70,6 +66,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to) => {
+  const isAdminRoute = to.path.startsWith('/admin')
+  const token = localStorage.getItem('token')
+
+  if (isAdminRoute && !token) {
+    return { name: 'login' }
+  }
+
+  // optional: if logged in, block going to /login
+  if (to.name === 'login' && token) {
+    return { name: 'admin-dashboard' }
+  }
 })
 
 export default router
