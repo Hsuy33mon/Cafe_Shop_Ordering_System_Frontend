@@ -12,11 +12,11 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     token: localStorage.getItem('token'),
     loading: false,
-    error: null
+    error: null,
   }),
 
   getters: {
-    isLoggedIn: (s) => !!s.token
+    isLoggedIn: (s) => !!s.token,
   },
 
   actions: {
@@ -44,6 +44,6 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.token = null
       localStorage.removeItem('token')
-    }
-  }
+    },
+  },
 })

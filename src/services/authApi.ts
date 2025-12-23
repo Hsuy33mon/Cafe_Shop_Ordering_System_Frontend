@@ -7,7 +7,7 @@ export async function loginApi(payload: LoginRequestDto): Promise<LoginResponseD
   const res = await fetch(`${BASE_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   })
 
   if (!res.ok) {

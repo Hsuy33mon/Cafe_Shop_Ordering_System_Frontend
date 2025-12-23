@@ -247,7 +247,7 @@
 @media (max-width: 640px) {
   .admin-page {
     grid-template-columns: minmax(0, 1fr);
-  } 
+  }
 
   .sidebar {
     display: none;
@@ -265,4 +265,3 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
-

@@ -1,44 +1,33 @@
 import { defineStore } from 'pinia'
+import { http } from '@/lib/http'
+import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
-export type ProductStatus = 'Active' | 'Hidden' | 'Out of stock'
-export type Availability = 'Cafe' | 'Room' | 'Both'
-
-export type MenuItem = {
-  id: number
-  sku: string
-  name: string
-  category: string
-  price: number
-  status: ProductStatus
-  availability: Availability
-  tags: string[]
-  updatedAt: string
-}
-
-// If your backend returns different field names, map it in mapFromApi()
 type MenuItemApi = any
 
-const API_BASE = 'http://localhost:8080/api/admin/menu-items'
-
 function mapFromApi(x: MenuItemApi): MenuItem {
-  // ✅ adjust these mappings if backend fields differ
   return {
-    id: x.id,
-    sku: x.sku,
-    name: x.name,
-    category: x.category,
+    id: Number(x.id),
+    sku: String(x.sku ?? ''),
+    name: String(x.name ?? ''),
+    category: String(x.categoryName ?? ''),
     price: Number(x.price ?? 0),
-    status: x.status,
-    availability: x.availability,
-    // tags: Array.isArray(x.tags) ? x.tags : [],
-    tags:[],
-    updatedAt: x.updatedAt,
+    status: (x.status ?? 'Hidden') as ProductStatus,
+    availability: (x.availability ?? 'Both') as any,
+    tags: Array.isArray(x.tags) ? x.tags.map(String) : [],
+    updatedAt: String(x.updatedAt ?? ''),
   }
 }
 
-async function parseError(res: Response) {
-  const text = await res.text().catch(() => '')
-  return text || `${res.status} ${res.statusText}`
+function axiosErrorMessage(e: any): string {
+  const data = e?.response?.data
+  return (
+    data?.message ||
+    data?.error ||
+    data?.detail ||
+    (typeof data === 'string' ? data : null) ||
+    e?.message ||
+    'Request failed'
+  )
 }
 
 export const useMenuItemsStore = defineStore('menuItems', {
@@ -51,9 +40,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
 
   getters: {
     categoryOptions(state): string[] {
-      const set = new Set<string>()
-      state.items.forEach((p) => set.add(p.category))
-      return Array.from(set)
+      return Array.from(new Set(state.items.map((x) => x.category)))
     },
   },
 
@@ -62,61 +49,50 @@ export const useMenuItemsStore = defineStore('menuItems', {
       this.loading = true
       this.error = null
       try {
-        const res = await fetch(API_BASE, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          // credentials: 'include', // enable if using cookies
-        })
+        const res = await http.get('/api/admin/menu-items')
 
-        if (!res.ok) throw new Error(await parseError(res))
-
-        const data = await res.json()
-
-        // backend might return: [] OR { items: [] }
-        const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : []
+        const data = res.data
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.items)
+            ? data.items
+            : Array.isArray(data?.data)
+              ? data.data
+              : []
 
         this.items = list.map(mapFromApi)
         this.lastLoadedAt = new Date().toISOString()
       } catch (e: any) {
-        this.error = e?.message ?? 'Failed to load menu items'
+        this.error = axiosErrorMessage(e)
       } finally {
         this.loading = false
       }
     },
 
-    // Optional: PATCH status endpoint (recommended)
     async updateStatus(id: number, status: ProductStatus) {
       this.loading = true
       this.error = null
       try {
-        const res = await fetch(`${API_BASE}/${id}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status }),
-        })
-        if (!res.ok) throw new Error(await parseError(res))
+        await http.patch(`/api/admin/menu-items/${id}/status`, { status })
 
-        // update locally (no need to refetch)
         const idx = this.items.findIndex((x) => x.id === id)
         if (idx !== -1) this.items[idx] = { ...this.items[idx], status }
       } catch (e: any) {
-        this.error = e?.message ?? 'Failed to update status'
+        this.error = axiosErrorMessage(e)
         throw e
       } finally {
         this.loading = false
       }
     },
 
-    // Optional: delete endpoint
     async remove(id: number) {
       this.loading = true
       this.error = null
       try {
-        const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
-        if (!res.ok) throw new Error(await parseError(res))
+        await http.delete(`/api/admin/menu-items/${id}`)
         this.items = this.items.filter((x) => x.id !== id)
       } catch (e: any) {
-        this.error = e?.message ?? 'Failed to delete item'
+        this.error = axiosErrorMessage(e)
         throw e
       } finally {
         this.loading = false

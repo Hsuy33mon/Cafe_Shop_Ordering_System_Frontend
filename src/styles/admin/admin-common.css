@@ -24,7 +24,7 @@
 }
 
 /* RESPONSIVE LAYOUT ONLY */
- /* Desktop only */
+/* Desktop only */
 .admin-page {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -37,7 +37,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
-
 
 @media (max-width: 768px) {
   .admin-page {

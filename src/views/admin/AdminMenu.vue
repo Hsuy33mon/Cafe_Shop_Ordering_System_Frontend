@@ -166,5 +166,4 @@ function goToAddProduct() {
 }
 </script>
 
-
 <style scoped src="@/styles/admin/menu-items.css"></style>
