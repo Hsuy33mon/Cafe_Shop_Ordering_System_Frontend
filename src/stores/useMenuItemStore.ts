@@ -13,7 +13,7 @@ function mapFromApi(x: MenuItemApi): MenuItem {
     price: Number(x.price ?? 0),
     status: (x.status ?? 'Hidden') as ProductStatus,
     availability: (x.availability ?? 'Both') as any,
-    tags: Array.isArray(x.tags) ? x.tags.map(String) : [],
+    tags: Array.isArray(x.tags) ? x.tags.map((t: any) => String(t?.name ?? '')) : [],
     updatedAt: String(x.updatedAt ?? ''),
   }
 }

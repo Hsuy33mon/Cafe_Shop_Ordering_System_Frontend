@@ -1,4 +1,6 @@
+// src/lib/http.ts
 import axios from 'axios'
+import router from '@/router'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 export const http = axios.create({
@@ -17,3 +19,26 @@ http.interceptors.request.use((config) => {
   }
   return config
 })
+
+http.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    const status = error?.response?.status
+    const message = error?.response?.data?.message || ''
+    const isExpired = String(message).toLowerCase().includes('expired')
+
+    if (status === 401) {
+      const auth = useAuthStore()
+      auth.logout()
+
+      if (router.currentRoute.value.path !== '/login') {
+        router.replace({
+          path: '/login',
+          query: { reason: isExpired ? 'expired' : 'unauthorized' },
+        })
+      }
+    }
+
+    return Promise.reject(error)
+  },
+)

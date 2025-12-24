@@ -64,8 +64,8 @@
       <!-- Tags -->
       <template #cell-tags="{ value }">
         <div class="tag-list" v-if="Array.isArray(value)">
-          <span v-for="tag in value" :key="tag" class="menu-tag">
-            {{ tag }}
+          <span v-for="tag in value" :key="tag.id ?? tag.name" class="menu-tag">
+            {{ tag.name ?? tag }}
           </span>
         </div>
       </template>
@@ -139,12 +139,10 @@ function onPageChange(page: number) {
 }
 
 function editProduct(row: MenuItem) {
-  // example route name – adjust to your routes
   router.push({ name: 'admin-menu-edit', params: { id: row.id } })
 }
 
 async function toggleActive(row: MenuItem) {
-  // flow decision: Active -> Hidden, otherwise -> Active
   const next: ProductStatus = row.status === 'Active' ? 'Hidden' : 'Active'
   try {
     await menuItemsStore.updateStatus(row.id, next)
