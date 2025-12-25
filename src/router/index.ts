@@ -1,29 +1,34 @@
-import { createRouter, createWebHistory } from 'vue-router'
 import UserLayout from '@/components/layout/UserLayout.vue'
 import aboutPage from '@/views/AboutPage.vue'
-import ProductsPage from '@/views/ProductsPage.vue'
 import CartPage from '@/views/CartPage.vue'
-import HomePage from '@/views/HomePageView.vue'
 import ContactPage from '@/views/ContactPage.vue'
-import PaymentPage from '@/views/PaymentPage.vue'
-import ShopPage from '@/views/ShopPage.vue'
+import HomePage from '@/views/HomePageView.vue'
 import OrderStatusPage from '@/views/OrderStatusPage.vue'
 import OrdersPage from '@/views/OrdersPage.vue'
+import PaymentPage from '@/views/PaymentPage.vue'
 import ProductDetailsView from '@/views/ProductDetailsView.vue'
+import ProductsPage from '@/views/ProductsPage.vue'
+import ShopPage from '@/views/ShopPage.vue'
+import { createRouter, createWebHistory } from 'vue-router'
 
 // Admin views
 import AdminLayout from '@/components/admin/AdminLayout.vue'
-import AdminDashboard from '@/views/admin/AdminDashboard.vue'
-import AdminOrders from '@/views/admin/AdminOrders.vue'
-import AdminMenu from '@/views/admin/AdminMenu.vue'
-import AdminTables from '@/views/admin/AdminTables.vue'
 import AdminCustomers from '@/views/admin/AdminCustomers.vue'
-import AdminSettings from '@/views/admin/AdminSettings.vue'
+import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import AdminMenu from '@/views/admin/AdminMenu.vue'
 import AdminOrderDetails from '@/views/admin/AdminOrderDetails.vue'
+import AdminOrders from '@/views/admin/AdminOrders.vue'
+import AdminSettings from '@/views/admin/AdminSettings.vue'
+import AdminTables from '@/views/admin/AdminTables.vue'
 import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
+
+// Cateogry views
+import CategoryTable from '@/views/admin/CategoryTable.vue'
+import CategoryCreate from '@/views/admin/CategoryCreate.vue'
 
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import LoginView from '@/views/admin/LoginView.vue'
+
 
 const routes = [
   {
@@ -60,6 +65,11 @@ const routes = [
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
       { path: 'orders/:id', name: 'admin-order-details', component: AdminOrderDetails },
       { path: 'menu-items/new', name: 'admin-menu-new', component: MenuItemCreate },
+
+      // Category
+      {path: 'category/table', name: 'category-table', component: CategoryTable},
+      {path: 'category/new', name: 'admin-category-new', component: CategoryCreate}
+
     ],
   },
 ]
