@@ -26,8 +26,12 @@ import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
 import CategoryTable from '@/views/admin/CategoryTable.vue'
 import CategoryCreate from '@/views/admin/CategoryCreate.vue'
 
+// Tags views
+import TagsTable from '@/views/admin/TagsTable.vue'
+
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import LoginView from '@/views/admin/LoginView.vue'
+
 
 
 const routes = [
@@ -68,7 +72,10 @@ const routes = [
 
       // Category
       {path: 'category/table', name: 'category-table', component: CategoryTable},
-      {path: 'category/new', name: 'admin-category-new', component: CategoryCreate}
+      {path: 'category/new', name: 'admin-category-new', component: CategoryCreate},
+
+      // Tags
+      {path: 'tags/table', name: 'tags-table', component: TagsTable}
 
     ],
   },

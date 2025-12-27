@@ -19,7 +19,7 @@
           v-model="search"
           type="text"
           class="search-input"
-          placeholder="Search by category name…"
+          placeholder="Search by category name ..."
         />
       </div>
     </section>
