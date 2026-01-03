@@ -7,14 +7,41 @@
 /* HEADER */
 .product-form-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.02); /* same light gray feel */
+  border: 1px solid rgba(0, 0, 0, 0.08); /* subtle frame */
+  border-radius: 16px;
+  padding: 16px;
 }
 
+/* keep everything aligned nicely on the left */
 .product-form-header-left {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.back-link {
+  border: none;
+  background: transparent;
+  color: #2563eb; /* link blue */
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.back-link:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.back-link:active {
+  transform: translateY(1px);
 }
 
 .product-form-title {
@@ -51,6 +78,10 @@
 .product-form-body {
   padding-top: 0.9rem;
   padding-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.02); /* same light gray feel */
+  border: 1px solid rgba(0, 0, 0, 0.08); /* subtle frame */
+  border-radius: 16px;
+  padding: 16px;
 }
 
 .product-form-grid {
@@ -430,4 +461,38 @@
   .ingredients-row {
     grid-template-columns: 1.4fr 1fr 1.2fr auto;
   }
+}
+
+/* ---- Sizes row layout ---- */
+.sizes-row {
+  padding: 10px 12px; /* was 10px 0 */
+  /* keep the rest from before */
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr 40px;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sizes-row:first-of-type {
+  border-top: none;
+}
+
+/* X button */
+.sizes-remove {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sizes-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

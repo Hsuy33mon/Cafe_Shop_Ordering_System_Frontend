@@ -1,3 +1,1 @@
-<template>
-  Create Category
-</template>
+<template>Create Category</template>

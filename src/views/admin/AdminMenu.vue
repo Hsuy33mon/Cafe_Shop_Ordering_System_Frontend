@@ -52,7 +52,14 @@
       @page-change="onPageChange"
     >
       <!-- Price: right aligned with ฿ -->
-      <template #cell-price="{ value }"> ฿{{ value }} </template>
+      <template #cell-price="{ value }">
+        <div class="price-list" v-if="Array.isArray(value)">
+          <span v-for="price in value" :key="price.id ?? price.name" class="menu-tag">
+            {{ tag.name ?? tag }}
+          </span>
+        </div>
+        ฿{{ value }}
+      </template>
 
       <!-- Status pill -->
       <template #cell-status="{ value }">

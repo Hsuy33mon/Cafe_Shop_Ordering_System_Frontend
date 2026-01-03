@@ -4,7 +4,7 @@
     <!-- HEADER -->
     <section class="panel product-form-header">
       <div class="product-form-header-left">
-        <button class="btn-link" @click="goBack">← Back to menu items</button>
+        <button class="back-link" type="button" @click="goBack">← Back to menu items</button>
 
         <h1 class="product-form-title">Add product</h1>
         <p class="product-form-subtitle">
@@ -97,35 +97,87 @@
 
           <div class="field field--row">
             <div class="field-group field-group--grow">
-              <label class="field-label" for="category">Category</label>
+              <label class="field-label" for="categoryId">Category</label>
               <select
-                id="category"
-                v-model="form.category"
+                id="categoryId"
+                v-model.number="form.categoryId"
                 class="field-input field-select"
                 required
               >
-                <option disabled value="">Select category</option>
-                <option>Coffee & drinks</option>
-                <option>Burgers & mains</option>
-                <option>Desserts</option>
-                <option>Breakfast</option>
-                <option>Snacks</option>
+                <option disabled :value="null">Select category</option>
+
+                <!-- Replace with API categories later -->
+                <option :value="1">Coffee & drinks</option>
+                <option :value="2">Burgers & mains</option>
+                <option :value="3">Desserts</option>
+                <option :value="4">Breakfast</option>
+                <option :value="5">Snacks</option>
               </select>
             </div>
+          </div>
 
-            <div class="field-group field-group--price">
-              <label class="field-label" for="price">Price (฿)</label>
-              <input
-                id="price"
-                v-model.number="form.price"
-                type="number"
-                min="0"
-                step="1"
-                class="field-input field-input--right"
-                placeholder="260"
-                required
-              />
+          <!-- SIZES -->
+          <div class="field">
+            <div class="field-label-row">
+              <span class="field-label">Sizes</span>
+              <button type="button" class="btn-chip" @click="addSizeRow">+ Add size</button>
             </div>
+
+            <div class="ingredients-table">
+              <div class="ingredients-header">
+                <span>Size</span>
+                <span>Sell price (฿)</span>
+                <span>Original price (฿)</span>
+                <span>Note</span>
+                <span></span>
+              </div>
+
+              <div v-for="(row, index) in sizes" :key="row.id" class="sizes-row">
+                <select v-model.number="row.sizeId" class="field-input" required>
+                  <option disabled :value="null">Select</option>
+                  <option :value="1">Regular</option>
+                  <option :value="2">Large</option>
+                </select>
+
+                <input
+                  v-model.number="row.sellPrice"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="field-input field-input--right"
+                  placeholder="120"
+                  required
+                />
+
+                <input
+                  v-model.number="row.originalPrice"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="field-input field-input--right"
+                  placeholder="150"
+                />
+
+                <input
+                  v-model="row.desc"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. Regular"
+                />
+
+                <button
+                  type="button"
+                  class="sizes-remove"
+                  @click="removeSizeRow(index)"
+                  :disabled="sizes.length === 1"
+                  title="Remove row"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <p class="field-hint">Prices are defined per size.</p>
           </div>
 
           <div class="field">
@@ -302,6 +354,34 @@ const form = reactive<ProductForm>({
   status: 'Active',
   internalNote: '',
 })
+
+type SizeRow = {
+  id: number
+  sizeId: number | null
+  sellPrice: number | null
+  originalPrice: number | null
+  desc: string
+}
+
+const sizes = ref<SizeRow[]>([
+  { id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' },
+])
+
+function addSizeRow() {
+  const id = Date.now() + Math.random()
+  sizes.value.push({
+    id,
+    sizeId: null,
+    sellPrice: null,
+    originalPrice: null,
+    desc: '',
+  })
+}
+
+function removeSizeRow(index: number) {
+  if (sizes.value.length === 1) return
+  sizes.value.splice(index, 1)
+}
 
 /* ---------- IMAGES / GALLERY ---------- */
 
