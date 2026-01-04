@@ -4,7 +4,7 @@ Admin Setting
     <button class="setting-btn" @click="goToCategory"> Categories </button>
     <button class="setting-btn" @click="goToProduct"> Products </button>
     <button class="setting-btn" @click="goToTags"> Tags </button>
-    <button class="setting-btn" > Sizes </button>
+    <button class="setting-btn" @click="goToSizes"> Sizes </button>
 </div>
 
 
@@ -23,6 +23,10 @@ function goToTags(){
 
 function goToProduct(){
   router.push({name: 'admin-menu'})
+}
+
+function goToSizes(){
+  router.push({name: 'size-table'})
 }
 </script>
 <style scoped src="@/styles/admin/admin-setting.css"></style>
