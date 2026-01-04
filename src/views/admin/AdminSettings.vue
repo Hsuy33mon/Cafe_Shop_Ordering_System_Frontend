@@ -4,7 +4,7 @@ Admin Setting
     <button class="setting-btn" @click="goToCategory"> Categories </button>
     <button class="setting-btn" @click="goToProduct"> Products </button>
     <button class="setting-btn" @click="goToTags"> Tags </button>
-    <button class="setting-btn"> Category </button>
+    <button class="setting-btn" > Sizes </button>
 </div>
 
 

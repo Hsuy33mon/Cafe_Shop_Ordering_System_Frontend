@@ -359,3 +359,37 @@
   color: #4f46e5;
   font-size: 0.7rem;
 }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+

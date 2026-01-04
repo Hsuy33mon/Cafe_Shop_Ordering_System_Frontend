@@ -1,6 +1,6 @@
 import type { Category } from '@/dtos/CategoryDto'
 import { http } from '@/lib/http'
-import {defineStore} from 'pinia'
+import { defineStore } from 'pinia'
 
 type CategoryApi = any
 
@@ -56,6 +56,17 @@ export const useCategoryStore = defineStore('categories' , {
         this.error = axiosErrorMessage(e)
       } finally {
         this.loading = false
+      }
+    },
+
+    async create(payload: {name : string}){
+      try{
+        const res = await http.post('api/admin/categories', payload)
+        await this.fetchAll()
+        return res.data
+      }catch(e: any){
+        this.error = axiosErrorMessage(e)
+        throw e
       }
     },
 

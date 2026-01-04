@@ -8,7 +8,7 @@
         <p class="menu-subtitle">Manage Tags.</p>
       </div>
 
-      <button class="menu-btn-primary" @click="goToAddTag"> + Add Tag</button>
+      <button class="menu-btn-primary" @click="showCreateModal = true"> + Add Tag</button>
     </section>
 
     <!-- SEARCH BAR  -->
@@ -37,6 +37,34 @@
       <button class="btn-link btn-link--danger" @click="removeTag(row)">Delete</button>
     </template>
     </AdminTable>
+
+    <!-- CREATE TAG MODAL -->
+<div v-if="showCreateModal" class="modal-backdrop">
+  <div class="modal">
+    <h2>Create Tag</h2>
+
+    <input
+      v-model="newTagName"
+      type="text"
+      placeholder="Tag name"
+      class="modal-input"
+    />
+
+    <div class="modal-actions">
+      <button class="btn-link btn-link--danger" @click="closeModal">
+        Cancel
+      </button>
+
+      <button
+        class="menu-btn-primary"
+        :disabled="!newTagName || isSubmitting"
+        @click="createTag"
+      >
+        Create
+      </button>
+    </div>
+  </div>
+</div>
   </main>
 </template>
 
@@ -49,13 +77,17 @@ import { useTagStore } from '../../stores/useTagStore';
 
   const router = useRouter()
   const tagStore = useTagStore()
+  const showCreateModal = ref(false)
+  const newTagName = ref('')
+  const isSubmitting = ref(false)
 
   onMounted(() => {
     tagStore.fetchAll()
   })
 
   const tagColumns: TableColumn[] = [
-    {key: 'name', label: 'Name'}
+    {key: 'name', label: 'Name'},
+    {key: 'actions', label: '', align: 'right', width: '140px'}
   ]
 
   const search = ref('')
@@ -68,8 +100,25 @@ import { useTagStore } from '../../stores/useTagStore';
     console.log('Tag page -> ', page)
   }
 
-  function goToAddTag() {
-    router.push({name: 'admin-tag-new'})
+  function closeModal() {
+    showCreateModal.value = false
+    newTagName.value = ''
+  }
+
+  async function createTag() {
+  if (!newTagName.value.trim()) return
+
+  try {
+    isSubmitting.value = true
+
+    await tagStore.create({
+      name: newTagName.value
+    })
+
+    closeModal()
+  } finally {
+    isSubmitting.value = false
+  }
   }
 
   function editTag(row: any) {
