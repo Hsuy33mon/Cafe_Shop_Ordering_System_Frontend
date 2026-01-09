@@ -1,13 +1,14 @@
-import type { Tag } from "@/dtos/TagDto"
-import {http} from '@/lib/http'
-import { defineStore } from "pinia"
+import type { Size } from '@/dtos/SizeDto'
+import { http } from '@/lib/http'
+import { defineStore } from 'pinia'
 
-type TagApi = any
+type SizeApi = any
 
-function mapFromApi(x: TagApi): Tag {
+function mapFromApi(x: SizeApi): Size {
   return {
     id: Number(x.id),
     name: String(x.name ?? ''),
+    shortName: String(x.shortName ?? ''),
   }
 }
 
@@ -19,13 +20,13 @@ function axiosErrorMessage(e: any): string {
     data?.detail ||
     (typeof data === 'string' ? data : null) ||
     e?.message ||
-    'Resuqest failed'
+    'Request failed'
   )
 }
 
-export const useTagStore = defineStore('tags', {
+export const useSizeStore = defineStore('sizes', {
   state: () => ({
-    items: [] as Tag[],
+    items: [] as Size[],
     loading: false,
     error: null as string | null,
     leastLoadedAt: null as string | null,
@@ -35,9 +36,8 @@ export const useTagStore = defineStore('tags', {
     async fetchAll() {
       this.loading = true
       this.error = null
-
       try {
-        const res = await http.get('/api/admin/tags')
+        const res = await http.get('/api/admin/sizes')
 
         const data = res.data
         const list = Array.isArray(data)
@@ -56,23 +56,23 @@ export const useTagStore = defineStore('tags', {
       }
     },
 
-    async create(payload : {name : string}){
-      try{
-        const res = await http.post('/api/admin/tags', payload)
+    async create(payload: { name: string; shortName: string }) {
+      try {
+        const res = await http.post('/api/admin/sizes', payload)
         await this.fetchAll()
         return res.data
-      }catch( e:any){
+      } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
     },
 
-    async remove(id:number) {
+    async remove(id: number) {
       this.loading = true
       this.error = null
       try {
-        await http.delete(`/api/admin/tags/${id}`)
-        this.items = this.items.filter((x) => x.id !== id)
+        await http.delete(`/api/admin/sizes/${id}`)
+        this.items = this.items.filter((x) => x.id != id)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
