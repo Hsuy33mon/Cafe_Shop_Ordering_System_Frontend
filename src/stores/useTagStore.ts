@@ -1,6 +1,6 @@
-import type { Tag } from "@/dtos/TagDto"
-import {http} from '@/lib/http'
-import { defineStore } from "pinia"
+import type { Tag } from '@/dtos/TagDto'
+import { http } from '@/lib/http'
+import { defineStore } from 'pinia'
 
 type TagApi = any
 
@@ -56,18 +56,18 @@ export const useTagStore = defineStore('tags', {
       }
     },
 
-    async create(payload : {name : string}){
-      try{
+    async create(payload: { name: string }) {
+      try {
         const res = await http.post('/api/admin/tags', payload)
         await this.fetchAll()
         return res.data
-      }catch( e:any){
+      } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
     },
 
-    async remove(id:number) {
+    async remove(id: number) {
       this.loading = true
       this.error = null
       try {

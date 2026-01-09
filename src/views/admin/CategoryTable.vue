@@ -70,12 +70,11 @@ import AdminTable, { type TableColumn } from '../../components/admin/AdminTable.
 import { ref, computed, onMounted } from 'vue'
 import { useCategoryStore } from '../../stores/useCategoryStore'
 
-  const router = useRouter()
-  const categoryStore = useCategoryStore()
-  const showCreateModal = ref(false)
-  const newCategoryName = ref('')
-  const isSubmitting = ref(false)
-
+const router = useRouter()
+const categoryStore = useCategoryStore()
+const showCreateModal = ref(false)
+const newCategoryName = ref('')
+const isSubmitting = ref(false)
 
 onMounted(() => {
   categoryStore.fetchAll()
@@ -96,24 +95,23 @@ const filteredCategories = computed(() => {
   return categoryStore.items.filter((c) => !s || c.name.toLowerCase().includes(s))
 })
 
+function onPageChange(page: number) {
+  console.log('Category page -> ', page)
+}
 
-  function onPageChange(page: number){
-    console.log('Category page -> ', page)
-  }
+function closeModal() {
+  showCreateModal.value = false
+  newCategoryName.value = ''
+}
 
-  function closeModal() {
-    showCreateModal.value = false
-    newCategoryName.value = ''
-  }
-
-  async function createCategory() {
+async function createCategory() {
   if (!newCategoryName.value.trim()) return
 
   try {
     isSubmitting.value = true
 
     await categoryStore.create({
-      name: newCategoryName.value
+      name: newCategoryName.value,
     })
 
     closeModal()
@@ -122,17 +120,16 @@ const filteredCategories = computed(() => {
   }
 }
 
-  function editCategory(row: any){
-    router.push({name : 'admin-category-edit', params: {id: row.id}})
-  }
+function editCategory(row: any) {
+  router.push({ name: 'admin-category-edit', params: { id: row.id } })
+}
 
-  function removeCategory(row: any){
-    if(!confirm(`Are you sure you want to delete "${row.name}"?`)){
-      return
-    }
-      categoryStore.remove(row.id)
+function removeCategory(row: any) {
+  if (!confirm(`Are you sure you want to delete "${row.name}"?`)) {
+    return
   }
-
+  categoryStore.remove(row.id)
+}
 </script>
 
 <style scoped src="@/styles/admin/menu-items.css"></style>
