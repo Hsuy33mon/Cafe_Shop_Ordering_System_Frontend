@@ -11,8 +11,8 @@ function mapFromApi(x: MenuItemApi): MenuItem {
     name: String(x.name ?? ''),
     category: String(x.categoryName ?? ''),
     price: Number(x.price ?? 0),
-    status: (x.status ?? 'Hidden') as ProductStatus,
-    availability: (x.availability ?? 'Both') as any,
+    status: (x.status ?? 'HIDDEN') as ProductStatus,
+    availability: (x.availability ?? 'BOTH') as any,
     tags: Array.isArray(x.tags) ? x.tags.map((t: any) => String(t?.name ?? '')) : [],
     updatedAt: String(x.updatedAt ?? ''),
   }
@@ -64,6 +64,21 @@ export const useMenuItemsStore = defineStore('menuItems', {
         this.lastLoadedAt = new Date().toISOString()
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // ✅ NEW: Create MenuItem
+    async create(payload: any) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await http.post('/api/admin/menu-items', payload)
+        return res.data
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
       } finally {
         this.loading = false
       }
