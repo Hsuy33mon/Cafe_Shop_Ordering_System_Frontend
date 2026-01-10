@@ -100,18 +100,19 @@
               <label class="field-label" for="categoryId">Category</label>
               <select
                 id="categoryId"
-                v-model.number="form.categoryId"
+                v-model="form.categoryId"
                 class="field-input field-select"
                 required
               >
                 <option disabled :value="null">Select category</option>
-                <!-- Replace with API categories later -->
-                <option :value="1">Coffee & drinks</option>
-                <option :value="2">Burgers & mains</option>
-                <option :value="3">Desserts</option>
-                <option :value="4">Breakfast</option>
-                <option :value="5">Snacks</option>
+
+                <option v-for="c in categoryStore.items" :key="c.id" :value="c.id">
+                  {{ c.name }}
+                </option>
               </select>
+
+              <p v-if="categoryStore.loading" class="field-hint">Loading categories...</p>
+              <p v-if="categoryStore.error" class="form-error">{{ categoryStore.error }}</p>
             </div>
           </div>
 
@@ -132,11 +133,12 @@
               </div>
 
               <div v-for="(row, index) in sizes" :key="row.id" class="sizes-row">
-                <select v-model.number="row.sizeId" class="field-input" required>
+                <select v-model="row.sizeId" class="field-input" required>
                   <option disabled :value="null">Select</option>
-                  <!-- Replace with API sizes later -->
-                  <option :value="1">Regular</option>
-                  <option :value="2">Large</option>
+
+                  <option v-for="s in sizeStore.items" :key="s.id" :value="s.id">
+                    {{ s.name }}
+                  </option>
                 </select>
 
                 <input
@@ -350,11 +352,16 @@ import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../../stores/useMenuItemStore'
 import { useTagStore } from '../../stores/useTagStore'
+import { useSizeStore } from '../../stores/useSizeStore'
+import { useCategoryStore } from '../../stores/useCategoryStore'
+
 import { onMounted } from 'vue'
 const tagStore = useTagStore()
 
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
+const sizeStore = useSizeStore()
+const categoryStore = useCategoryStore()
 
 type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'OUT_OF_STOCK'
 type AvailableIn = 'CAFE' | 'ROOM' | 'BOTH'
@@ -382,9 +389,11 @@ const form = reactive<ProductForm>({
 })
 
 onMounted(async () => {
-  if (!tagStore.items.length) {
-    await tagStore.fetchAll()
-  }
+  await Promise.all([
+    tagStore.items.length ? Promise.resolve() : tagStore.fetchAll(),
+    categoryStore.items.length ? Promise.resolve() : categoryStore.fetchAll(),
+    sizeStore.items.length ? Promise.resolve() : sizeStore.fetchAll(),
+  ])
 })
 
 function toggleTag(id: number) {
