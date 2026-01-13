@@ -1,18 +1,32 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useOrderSessionStore } from '@/stores/orderSession'
 
 const router = useRouter()
+const route = useRoute()
 
-const goToCart = () => {
-  router.push('/cart')
-}
+const goToCart = () => router.push('/cart')
+
+const session = useOrderSessionStore()
+session.hydrate()
+
+const sessionLabel = computed(() => {
+  if (!session.isReady) return ''
+  return `${session.customerName} • Table ${session.tableNumber}`
+})
 
 const isMobileMenuOpen = ref(false)
 const cartCount = ref(5)
 
 function closeMobile() {
   isMobileMenuOpen.value = false
+}
+
+// ✅ active helper
+function isActive(basePath: string, exact = true) {
+  if (exact) return route.path === basePath
+  return route.path === basePath || route.path.startsWith(basePath + '/')
 }
 </script>
 
@@ -26,20 +40,45 @@ function closeMobile() {
         <div class="logo-text">CafeShop</div>
       </div>
 
-      <!-- CENTER: NAV LINKS -->
       <nav class="nav-links">
-        <RouterLink to="/" class="nav-link" active-class="nav-link--active"> Home </RouterLink>
-        <RouterLink to="/about" class="nav-link" active-class="nav-link--active">
+        <RouterLink to="/" class="nav-link" :class="{ 'nav-link--active': isActive('/') }"
+          >Home</RouterLink
+        >
+
+        <RouterLink
+          to="/about"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive('/about') }"
+        >
           About
         </RouterLink>
-        <RouterLink to="/products" class="nav-link" active-class="nav-link--active">
+
+        <RouterLink
+          to="/products"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive('/products') }"
+        >
           Menu
         </RouterLink>
-        <RouterLink to="/shop" class="nav-link" active-class="nav-link--active"> Shop </RouterLink>
-        <RouterLink to="/orders" class="nav-link" active-class="nav-link--active">
+
+        <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
+          Shop
+        </RouterLink>
+
+        <!-- ✅ inclusive for /orders and /orders/:id -->
+        <RouterLink
+          to="/orders"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive('/orders', false) }"
+        >
           Orders
         </RouterLink>
-        <RouterLink to="/contact" class="nav-link" active-class="nav-link--active">
+
+        <RouterLink
+          to="/contact"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive('/contact') }"
+        >
           Contact
         </RouterLink>
       </nav>
@@ -61,26 +100,68 @@ function closeMobile() {
           <span class="menu-bar" />
           <span class="menu-bar" />
         </button>
+        <div v-if="sessionLabel" class="session-pill" title="Current session">
+          {{ sessionLabel }}
+        </div>
       </div>
     </div>
-
-    <!-- Mobile dropdown menu -->
     <transition name="fade-down">
       <nav v-if="isMobileMenuOpen" class="mobile-menu">
-        <RouterLink to="/" class="mobile-link" @click="closeMobile">Home</RouterLink>
-        <RouterLink to="/about" class="mobile-link" @click="closeMobile">About</RouterLink>
-        <RouterLink to="/products" class="mobile-link" @click="closeMobile">Menu</RouterLink>
-        <RouterLink to="/shop" class="mobile-link" @click="closeMobile">Shop</RouterLink>
-        <RouterLink to="/orders" class="mobile-link" @click="closeMobile">Orders</RouterLink>
-        <RouterLink to="/contact" class="mobile-link" @click="closeMobile">Contact</RouterLink>
-        <RouterLink to="/cart" class="mobile-link" @click="closeMobile">Purchase</RouterLink>
+        <RouterLink
+          to="/"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/') }"
+          @click="closeMobile"
+          >Home</RouterLink
+        >
+        <RouterLink
+          to="/about"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/about') }"
+          @click="closeMobile"
+          >About</RouterLink
+        >
+        <RouterLink
+          to="/products"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/products') }"
+          @click="closeMobile"
+          >Menu</RouterLink
+        >
+        <RouterLink
+          to="/shop"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/shop') }"
+          @click="closeMobile"
+          >Shop</RouterLink
+        >
+        <RouterLink
+          to="/orders"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/orders', false) }"
+          @click="closeMobile"
+          >Orders</RouterLink
+        >
+        <RouterLink
+          to="/contact"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/contact') }"
+          @click="closeMobile"
+          >Contact</RouterLink
+        >
+        <RouterLink
+          to="/cart"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/cart') }"
+          @click="closeMobile"
+          >Purchase</RouterLink
+        >
       </nav>
     </transition>
   </header>
 </template>
 
 <style scoped>
-/* ---------- NAVBAR WRAPPER ---------- */
 .navbar {
   position: sticky;
   top: 0;
@@ -96,7 +177,6 @@ function closeMobile() {
   height: 68px;
 }
 
-/* ---------- LEFT: LOGO ---------- */
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -121,7 +201,6 @@ function closeMobile() {
   color: #0f172a;
 }
 
-/* ---------- CENTER: LINKS ---------- */
 .nav-links {
   flex: 1;
   display: flex;
@@ -162,19 +241,16 @@ function closeMobile() {
   transform: translateY(-50%);
 }
 
-/* small hover emphasis for desktop */
 .nav-link:hover {
   opacity: 1;
 }
 
-/* ---------- RIGHT: PURCHASE BUTTON + HAMBURGER ---------- */
 .navbar-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* big yellow rectangle button */
 .purchase-btn {
   display: inline-flex;
   align-items: center;
@@ -205,7 +281,6 @@ function closeMobile() {
   font-size: 0.75rem;
 }
 
-/* hamburger */
 .menu-btn {
   display: none;
   border: none;
@@ -226,7 +301,6 @@ function closeMobile() {
     opacity 0.18s ease;
 }
 
-/* turn into "X" when open */
 .menu-btn--open .menu-bar:nth-child(1) {
   transform: translateY(3px) rotate(45deg);
 }
@@ -234,7 +308,6 @@ function closeMobile() {
   transform: translateY(-3px) rotate(-45deg);
 }
 
-/* ---------- MOBILE MENU ---------- */
 .mobile-menu {
   display: none;
 }
@@ -283,5 +356,40 @@ function closeMobile() {
 .fade-down-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+/* Desktop session pill */
+.session-pill {
+  max-width: 280px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #f3f4f6;
+  background: #fff;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #111827;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile session block */
+.mobile-session {
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fffbeb; /* light cafe yellow */
+}
+
+.mobile-session-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.mobile-session-value {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
 }
 </style>

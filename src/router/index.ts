@@ -1,3 +1,5 @@
+import { createRouter, createWebHistory } from 'vue-router'
+
 import UserLayout from '@/components/layout/UserLayout.vue'
 import aboutPage from '@/views/AboutPage.vue'
 import CartPage from '@/views/CartPage.vue'
@@ -9,9 +11,12 @@ import PaymentPage from '@/views/PaymentPage.vue'
 import ProductDetailsView from '@/views/ProductDetailsView.vue'
 import ProductsPage from '@/views/ProductsPage.vue'
 import ShopPage from '@/views/ShopPage.vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import StartOrderView from '@/views/StartOrderView.vue'
 
-// Admin views
+import AuthLayout from '@/components/layout/AuthLayout.vue'
+import LoginView from '@/views/admin/LoginView.vue'
+
+// Admin
 import AdminLayout from '@/components/admin/AdminLayout.vue'
 import AdminCustomers from '@/views/admin/AdminCustomers.vue'
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
@@ -22,18 +27,14 @@ import AdminSettings from '@/views/admin/AdminSettings.vue'
 import AdminTables from '@/views/admin/AdminTables.vue'
 import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
 
-// Cateogry views
+// Category/Tags/Size
 import CategoryTable from '@/views/admin/CategoryTable.vue'
-import CategoryCreate from '@/views/admin/CategoryCreate.vue'
-
-// Tags views
 import TagsTable from '@/views/admin/TagsTable.vue'
-
-// Size views
 import SizeTable from '@/views/admin/SizeTable.vue'
 
-import AuthLayout from '@/components/layout/AuthLayout.vue'
-import LoginView from '@/views/admin/LoginView.vue'
+// ✅ Pinia store for user session
+import { useOrderSessionStore } from '@/stores/orderSession'
+
 const routes = [
   {
     path: '/login',
@@ -45,17 +46,34 @@ const routes = [
     component: UserLayout,
     children: [
       { path: '', name: 'home', component: HomePage },
-      { path: 'orders', name: 'orders', component: OrdersPage },
-      { path: 'orders/:id', name: 'order-status', component: OrderStatusPage },
+      { path: 'start', name: 'start-order', component: StartOrderView },
+      {
+        path: 'orders',
+        name: 'orders',
+        component: OrdersPage,
+        meta: { requiresOrderSession: true },
+      },
+      {
+        path: 'orders/:id',
+        name: 'order-status',
+        component: OrderStatusPage,
+        meta: { requiresOrderSession: true },
+      },
+      { path: 'cart', name: 'cart', component: CartPage, meta: { requiresOrderSession: true } },
+      {
+        path: 'payment',
+        name: 'payment',
+        component: PaymentPage,
+        meta: { requiresOrderSession: true },
+      },
       { path: 'shop', name: 'shop', component: ShopPage },
       { path: 'contact', name: 'contact', component: ContactPage },
       { path: 'about', name: 'about', component: aboutPage },
       { path: 'products', name: 'products', component: ProductsPage },
-      { path: 'cart', name: 'cart', component: CartPage },
-      { path: 'payment', name: 'payment', component: PaymentPage },
       { path: 'products/:id', name: 'product-details', component: ProductDetailsView },
     ],
   },
+
   // ADMIN AREA
   {
     path: '/admin',
@@ -75,6 +93,7 @@ const routes = [
     ],
   },
 ]
+
 const router = createRouter({
   history: createWebHistory(),
   routes,
@@ -88,10 +107,20 @@ router.beforeEach((to) => {
     return { name: 'login' }
   }
 
-  // optional: if logged in, block going to /login
   if (to.name === 'login' && token) {
     return { name: 'admin-dashboard' }
   }
+
+  if (!isAdminRoute) {
+    const session = useOrderSessionStore()
+    session.hydrate()
+    if (to.name === 'start-order') return true
+    if (!session.isReady) {
+      return { name: 'start-order', query: { redirect: to.fullPath } }
+    }
+  }
+
+  return true
 })
 
 export default router
