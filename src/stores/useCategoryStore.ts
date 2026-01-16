@@ -70,6 +70,18 @@ export const useCategoryStore = defineStore('categories', {
       }
     },
 
+    async update(id: number, payload: {name: string}){
+      try{
+        const res = await http.put(`api/admin/categories/${id}`, payload)
+        await this.fetchAll()
+        return res.data
+      }catch(e: any){
+        this.error = axiosErrorMessage(e)
+        throw e
+      }
+
+    },
+
     async remove(id: number) {
       this.loading = true
       this.error = null

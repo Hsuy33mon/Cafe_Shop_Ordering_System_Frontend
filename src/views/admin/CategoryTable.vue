@@ -6,7 +6,7 @@
         <h1 class="menu-title">Categories</h1>
         <p class="menu-subtitle">Manage menu categories.</p>
       </div>
-      <button class="menu-btn-primary" @click="showCreateModal = true">+ Add category</button>
+      <button class="menu-btn-primary" @click="openCreateModal">+ Add category</button>
     </section>
 
     <!-- FILTER BAR -->
@@ -37,12 +37,12 @@
     </AdminTable>
 
     <!-- CREATE CATEGORY MODAL -->
-    <div v-if="showCreateModal" class="modal-backdrop">
+    <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h2>Create Category</h2>
+        <h2>{{isEditMode ? 'Update Category' : 'Create Category'}}</h2>
 
         <input
-          v-model="newCategoryName"
+          v-model="categoryName"
           type="text"
           placeholder="Category name"
           class="modal-input"
@@ -53,10 +53,10 @@
 
           <button
             class="menu-btn-primary"
-            :disabled="!newCategoryName || isSubmitting"
-            @click="createCategory"
+            :disabled="!categoryName || isSubmitting"
+            @click="submitCategory"
           >
-            Create
+            {{isEditMode ? 'Update' : 'Create' }}
           </button>
         </div>
       </div>
@@ -65,16 +65,16 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import AdminTable, { type TableColumn } from '../../components/admin/AdminTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useCategoryStore } from '../../stores/useCategoryStore'
 
-const router = useRouter()
 const categoryStore = useCategoryStore()
-const showCreateModal = ref(false)
-const newCategoryName = ref('')
-const isSubmitting = ref(false)
+const showModal = ref(false)
+const categoryName = ref('')
+const isEditMode = ref(false)
+const editingCategoryId = ref<number | null>(null)
+const isSubmitting= ref(false)
 
 onMounted(() => {
   categoryStore.fetchAll()
@@ -85,7 +85,7 @@ const categoryColumns: TableColumn[] = [
   { key: 'slug', label: 'Slug' },
   { key: 'menuItemCount', label: 'Number of Menu Item' },
   { key: 'updatedAt', label: ' UpdatedAt' },
-  { key: 'actions', label: '', align: 'right', width: '140px' },
+  { key: 'actions', label: 'Actions', align: 'center', width: '140px' },
 ]
 
 const search = ref('')
@@ -100,20 +100,32 @@ function onPageChange(page: number) {
 }
 
 function closeModal() {
-  showCreateModal.value = false
-  newCategoryName.value = ''
+  isEditMode.value = false
+  editingCategoryId.value = null
+  categoryName.value = ''
+  showModal.value = false
 }
 
-async function createCategory() {
-  if (!newCategoryName.value.trim()) return
+function openCreateModal(){
+  isEditMode.value = false
+  editingCategoryId.value = null
+  categoryName.value = ''
+  showModal.value = true
+
+}
+
+
+async function submitCategory() {
+  if (!categoryName.value.trim()) return
 
   try {
     isSubmitting.value = true
 
-    await categoryStore.create({
-      name: newCategoryName.value,
-    })
-
+    if(isEditMode.value && editingCategoryId.value !== null){
+      await categoryStore.update(editingCategoryId.value , {name: categoryName.value})
+    }else{
+      await categoryStore.create({name: categoryName.value})
+    }
     closeModal()
   } finally {
     isSubmitting.value = false
@@ -121,7 +133,10 @@ async function createCategory() {
 }
 
 function editCategory(row: any) {
-  router.push({ name: 'admin-category-edit', params: { id: row.id } })
+  isEditMode.value = true
+  editingCategoryId.value = row.id
+  categoryName.value = row.name
+  showModal.value = true
 }
 
 function removeCategory(row: any) {
