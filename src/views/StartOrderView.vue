@@ -51,11 +51,15 @@
 
         <!-- MOBILE: scan-first -->
         <div v-else class="mobile-area">
-          <button type="button" class="btn btn-primary" @click="openScanner">Scan table QR</button>
+          <div class="mobile-actions">
+            <button type="button" class="btn btn-primary" @click="openScanner">
+              Scan table QR
+            </button>
 
-          <button type="button" class="btn btn-ghost" @click="toggleManual">
-            {{ manualMode ? 'Hide manual entry' : 'Enter table number manually' }}
-          </button>
+            <button type="button" class="btn btn-ghost" @click="toggleManual">
+              {{ manualMode ? 'Hide manual entry' : 'Enter table number manually' }}
+            </button>
+          </div>
 
           <div v-if="manualMode" class="field mt-10">
             <label class="label" for="tableMobile">Table number</label>
