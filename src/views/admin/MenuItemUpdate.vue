@@ -6,10 +6,9 @@
       <div class="product-form-header-left">
         <button class="back-link" type="button" @click="goBack">← Back to menu items</button>
 
-        <h1 class="product-form-title">Add product</h1>
+        <h1 class="product-form-title">Edit product</h1>
         <p class="product-form-subtitle">
-          Create a new item for CafeShop menu. Images, steps and ingredients will be used on the
-          customer product page.
+          Update menu item details, prices, sizes and ingredients.
         </p>
       </div>
 
@@ -336,7 +335,7 @@
               Cancel
             </button>
             <button type="submit" class="btn-primary" :disabled="saving">
-              {{ saving ? 'Saving...' : 'Save product' }}
+              {{ saving ? 'Saving...' : 'Update product' }}
             </button>
           </div>
 
@@ -349,7 +348,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useCategoryStore } from '../../stores/useCategoryStore'
 import { useMenuItemsStore } from '../../stores/useMenuItemStore'
 import { useSizeStore } from '../../stores/useSizeStore'
@@ -359,6 +358,8 @@ import { onMounted } from 'vue'
 const tagStore = useTagStore()
 
 const router = useRouter()
+const route = useRoute()
+const menuItemId = Number(route.params.id)
 const menuItemsStore = useMenuItemsStore()
 const sizeStore = useSizeStore()
 const categoryStore = useCategoryStore()
@@ -394,6 +395,36 @@ onMounted(async () => {
     categoryStore.items.length ? Promise.resolve() : categoryStore.fetchAll(),
     sizeStore.items.length ? Promise.resolve() : sizeStore.fetchAll(),
   ])
+
+  const item = await menuItemsStore.fetchById(menuItemId)
+  form.sku = item.sku ?? ''
+  form.name = item.name
+  form.shortDesc = item.shortDesc ?? ''
+  form.status = item.status
+  form.availableIn = item.availableIn
+  form.internalNote = item.internalNote ?? ''
+  form.categoryId = item.categoryId
+  form.tagIds = item.tagIds ?? []
+
+  // SIZES
+  sizes.value = item.sizes.map((s: any) => ({
+    id: s.id,
+    sizeId: s.sizeId,
+    sellPrice: s.sellPrice,
+    originalPrice: s.originalPrice,
+    desc: s.desc ?? '',
+  }))
+
+  // INGREDIENTS
+  ingredients.value = item.ingredients.length
+    ? item.ingredients.map((i: any) => ({
+        id: i.id,
+        name: i.name,
+        amount: i.amount ?? '',
+        note: i.note ?? '',
+      }))
+    : [{ id: 1, name: '', amount: '', note: '' }]
+
 })
 
 function toggleTag(id: number) {
@@ -530,7 +561,7 @@ async function onSubmit() {
       ingredients: normalizeIngredientRows(),
     }
 
-    await menuItemsStore.create(payload)
+    await menuItemsStore.update(menuItemId, payload)
     await menuItemsStore.fetchAll()
 
     router.push({ name: 'admin-menu' })

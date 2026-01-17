@@ -1,5 +1,6 @@
 import type { Size } from '@/dtos/SizeDto'
 import { http } from '@/lib/http'
+import axios from 'axios'
 import { defineStore } from 'pinia'
 
 type SizeApi = any
@@ -62,6 +63,17 @@ export const useSizeStore = defineStore('sizes', {
         await this.fetchAll()
         return res.data
       } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
+      }
+    },
+
+    async update(id: number, payload: {name: string; shortName: string; active: boolean }){
+      try{
+        const res = await http.put(`/api/admin/sizes/${id}`, payload)
+        await this.fetchAll()
+        return res.data
+      }catch( e: any){
         this.error = axiosErrorMessage(e)
         throw e
       }

@@ -6,7 +6,7 @@
         <h1 class="menu-title">Tags</h1>
         <p class="menu-subtitle">Manage Tags.</p>
       </div>
-      <button class="menu-btn-primary" @click="showCreateModal = true">+ Add Tag</button>
+      <button class="menu-btn-primary" @click="openCreateModal">+ Add Tag</button>
     </section>
 
     <!-- SEARCH BAR  -->
@@ -37,21 +37,21 @@
     </AdminTable>
 
     <!-- CREATE TAG MODAL -->
-    <div v-if="showCreateModal" class="modal-backdrop">
+    <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h2>Create Tag</h2>
+        <h2>{{ isEditingMode ? 'Update Tag' : 'Create Tag'}}</h2>
 
-        <input v-model="newTagName" type="text" placeholder="Tag name" class="modal-input" />
+        <input v-model="tagName" type="text" placeholder="Tag name" class="modal-input" />
 
         <div class="modal-actions">
           <button class="btn-link btn-link--danger" @click="closeModal">Cancel</button>
 
           <button
             class="menu-btn-primary"
-            :disabled="!newTagName || isSubmitting"
-            @click="createTag"
+            :disabled="!tagName || isSubmitting"
+            @click="submitTag"
           >
-            Create
+            {{ isEditingMode ? 'Update' : 'Create'}}
           </button>
         </div>
       </div>
@@ -61,14 +61,14 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import AdminTable, { type TableColumn } from '../../components/admin/AdminTable.vue'
 import { useTagStore } from '../../stores/useTagStore'
 
-const router = useRouter()
 const tagStore = useTagStore()
-const showCreateModal = ref(false)
-const newTagName = ref('')
+const showModal = ref(false)
+const tagName = ref('')
+const isEditingMode = ref(false)
+const editingTagId = ref<number | null> (null)
 const isSubmitting = ref(false)
 
 onMounted(() => {
@@ -77,8 +77,9 @@ onMounted(() => {
 
 const tagColumns: TableColumn[] = [
   { key: 'name', label: 'Name' },
-  { key: 'actions', label: '', align: 'right', width: '140px' },
+  { key: 'actions', label: 'Actions', align: 'right', width: '140px' },
 ]
+
 function onPageChange(page: number) {
   console.log('Tag page -> ', page)
 }
@@ -89,19 +90,30 @@ const filteredTags = computed(() => {
 })
 
 function closeModal() {
-  showCreateModal.value = false
-  newTagName.value = ''
+  showModal.value = false
+  tagName.value = ''
+  isEditingMode.value = false
+  editingTagId.value = null
 }
 
-async function createTag() {
-  if (!newTagName.value.trim()) return
+function openCreateModal(){
+  showModal.value = true
+  tagName.value = ''
+  isEditingMode.value = false
+  editingTagId.value = null
+}
+
+async function submitTag() {
+  if (!tagName.value.trim()) return
 
   try {
     isSubmitting.value = true
 
-    await tagStore.create({
-      name: newTagName.value,
-    })
+    if(isEditingMode.value && editingTagId.value !== null){
+      await tagStore.update(editingTagId.value, {name: tagName.value})
+    }else{
+      await tagStore.create({name: tagName.value})
+    }
 
     closeModal()
   } finally {
@@ -110,7 +122,10 @@ async function createTag() {
 }
 
 function editTag(row: any) {
-  router.push({ name: 'admin-tag-edit', params: { id: row.id } })
+  showModal.value = true
+  tagName.value = row.name
+  isEditingMode.value = true
+  editingTagId.value = row.id
 }
 
 function removeTag(row: any) {

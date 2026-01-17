@@ -26,6 +26,7 @@ import AdminOrders from '@/views/admin/AdminOrders.vue'
 import AdminSettings from '@/views/admin/AdminSettings.vue'
 import AdminTables from '@/views/admin/AdminTables.vue'
 import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
+import MenuItemUpdate from '@/views/admin/MenuItemUpdate.vue'
 
 // Category/Tags/Size
 import CategoryTable from '@/views/admin/CategoryTable.vue'
@@ -34,6 +35,7 @@ import SizeTable from '@/views/admin/SizeTable.vue'
 
 // ✅ Pinia store for user session
 import { useOrderSessionStore } from '@/stores/orderSession'
+
 
 const routes = [
   {
@@ -87,6 +89,7 @@ const routes = [
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
       { path: 'orders/:id', name: 'admin-order-details', component: AdminOrderDetails },
       { path: 'menu-items/new', name: 'admin-menu-new', component: MenuItemCreate },
+      { path: 'menu-items/:id/edit', name: 'admin-menu-edit', component: MenuItemUpdate},
       { path: 'category/table', name: 'category-table', component: CategoryTable },
       { path: 'tags/table', name: 'tags-table', component: TagsTable },
       { path: 'sizes/table', name: 'size-table', component: SizeTable },
