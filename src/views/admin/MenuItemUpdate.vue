@@ -282,7 +282,7 @@
             <label class="field-label" for="status">Status</label>
             <select id="status" v-model="form.status" class="field-input field-select">
               <option value="ACTIVE">Active</option>
-              <option value="HIDDEN">Hidden</option>
+              <option value="INACTIVE">Inactive</option>
               <option value="OUT_OF_STOCK">Out of stock</option>
             </select>
             <p class="field-hint">
@@ -309,8 +309,8 @@
                 <input
                   class="tag-pill-input"
                   type="checkbox"
-                  :checked="isTagSelected(t.id)"
-                  @change="toggleTag(t.id)"
+                  :value = "t.id"
+                  v-model = "form.tagIds"
                 />
                 {{ t.name }}
               </label>
@@ -364,7 +364,7 @@ const menuItemsStore = useMenuItemsStore()
 const sizeStore = useSizeStore()
 const categoryStore = useCategoryStore()
 
-type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'OUT_OF_STOCK'
+type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK'
 type AvailableIn = 'CAFE' | 'ROOM' | 'BOTH'
 
 type ProductForm = {
@@ -404,16 +404,24 @@ onMounted(async () => {
   form.availableIn = item.availableIn
   form.internalNote = item.internalNote ?? ''
   form.categoryId = item.categoryId
-  form.tagIds = item.tagIds ?? []
+  form.tagIds = item.tags?.map((t:any) => t.id) ?? []
 
   // SIZES
-  sizes.value = item.sizes.map((s: any) => ({
-    id: s.id,
-    sizeId: s.sizeId,
-    sellPrice: s.sellPrice,
-    originalPrice: s.originalPrice,
-    desc: s.desc ?? '',
+  sizes.value = item.sizes.length ? item.sizes.map((s: any) => ({
+      id: Date.now() + Math.random(),
+      sizeId: s.size_id,
+      sellPrice: s.sellPrice,
+      originalPrice: s.originalPrice,
+      desc: s.description ?? '',
   }))
+   : [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
+  // sizes.value = item.sizes.map((s: any) => ({
+  //   id: s.id,
+  //   sizeId: s.sizeId,
+  //   sellPrice: s.sellPrice,
+  //   originalPrice: s.originalPrice,
+  //   desc: s.desc ?? '',
+  // }))
 
   // INGREDIENTS
   ingredients.value = item.ingredients.length
