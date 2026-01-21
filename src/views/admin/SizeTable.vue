@@ -40,7 +40,7 @@
     <!-- CREATE SIZE MODAL -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h2>{{isEditMode ? 'Update Size' : 'Create Size'}}</h2>
+        <h2>{{ isEditMode ? 'Update Size' : 'Create Size' }}</h2>
 
         <input v-model="form.name" type="text" placeholder="Size name" class="modal-input" />
 
@@ -59,7 +59,7 @@
             :disabled="!form.name || !form.shortName || isSubmitting"
             @click="submitSize"
           >
-            {{isEditMode ? 'Update' : 'Create'}}
+            {{ isEditMode ? 'Update' : 'Create' }}
           </button>
         </div>
       </div>
@@ -117,23 +117,22 @@ function openCreateModal() {
   showModal.value = true
 }
 
-
 async function submitSize() {
   if (!form.value.name.trim() || !form.value.shortName.trim()) return
 
   try {
     isSubmitting.value = true
-    if(isEditMode.value && editingSizeId.value !== null){
-      await sizeStore.update(editingSizeId.value,{
-      name: form.value.name,
-      shortName: form.value.shortName,
-      active: true
-    })
-    }else{
+    if (isEditMode.value && editingSizeId.value !== null) {
+      await sizeStore.update(editingSizeId.value, {
+        name: form.value.name,
+        shortName: form.value.shortName,
+        active: true,
+      })
+    } else {
       await sizeStore.create({
-      name: form.value.name,
-      shortName: form.value.shortName
-    })
+        name: form.value.name,
+        shortName: form.value.shortName,
+      })
     }
 
     closeModal()
@@ -147,8 +146,8 @@ function editSize(row: any) {
   editingSizeId.value = row.id
   form.value = {
     name: row.name,
-    shortName: row.shortName
-    }
+    shortName: row.shortName,
+  }
   showModal.value = true
 }
 

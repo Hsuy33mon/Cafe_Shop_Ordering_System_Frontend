@@ -39,14 +39,9 @@
     <!-- CREATE CATEGORY MODAL -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h2>{{isEditMode ? 'Update Category' : 'Create Category'}}</h2>
+        <h2>{{ isEditMode ? 'Update Category' : 'Create Category' }}</h2>
 
-        <input
-          v-model="categoryName"
-          type="text"
-          placeholder="Category name"
-          class="modal-input"
-        />
+        <input v-model="categoryName" type="text" placeholder="Category name" class="modal-input" />
 
         <div class="modal-actions">
           <button class="btn-link btn-link--danger" @click="closeModal">Cancel</button>
@@ -56,7 +51,7 @@
             :disabled="!categoryName || isSubmitting"
             @click="submitCategory"
           >
-            {{isEditMode ? 'Update' : 'Create' }}
+            {{ isEditMode ? 'Update' : 'Create' }}
           </button>
         </div>
       </div>
@@ -74,7 +69,7 @@ const showModal = ref(false)
 const categoryName = ref('')
 const isEditMode = ref(false)
 const editingCategoryId = ref<number | null>(null)
-const isSubmitting= ref(false)
+const isSubmitting = ref(false)
 
 onMounted(() => {
   categoryStore.fetchAll()
@@ -106,14 +101,12 @@ function closeModal() {
   showModal.value = false
 }
 
-function openCreateModal(){
+function openCreateModal() {
   isEditMode.value = false
   editingCategoryId.value = null
   categoryName.value = ''
   showModal.value = true
-
 }
-
 
 async function submitCategory() {
   if (!categoryName.value.trim()) return
@@ -121,10 +114,10 @@ async function submitCategory() {
   try {
     isSubmitting.value = true
 
-    if(isEditMode.value && editingCategoryId.value !== null){
-      await categoryStore.update(editingCategoryId.value , {name: categoryName.value})
-    }else{
-      await categoryStore.create({name: categoryName.value})
+    if (isEditMode.value && editingCategoryId.value !== null) {
+      await categoryStore.update(editingCategoryId.value, { name: categoryName.value })
+    } else {
+      await categoryStore.create({ name: categoryName.value })
     }
     closeModal()
   } finally {

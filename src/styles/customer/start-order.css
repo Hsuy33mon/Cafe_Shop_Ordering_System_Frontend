@@ -207,9 +207,9 @@
 /* ✅ Space between Scan + Manual buttons */
 .mobile-actions {
   display: flex;
-  gap: 12px;          /* <-- spacing between buttons */
-  margin-top: 10px;   /* optional: space above the row */
-  flex-wrap: wrap;    /* prevents squishing on small screens */
+  gap: 12px; /* <-- spacing between buttons */
+  margin-top: 10px; /* optional: space above the row */
+  flex-wrap: wrap; /* prevents squishing on small screens */
 }
 
 /* optional: keep buttons nice size */
@@ -218,3 +218,43 @@
   border-radius: 12px;
 }
 
+/* --- Order type row spacing --- */
+.radio-row {
+  display: flex;
+  gap: 18px; /* space between Table and Room */
+  align-items: center;
+  margin-top: 6px;
+  margin-bottom: 9px; /* <-- add space to Table/Room number area */
+}
+
+/* --- Radio label box look (optional, keeps your pill border) --- */
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; /* space between circle and text */
+  padding: 10px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* --- Make the radio circle smaller --- */
+.radio input[type='radio'] {
+  accent-color: #f59e0b; /* your brand color */
+  width: 14px; /* <-- smaller */
+  height: 14px; /* <-- smaller */
+}
+
+/* If you want even smaller: use 13px
+.radio input[type='radio'] { width: 13px; height: 13px; }
+*/
+
+/* --- Add a bit spacing before the next field label --- */
+.field + .field {
+  margin-top: 10px; /* overall spacing between fields */
+}
+
+/* Or if you only want extra space after order type field: */
+.order-type-field {
+  margin-bottom: 14px;
+}

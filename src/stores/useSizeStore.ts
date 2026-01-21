@@ -68,12 +68,12 @@ export const useSizeStore = defineStore('sizes', {
       }
     },
 
-    async update(id: number, payload: {name: string; shortName: string; active: boolean }){
-      try{
+    async update(id: number, payload: { name: string; shortName: string; active: boolean }) {
+      try {
         const res = await http.put(`/api/admin/sizes/${id}`, payload)
         await this.fetchAll()
         return res.data
-      }catch( e: any){
+      } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }

@@ -7,11 +7,12 @@
         <p class="start-sub">
           {{
             isMobile
-              ? 'Scan your table QR to continue.'
-              : 'Enter your name and table number to continue.'
+              ? 'Scan your table/room QR to continue.'
+              : 'Enter your name and select table/room to continue.'
           }}
         </p>
       </header>
+
       <form class="start-form" @submit.prevent="onContinue">
         <div class="field">
           <label class="label" for="name">Your name</label>
@@ -26,20 +27,38 @@
             required
           />
         </div>
+
+        <!-- DESKTOP -->
         <div v-if="!isMobile" class="desktop-area">
           <div class="field">
-            <label class="label" for="table">Table number</label>
+            <p class="label">Order type</p>
+
+            <div class="radio-row">
+              <label class="radio">
+                <input type="radio" name="orderType" value="TABLE" v-model="orderType" />
+                <span>Table</span>
+              </label>
+
+              <label class="radio">
+                <input type="radio" name="orderType" value="ROOM" v-model="orderType" />
+                <span>Room</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" :for="placeInputId">{{ placeLabel }}</label>
             <input
-              id="table"
-              v-model="tableNumber"
+              :id="placeInputId"
+              v-model="placeNumber"
               class="input"
               type="text"
               inputmode="numeric"
-              placeholder="e.g. 12"
+              :placeholder="orderType === 'ROOM' ? 'e.g. 305' : 'e.g. 12'"
               maxlength="10"
               required
             />
-            <p class="hint">Tip: use the QR on your table, or type the number.</p>
+            <p class="hint">Tip: you can also use the QR on the table/room.</p>
           </div>
 
           <div class="actions">
@@ -49,29 +68,42 @@
           </div>
         </div>
 
-        <!-- MOBILE: scan-first -->
+        <!-- MOBILE -->
         <div v-else class="mobile-area">
           <div class="mobile-actions">
-            <button type="button" class="btn btn-primary" @click="openScanner">
-              Scan table QR
-            </button>
+            <button type="button" class="btn btn-primary" @click="openScanner">Scan QR</button>
 
             <button type="button" class="btn btn-ghost" @click="toggleManual">
-              {{ manualMode ? 'Hide manual entry' : 'Enter table number manually' }}
+              {{ manualMode ? 'Hide manual entry' : 'Enter manually' }}
             </button>
           </div>
 
-          <div v-if="manualMode" class="field mt-10">
-            <label class="label" for="tableMobile">Table number</label>
+          <div v-if="manualMode" class="field order-type-field">
+            <p class="label">Order type</p>
+
+            <div class="radio-row">
+              <label class="radio-pill">
+                <input type="radio" name="orderType" value="TABLE" v-model="orderType" />
+                <span>Table</span>
+              </label>
+
+              <label class="radio">
+                <input type="radio" name="orderTypeMobile" value="ROOM" v-model="orderType" />
+                <span>Room</span>
+              </label>
+            </div>
+
+            <label class="label mt-10" :for="placeInputIdMobile">{{ placeLabel }}</label>
             <input
-              id="tableMobile"
-              v-model="tableNumber"
+              :id="placeInputIdMobile"
+              v-model="placeNumber"
               class="input"
               type="text"
               inputmode="numeric"
-              placeholder="e.g. 12"
+              :placeholder="orderType === 'ROOM' ? 'e.g. 305' : 'e.g. 12'"
               maxlength="10"
             />
+
             <div class="actions mt-10">
               <button class="btn btn-primary" type="submit" :disabled="!canContinueMobile">
                 Continue
@@ -87,7 +119,7 @@
           <div class="modal-card">
             <div class="modal-head">
               <div>
-                <p class="modal-title">Scan table QR</p>
+                <p class="modal-title">Scan QR</p>
                 <p class="modal-sub">Point your camera at the QR code.</p>
               </div>
               <button
@@ -122,13 +154,16 @@ import { useRouter, useRoute } from 'vue-router'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { useOrderSessionStore } from '@/stores/orderSession'
 
+type OrderType = 'TABLE' | 'ROOM'
+
 const router = useRouter()
 const route = useRoute()
 const session = useOrderSessionStore()
 session.hydrate()
 
 const customerName = ref(session.customerName || '')
-const tableNumber = ref(session.tableNumber || '')
+const orderType = ref<OrderType>((session.orderType as OrderType) || 'TABLE')
+const placeNumber = ref(session.placeNumber || session.tableNumber || '') // fallback for old storage
 
 const errorMsg = ref('')
 const manualMode = ref(false)
@@ -142,6 +177,7 @@ const isMobile = ref(false)
 function updateIsMobile() {
   isMobile.value = window.matchMedia('(max-width: 768px)').matches
 }
+
 onMounted(() => {
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
@@ -149,38 +185,79 @@ onMounted(() => {
   session.hydrate()
 
   const hasRedirect = typeof route.query.redirect === 'string' && route.query.redirect.length > 0
-
   if (!hasRedirect) {
     session.clear()
   }
 })
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateIsMobile)
   stopScanner()
 })
-const canContinueDesktop = computed(
-  () => customerName.value.trim().length >= 2 && tableNumber.value.trim().length >= 1,
+
+const placeLabel = computed(() => (orderType.value === 'ROOM' ? 'Room number' : 'Table number'))
+const placeInputId = computed(() => (orderType.value === 'ROOM' ? 'room' : 'table'))
+const placeInputIdMobile = computed(() =>
+  orderType.value === 'ROOM' ? 'roomMobile' : 'tableMobile',
 )
-const canContinueMobile = computed(
-  () => customerName.value.trim().length >= 2 && tableNumber.value.trim().length >= 1,
-)
+
+const canContinueDesktop = computed(() => {
+  return (
+    customerName.value.trim().length >= 2 &&
+    (orderType.value === 'TABLE' || orderType.value === 'ROOM') &&
+    placeNumber.value.trim().length >= 1
+  )
+})
+const canContinueMobile = computed(() => {
+  return (
+    customerName.value.trim().length >= 2 &&
+    (orderType.value === 'TABLE' || orderType.value === 'ROOM') &&
+    placeNumber.value.trim().length >= 1
+  )
+})
 
 function toggleManual() {
   errorMsg.value = ''
   manualMode.value = !manualMode.value
 }
 
-function parseTableFromQr(text: string): string | null {
+/**
+ * Supports QR formats like:
+ *  - "TABLE:12"
+ *  - "ROOM:305"
+ *  - "?type=TABLE&no=12"
+ *  - "?table=12"
+ *  - "?room=305"
+ *  - "12" (fallback -> uses current selected orderType)
+ */
+function parseOrderFromQr(text: string): { orderType?: OrderType; placeNumber?: string } | null {
   const t = text.trim()
 
-  const m1 = t.match(/TABLE\s*:\s*([A-Za-z0-9-]+)/i)
-  if (m1?.[1]) return m1[1]
+  // 1) PREFIX: TABLE:xx / ROOM:xx
+  const m1 = t.match(/^(TABLE|ROOM)\s*:\s*([A-Za-z0-9-]{1,10})$/i)
+  if (m1?.[1] && m1?.[2]) {
+    return { orderType: m1[1].toUpperCase() as OrderType, placeNumber: m1[2] }
+  }
 
-  const m2 = t.match(/(?:\?|&)table=([A-Za-z0-9-]+)/i)
-  if (m2?.[1]) return m2[1]
+  // 2) URL style params: type + no
+  const typeParam = t.match(/(?:\?|&)type=(TABLE|ROOM)/i)?.[1]
+  const noParam = t.match(/(?:\?|&)(?:no|number)=([A-Za-z0-9-]{1,10})/i)?.[1]
+  if (typeParam && noParam) {
+    return { orderType: typeParam.toUpperCase() as OrderType, placeNumber: noParam }
+  }
 
-  const m3 = t.match(/^([A-Za-z0-9-]{1,10})$/)
-  if (m3?.[1]) return m3[1]
+  // 3) URL style: table= / room=
+  const tableParam = t.match(/(?:\?|&)table=([A-Za-z0-9-]{1,10})/i)?.[1]
+  if (tableParam) return { orderType: 'TABLE', placeNumber: tableParam }
+
+  const roomParam = t.match(/(?:\?|&)room=([A-Za-z0-9-]{1,10})/i)?.[1]
+  if (roomParam) return { orderType: 'ROOM', placeNumber: roomParam }
+
+  // 4) Single token: "12" or "A12"
+  const m4 = t.match(/^([A-Za-z0-9-]{1,10})$/)
+  if (m4?.[1]) {
+    return { placeNumber: m4[1] } // type fallback to current selection
+  }
 
   return null
 }
@@ -190,7 +267,6 @@ async function openScanner() {
   scanning.value = true
 
   if (!videoEl.value) return
-
   reader = new BrowserMultiFormatReader()
 
   try {
@@ -201,19 +277,22 @@ async function openScanner() {
       if (!result) return
 
       const raw = result.getText()
-      const parsed = parseTableFromQr(raw)
+      const parsed = parseOrderFromQr(raw)
 
-      if (!parsed) {
-        errorMsg.value = 'QR detected, but table number format is not supported.'
+      if (!parsed?.placeNumber) {
+        errorMsg.value = 'QR detected, but format is not supported.'
         return
       }
 
-      tableNumber.value = parsed
+      if (parsed.orderType) orderType.value = parsed.orderType
+      placeNumber.value = parsed.placeNumber
+
       closeScanner()
+
       if (customerName.value.trim().length >= 2) {
         onContinue()
       } else {
-        errorMsg.value = 'Table detected. Please enter your name to continue.'
+        errorMsg.value = `${placeLabel.value} detected. Please enter your name to continue.`
       }
     })
   } catch {
@@ -242,15 +321,20 @@ function onContinue() {
     return
   }
 
-  // Desktop requires table, Mobile: if scanning used, table should already be set
-  if (tableNumber.value.trim().length < 1) {
-    errorMsg.value = 'Please enter or scan your table number.'
+  if (!orderType.value) {
+    errorMsg.value = 'Please select order type.'
+    return
+  }
+
+  if (placeNumber.value.trim().length < 1) {
+    errorMsg.value = `Please enter or scan your ${placeLabel.value.toLowerCase()}.`
     return
   }
 
   session.setSession({
     customerName: customerName.value,
-    tableNumber: tableNumber.value,
+    orderType: orderType.value,
+    placeNumber: placeNumber.value,
   })
 
   const redirect = (route.query.redirect as string) || '/shop'

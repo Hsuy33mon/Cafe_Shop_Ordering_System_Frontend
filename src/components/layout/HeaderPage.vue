@@ -13,7 +13,11 @@ session.hydrate()
 
 const sessionLabel = computed(() => {
   if (!session.isReady) return ''
-  return `${session.customerName} • Table ${session.tableNumber}`
+
+  const typeLabel = session.orderType === 'ROOM' ? 'Room' : 'Table'
+  const no = (session.placeNumber || session.tableNumber || '').trim()
+
+  return `${session.customerName} • ${typeLabel} ${no}`
 })
 
 const isMobileMenuOpen = ref(false)

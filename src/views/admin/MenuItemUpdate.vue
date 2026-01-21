@@ -306,12 +306,7 @@
                 class="tag-pill"
                 :class="{ 'tag-pill--active': isTagSelected(t.id) }"
               >
-                <input
-                  class="tag-pill-input"
-                  type="checkbox"
-                  :value = "t.id"
-                  v-model = "form.tagIds"
-                />
+                <input class="tag-pill-input" type="checkbox" :value="t.id" v-model="form.tagIds" />
                 {{ t.name }}
               </label>
             </div>
@@ -404,17 +399,18 @@ onMounted(async () => {
   form.availableIn = item.availableIn
   form.internalNote = item.internalNote ?? ''
   form.categoryId = item.categoryId
-  form.tagIds = item.tags?.map((t:any) => t.id) ?? []
+  form.tagIds = item.tags?.map((t: any) => t.id) ?? []
 
   // SIZES
-  sizes.value = item.sizes.length ? item.sizes.map((s: any) => ({
-      id: Date.now() + Math.random(),
-      sizeId: s.size_id,
-      sellPrice: s.sellPrice,
-      originalPrice: s.originalPrice,
-      desc: s.description ?? '',
-  }))
-   : [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
+  sizes.value = item.sizes.length
+    ? item.sizes.map((s: any) => ({
+        id: Date.now() + Math.random(),
+        sizeId: s.size_id,
+        sellPrice: s.sellPrice,
+        originalPrice: s.originalPrice,
+        desc: s.description ?? '',
+      }))
+    : [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
   // sizes.value = item.sizes.map((s: any) => ({
   //   id: s.id,
   //   sizeId: s.sizeId,
@@ -432,7 +428,6 @@ onMounted(async () => {
         note: i.note ?? '',
       }))
     : [{ id: 1, name: '', amount: '', note: '' }]
-
 })
 
 function toggleTag(id: number) {

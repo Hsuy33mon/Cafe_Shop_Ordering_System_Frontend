@@ -39,19 +39,15 @@
     <!-- CREATE TAG MODAL -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h2>{{ isEditingMode ? 'Update Tag' : 'Create Tag'}}</h2>
+        <h2>{{ isEditingMode ? 'Update Tag' : 'Create Tag' }}</h2>
 
         <input v-model="tagName" type="text" placeholder="Tag name" class="modal-input" />
 
         <div class="modal-actions">
           <button class="btn-link btn-link--danger" @click="closeModal">Cancel</button>
 
-          <button
-            class="menu-btn-primary"
-            :disabled="!tagName || isSubmitting"
-            @click="submitTag"
-          >
-            {{ isEditingMode ? 'Update' : 'Create'}}
+          <button class="menu-btn-primary" :disabled="!tagName || isSubmitting" @click="submitTag">
+            {{ isEditingMode ? 'Update' : 'Create' }}
           </button>
         </div>
       </div>
@@ -68,7 +64,7 @@ const tagStore = useTagStore()
 const showModal = ref(false)
 const tagName = ref('')
 const isEditingMode = ref(false)
-const editingTagId = ref<number | null> (null)
+const editingTagId = ref<number | null>(null)
 const isSubmitting = ref(false)
 
 onMounted(() => {
@@ -96,7 +92,7 @@ function closeModal() {
   editingTagId.value = null
 }
 
-function openCreateModal(){
+function openCreateModal() {
   showModal.value = true
   tagName.value = ''
   isEditingMode.value = false
@@ -109,10 +105,10 @@ async function submitTag() {
   try {
     isSubmitting.value = true
 
-    if(isEditingMode.value && editingTagId.value !== null){
-      await tagStore.update(editingTagId.value, {name: tagName.value})
-    }else{
-      await tagStore.create({name: tagName.value})
+    if (isEditingMode.value && editingTagId.value !== null) {
+      await tagStore.update(editingTagId.value, { name: tagName.value })
+    } else {
+      await tagStore.create({ name: tagName.value })
     }
 
     closeModal()

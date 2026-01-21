@@ -69,15 +69,14 @@ export const useMenuItemsStore = defineStore('menuItems', {
       }
     },
 
-    async fetchById(id: number){
-      try{
+    async fetchById(id: number) {
+      try {
         const res = await http.get(`/api/admin/menu-items/${id}`)
         return res.data
-      }catch(e:any){
+      } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
-
     },
 
     // ✅ NEW: Create MenuItem
@@ -95,11 +94,11 @@ export const useMenuItemsStore = defineStore('menuItems', {
       }
     },
 
-    async update(id: number, payload: any){
+    async update(id: number, payload: any) {
       this.loading = true
       this.error = null
-      try{
-        const res =await http.put(`/api/admin/menu-items/${id}`, payload)
+      try {
+        const res = await http.put(`/api/admin/menu-items/${id}`, payload)
         await this.fetchAll()
         return res.data
       } catch (e: any) {

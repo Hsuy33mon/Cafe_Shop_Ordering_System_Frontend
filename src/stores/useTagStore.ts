@@ -67,12 +67,12 @@ export const useTagStore = defineStore('tags', {
       }
     },
 
-    async update(id:number, payload: {name: string}){
-      try{
+    async update(id: number, payload: { name: string }) {
+      try {
         const res = await http.put(`/api/admin/tags/${id}`, payload)
         await this.fetchAll()
         return res.data
-      }catch (e: any){
+      } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
