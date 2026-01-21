@@ -80,6 +80,7 @@
 .actions {
   display: grid;
   gap: 10px;
+  margin-top: 14px;
 }
 
 .btn {
@@ -202,3 +203,18 @@
     font-size: 24px;
   }
 }
+
+/* ✅ Space between Scan + Manual buttons */
+.mobile-actions {
+  display: flex;
+  gap: 12px;          /* <-- spacing between buttons */
+  margin-top: 10px;   /* optional: space above the row */
+  flex-wrap: wrap;    /* prevents squishing on small screens */
+}
+
+/* optional: keep buttons nice size */
+.mobile-actions .btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+

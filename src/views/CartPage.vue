@@ -74,56 +74,8 @@
         <!-- RIGHT: SUMMARY CARD -->
         <aside class="cart-summary">
           <div class="summary-card">
-            <h2 class="summary-title">Order Type</h2>
-
-            <!-- order type toggle -->
-            <div class="payment-toggle">
-              <button
-                type="button"
-                class="payment-tab"
-                :class="{ 'payment-tab--active': orderType === 'shop' }"
-                @click="setOrderType('shop')"
-              >
-                <span class="payment-icon">☕</span>
-                <span>Dine at the Café</span>
-              </button>
-
-              <button
-                type="button"
-                class="payment-tab"
-                :class="{ 'payment-tab--active': orderType === 'room' }"
-                @click="setOrderType('room')"
-              >
-                <span class="payment-icon">🏨</span>
-                <span>Room delivery</span>
-              </button>
-            </div>
-
-            <!-- content for Take in shop -->
-            <div v-if="orderType === 'shop'" class="payment-panel">
-              <div class="field">
-                <label class="field-label">Table number</label>
-                <input v-model="roomNo" type="text" class="field-input" placeholder="T-2" />
-              </div>
-              <p class="order-text">
-                We&apos;ll prepare your order and serve it at the cafe counter.
-              </p>
-            </div>
-
-            <!-- content for Room delivery -->
-            <div v-else class="payment-panel">
-              <div class="field">
-                <label class="field-label">Room number</label>
-                <input v-model="roomNo" type="text" class="field-input" placeholder="Eg. 1205" />
-              </div>
-              <p class="order-text">
-                Please make sure your room number is correct. We&apos;ll deliver your food directly
-                to your room.
-              </p>
-            </div>
-
+            <h2 class="summary-title">Payment Summary</h2>
             <hr class="summary-divider" />
-
             <div class="totals">
               <div class="totals-row">
                 <span>Cart Subtotal</span>
