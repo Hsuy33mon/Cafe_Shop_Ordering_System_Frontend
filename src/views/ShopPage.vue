@@ -28,18 +28,18 @@
             />
           </div>
 
-          <div class="category-tabs">
-            <button
-              v-for="category in allCategories"
-              :key="category.value"
-              type="button"
-              class="tab-btn"
-              :class="{ 'tab-btn--active': selectedCategory === category.value }"
-              @click="selectedCategory = category.value"
-            >
-              {{ category.label }}
-            </button>
-          </div>
+            <div class="category-tabs">
+              <button
+                v-for="category in allCategories"
+                :key="category.value"
+                type="button"
+                class="tab-btn"
+                :class="{ 'tab-btn--active': selectedCategory === category.value }"
+                @click="selectedCategory = category.value"
+              >
+                {{ category.label }}
+              </button>
+            </div>
         </div>
       </section>
 
@@ -52,12 +52,24 @@
             class="item-card"
             :style="{ '--stagger': index }"
           >
-            <div class="item-media" @click="goToDetails(item.id)">
-              <img :src="item.imageUrl" :alt="item.name" class="item-image" />
-              <div v-if="item.badge" class="item-badge">
-                {{ item.badge }}
-              </div>
-            </div>
+            <div
+  class="item-media"
+  :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
+  @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)"
+>
+  <img :src="item.imageUrl" :alt="item.name" class="item-image" />
+
+  <!-- TAG BADGE (Season, Winter, etc.) -->
+  <div v-if="item.badge && item.status !== 'OUT_OF_STOCK'" class="item-badge">
+    {{ item.badge }}
+  </div>
+
+  <!-- OUT OF STOCK OVERLAY -->
+  <div v-if="item.status === 'OUT_OF_STOCK'" class="out-of-stock-overlay">
+    Out of stock
+  </div>
+</div>
+
 
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>
@@ -89,12 +101,22 @@
                   <span class="amount">{{ item.price }}</span>
                 </div>
 
-                <button
+                <!-- <button
                   type="button"
                   class="item-btn"
                   :class="{ 'item-btn--added': isInCart(item.id) }"
                   @click="toggleCart(item)"
-                >
+                > -->
+                <button
+                type="button"
+                class="item-btn"
+                :class="{
+                    'item-btn--added': isInCart(item.id),
+                    'item-btn--disabled': item.status === 'OUT_OF_STOCK'
+                }"
+                :disabled="item.status === 'OUT_OF_STOCK'"
+                @click="item.status !== 'OUT_OF_STOCK' && toggleCart(item)">
+
                   <span>
                     {{ isInCart(item.id) ? 'Added' : 'Add to bag' }}
                   </span>
@@ -107,6 +129,7 @@
             No items found. Try another keyword or filter.
           </p>
         </div>
+
         <!-- PAGINATION -->
         <div v-if="totalItems > 0" class="pagination">
           <button type="button" class="page-btn" :disabled="currentPage === 1" @click="prevPage">
@@ -146,211 +169,85 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
+import { useMenuItemsStore } from '../stores/useMenuItemStore'
+import { useCategoryStore } from '../stores/useCategoryStore'
 
 type ShopItem = {
   id: number
   name: string
-  category: 'Coffee beans' | 'Bottles & cups' | 'Merch' | 'Gift cards' | string
+  category: string
   price: number
   description: string
   size?: string
   badge?: string
   imageUrl: string
-  rating?: number // ✅ add this
+  rating?: number
+  status: 'ACTIVE' | 'OUT_OF_STOCK' | 'INACTIVE'
 }
 
 const router = useRouter()
+const menuItemsStore = useMenuItemsStore()
+const categoriesStore = useCategoryStore()
+const { items: menuItems } = storeToRefs(menuItemsStore)
+const { items: categories } = storeToRefs(categoriesStore)
+
+onMounted(() => {
+  if(!menuItems.value.length){
+    menuItemsStore.fetchAll()
+  }
+  if(!categories.value.length){
+    categoriesStore.fetchAll()
+  }
+})
+
+const items = computed<ShopItem[]>(() =>
+  menuItems.value
+    .filter((i) => i.status !== 'INACTIVE')
+    .map((i) => {
+      const firstSize = i.sizes?.[0]   // 👈 from backend
+      const firstTag = i.tags?.[0]
+
+      return {
+        id: i.id,
+        name: i.name,
+        category: i.category.toLowerCase(),
+        price: i.price,
+        description: i.shortDesc || 'CafeShop special',
+        badge: firstTag?.name,
+
+        size: firstSize
+          ? `${firstSize.shortName ? ` ${firstSize.shortName}` : ''}`
+          : undefined,
+
+        imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
+        rating: 4.5,
+        status: i.status,
+      }
+    })
+)
+
+
+const allCategories = computed(() => [
+  { value: 'all', label: 'All items' },
+  ...categories.value
+    .map((c) => ({
+      value: c.slug,
+      label: c.name,
+    })),
+])
 
 function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
 
-const items = ref<ShopItem[]>([
-  {
-    id: 1,
-    name: 'House Blend Beans',
-    category: 'Coffee beans',
-    price: 320,
-    rating: 4.7,
-    description: 'Balanced chocolate & nut profile – perfect for everyday pour-over.',
-    size: '250 g · Whole beans',
-    badge: 'Best seller',
-    imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
-  },
-  {
-    id: 2,
-    name: 'Weekend Espresso Roast',
-    category: 'Coffee beans',
-    price: 350,
-    rating: 4.3,
-    description: 'Rich, syrupy espresso roast with notes of caramel and dark chocolate.',
-    size: '250 g · Whole beans',
-    badge: 'New',
-    imageUrl: 'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
-  },
-  {
-    id: 3,
-    name: 'House Blend Beans',
-    category: 'Coffee beans',
-    price: 320,
-    rating: 4.7,
-    description: 'Balanced chocolate & nut profile – perfect for everyday pour-over.',
-    size: '250 g · Whole beans',
-    badge: 'Best seller',
-    imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
-  },
-  {
-    id: 4,
-    name: 'Weekend Espresso Roast',
-    category: 'Coffee beans',
-    price: 350,
-    rating: 4.3,
-    description: 'Rich, syrupy espresso roast with notes of caramel and dark chocolate.',
-    size: '250 g · Whole beans',
-    badge: 'New',
-    imageUrl: 'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
-  },
-  {
-    id: 5,
-    name: 'House Blend Beans',
-    category: 'Coffee beans',
-    price: 320,
-    rating: 4.7,
-    description: 'Balanced chocolate & nut profile – perfect for everyday pour-over.',
-    size: '250 g · Whole beans',
-    badge: 'Best seller',
-    imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
-  },
-  {
-    id: 6,
-    name: 'Weekend Espresso Roast',
-    category: 'Coffee beans',
-    price: 350,
-    rating: 4.3,
-    description: 'Rich, syrupy espresso roast with notes of caramel and dark chocolate.',
-    size: '250 g · Whole beans',
-    badge: 'New',
-    imageUrl: 'https://images.pexels.com/photos/894695/pexels-photo-894695.jpeg',
-  },
-  {
-    id: 7,
-    name: 'CafeShop Tumbler',
-    category: 'Bottles & cups',
-    price: 280,
-    rating: 4.3,
-    description: 'Insulated stainless-steel tumbler to keep your latte warm on the go.',
-    size: '400 ml · Double wall',
-    imageUrl: 'https://images.pexels.com/photos/373888/pexels-photo-373888.jpeg',
-  },
-  {
-    id: 8,
-    name: 'Ceramic Mug Set',
-    category: 'Bottles & cups',
-    price: 420,
-    rating: 4.3,
-    description: 'Two matte ceramic mugs in our cafe color palette.',
-    size: '2 x 320 ml',
-    imageUrl: 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg',
-  },
-  {
-    id: 9,
-    name: 'CafeShop Tote Bag',
-    category: 'Merch',
-    price: 190,
-    rating: 4.3,
-    description: 'Lightweight cotton tote with a subtle CafeShop illustration.',
-    size: 'One size',
-    badge: 'Limited',
-    imageUrl: 'https://images.pexels.com/photos/3738614/pexels-photo-3738614.jpeg',
-  },
-  {
-    id: 10,
-    name: 'Gift Card – Brunch for Two',
-    category: 'Gift cards',
-    price: 600,
-    rating: 4.3,
-    description: 'Includes two mains, two drinks and a shared dessert.',
-    size: 'Digital · Single use',
-    imageUrl: 'https://images.pexels.com/photos/264787/pexels-photo-264787.jpeg',
-  },
-  {
-    id: 11,
-    name: 'Ceramic Mug Set',
-    category: 'Bottles & cups',
-    price: 420,
-    rating: 4.3,
-    description: 'Two matte ceramic mugs in our cafe color palette.',
-    size: '2 x 320 ml',
-    imageUrl: 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg',
-  },
-  {
-    id: 12,
-    name: 'CafeShop Tote Bag',
-    category: 'Merch',
-    price: 190,
-    rating: 4.3,
-    description: 'Lightweight cotton tote with a subtle CafeShop illustration.',
-    size: 'One size',
-    badge: 'Limited',
-    imageUrl: 'https://images.pexels.com/photos/3738614/pexels-photo-3738614.jpeg',
-  },
-  {
-    id: 13,
-    name: 'Gift Card – Brunch for Two',
-    category: 'Gift cards',
-    price: 600,
-    rating: 4.3,
-    description: 'Includes two mains, two drinks and a shared dessert.',
-    size: 'Digital · Single use',
-    imageUrl: 'https://images.pexels.com/photos/264787/pexels-photo-264787.jpeg',
-  },
-  {
-    id: 14,
-    name: 'Ceramic Mug Set',
-    category: 'Bottles & cups',
-    price: 420,
-    rating: 4.3,
-    description: 'Two matte ceramic mugs in our cafe color palette.',
-    size: '2 x 320 ml',
-    imageUrl: 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg',
-  },
-  {
-    id: 15,
-    name: 'CafeShop Tote Bag',
-    category: 'Merch',
-    price: 190,
-    rating: 4.3,
-    description: 'Lightweight cotton tote with a subtle CafeShop illustration.',
-    size: 'One size',
-    badge: 'Limited',
-    imageUrl: 'https://images.pexels.com/photos/3738614/pexels-photo-3738614.jpeg',
-  },
-  {
-    id: 16,
-    name: 'Gift Card – Brunch for Two',
-    category: 'Gift cards',
-    price: 600,
-    rating: 4.3,
-    description: 'Includes two mains, two drinks and a shared dessert.',
-    size: 'Digital · Single use',
-    imageUrl: 'https://images.pexels.com/photos/264787/pexels-photo-264787.jpeg',
-  },
-])
 const currentPage = ref(1)
 const pageSize = ref(12)
 const searchText = ref('')
 const selectedCategory = ref<string>('all')
 const cartIds = ref<number[]>([])
-
-const allCategories = [
-  { value: 'all', label: 'All items' },
-  { value: 'Coffee beans', label: 'Coffee beans' },
-  { value: 'Bottles & cups', label: 'Bottles & cups' },
-  { value: 'Merch', label: 'Merch' },
-  { value: 'Gift cards', label: 'Gift cards' },
-]
 
 const showingCount = computed(() => paginatedItems.value.length)
 
@@ -423,6 +320,8 @@ function starType(rating: number, starNumber: number): 'full' | 'half' | 'empty'
   if (r >= starNumber - 0.5) return 'half'
   return 'empty'
 }
+
+
 </script>
 
 <style scoped src="@/styles/customer/shop-item.css"></style>

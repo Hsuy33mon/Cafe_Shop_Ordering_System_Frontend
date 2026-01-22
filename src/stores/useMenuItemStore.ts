@@ -4,19 +4,24 @@ import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
 type MenuItemApi = any
 
-function mapFromApi(x: MenuItemApi): MenuItem {
+function mapFromApi(x: any): MenuItemApi {
+  const firstSize = x.sizes?.[0]
+
   return {
     id: Number(x.id),
     sku: String(x.sku ?? ''),
     name: String(x.name ?? ''),
     category: String(x.categoryName ?? ''),
-    price: Number(x.price ?? 0),
-    status: (x.status ?? 'HIDDEN') as ProductStatus,
-    availability: (x.availability ?? 'BOTH') as any,
-    tags: Array.isArray(x.tags) ? x.tags.map((t: any) => String(t?.name ?? '')) : [],
+    price: Number(firstSize?.sellPrice ?? 0),
+    status: x.status,
+    availability: x.availableIn,
+    tags: Array.isArray(x.tags) ? x.tags : [],
+    shortDesc: x.shortDesc,
+    sizes: x.sizes,
     updatedAt: String(x.updatedAt ?? ''),
   }
 }
+
 
 function axiosErrorMessage(e: any): string {
   const data = e?.response?.data
