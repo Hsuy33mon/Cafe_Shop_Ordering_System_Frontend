@@ -1,7 +1,7 @@
 // src/services/authApi.ts
 import type { LoginRequestDto, LoginResponseDto } from '@/dtos/auth/LoginDto'
 
-const BASE_URL = 'http://localhost:8080'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 
 export async function loginApi(payload: LoginRequestDto): Promise<LoginResponseDto> {
   const res = await fetch(`${BASE_URL}/api/auth/login`, {
