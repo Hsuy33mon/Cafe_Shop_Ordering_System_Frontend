@@ -18,6 +18,7 @@ function mapFromApi(x: any): MenuItemApi {
     tags: Array.isArray(x.tags) ? x.tags : [],
     shortDesc: x.shortDesc,
     sizes: x.sizes,
+    ingredients: x.ingredients ?? [],
     updatedAt: String(x.updatedAt ?? ''),
   }
 }
@@ -39,6 +40,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
   state: () => ({
     items: [] as MenuItem[],
     loading: false,
+    currentItem: null as MenuItem | null,
     error: null as string | null,
     lastLoadedAt: null as string | null,
   }),
@@ -77,14 +79,13 @@ export const useMenuItemsStore = defineStore('menuItems', {
     async fetchById(id: number) {
       try {
         const res = await http.get(`/api/admin/menu-items/${id}`)
-        return res.data
+        this.currentItem = mapFromApi(res.data)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
     },
 
-    // ✅ NEW: Create MenuItem
     async create(payload: any) {
       this.loading = true
       this.error = null
