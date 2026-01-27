@@ -4,19 +4,25 @@ import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
 type MenuItemApi = any
 
-function mapFromApi(x: MenuItemApi): MenuItem {
+function mapFromApi(x: any): MenuItemApi {
+  const firstSize = x.sizes?.[0]
+
   return {
     id: Number(x.id),
     sku: String(x.sku ?? ''),
     name: String(x.name ?? ''),
     category: String(x.categoryName ?? ''),
-    price: Number(x.price ?? 0),
-    status: (x.status ?? 'HIDDEN') as ProductStatus,
-    availability: (x.availability ?? 'BOTH') as any,
-    tags: Array.isArray(x.tags) ? x.tags.map((t: any) => String(t?.name ?? '')) : [],
+    price: Number(firstSize?.sellPrice ?? 0),
+    status: x.status,
+    availability: x.availableIn,
+    tags: Array.isArray(x.tags) ? x.tags : [],
+    shortDesc: x.shortDesc,
+    sizes: x.sizes,
+    ingredients: x.ingredients ?? [],
     updatedAt: String(x.updatedAt ?? ''),
   }
 }
+
 
 function axiosErrorMessage(e: any): string {
   const data = e?.response?.data
@@ -34,6 +40,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
   state: () => ({
     items: [] as MenuItem[],
     loading: false,
+    currentItem: null as MenuItem | null,
     error: null as string | null,
     lastLoadedAt: null as string | null,
   }),
@@ -72,14 +79,13 @@ export const useMenuItemsStore = defineStore('menuItems', {
     async fetchById(id: number) {
       try {
         const res = await http.get(`/api/admin/menu-items/${id}`)
-        return res.data
+        this.currentItem = mapFromApi(res.data)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e
       }
     },
 
-    // ✅ NEW: Create MenuItem
     async create(payload: any) {
       this.loading = true
       this.error = null

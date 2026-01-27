@@ -1,6 +1,6 @@
 <template>
   <div class="pd-page">
-    <main class="pd-main">
+    <main  v-if="product" class="pd-main">
       <!-- TOP BREADCRUMB -->
       <section class="cs-container pd-breadcrumb">
         <span class="pd-breadcrumb-text">
@@ -63,7 +63,7 @@
         <div class="pd-info-card">
           <header class="pd-header">
             <div class="pd-title-row">
-              <h1 class="pd-title">{{ product.name }}</h1>
+              <h1 class="pd-title">{{ product?.name }}</h1>
               <div class="pd-price-pill">฿{{ product.price }}</div>
             </div>
 
@@ -78,7 +78,7 @@
                 </span>
               </span>
               <span class="pd-rating-text">
-                {{ product.rating.toFixed(1) }} ({{ product.ratingCount }} ratings)
+                {{ product?.rating?.toFixed(1) }} ({{ product.ratingCount }} ratings)
               </span>
             </div>
 
@@ -303,9 +303,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useMenuItemsStore } from '../stores/useMenuItemStore'
 const router = useRouter()
+const menuItemsStore = useMenuItemsStore()
 
 type Product = {
   id: number
@@ -331,38 +333,60 @@ function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
 
-// Mock product – replace with API / Pinia later
-const allProducts: Product[] = [
-  {
-    id: 1,
-    name: 'Saumon Gravlax',
-    price: 19,
-    description: 'Tomatoes, nori, feta cheese, mushrooms, rice noodles, corn, shrimp.',
+onMounted(()=>{
+  menuItemsStore.fetchById(productId);
+})
+
+const product = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item) return null
+
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.shortDesc,
+    label: item.tags?.[0]?.name ?? item.status,
+
+    price: item.price, // already mapped from first size
+    rating: 5,
+    ratingCount: 0,
+
     imageUrl:
       'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
+
     images: [
       'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
-      'https://images.pexels.com/photos/3731477/pexels-photo-3731477.jpeg?auto=compress&w=800',
-      'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&w=800',
     ],
-    label: 'Vegan',
-    rating: 5,
-    ratingCount: 4,
-  },
-  {
-    id: 2,
-    name: 'Chevrefrit Bowl',
-    price: 14,
-    description: 'Colorful salad bowl with fresh veggies and feta cheese.',
-    imageUrl:
-      'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg?auto=compress&w=800',
-    label: 'Vegan',
-    rating: 4.8,
-    ratingCount: 12,
-  },
-]
+  }
+})
 
-const product = computed(() => allProducts.find((p) => p.id === productId) ?? allProducts[0])
+
+const ingredientRows = computed<IngredientRow[]>(() => {
+  const item = menuItemsStore.currentItem
+  if (!item?.ingredients?.length) return []
+
+  const rows: IngredientRow[] = []
+
+  for (let i = 0; i < item.ingredients.length; i += 2) {
+    rows.push({
+      left: {
+        label: item.ingredients[i].name,
+        value: item.ingredients[i].amount,
+      },
+      right: item.ingredients[i + 1]
+        ? {
+            label: item.ingredients[i + 1].name,
+            value: item.ingredients[i + 1].amount,
+          }
+        : { label: '', value: '' },
+    })
+  }
+
+  return rows
+})
+
+
+// const product = computed(() => allProducts.find((p) => p.id === productId) ?? allProducts[0])
 
 const steps = [
   {
@@ -406,39 +430,9 @@ const tabList = [
   { value: 'reviews', label: 'Reviews' },
 ]
 
-// Example ingredient table rows
-const ingredientRows = computed<IngredientRow[]>(() => [
-  {
-    left: { label: 'Salmon', value: '1 pack' },
-    right: { label: 'Porro', value: '2 pack' },
-  },
-  {
-    left: { label: 'Capers', value: '150g' },
-    right: { label: 'Facilis', value: '1kg' },
-  },
-  {
-    left: { label: 'Adipisicing', value: '500g' },
-    right: { label: 'Goluptatem', value: '1 teaspoon' },
-  },
-  {
-    left: { label: 'Dolorem obcaecati', value: '3 teaspoon' },
-    right: { label: 'Vel fuga', value: '300g' },
-  },
-])
-
 // Bought-together mock
-const boughtTogether = computed<Product[]>(() =>
-  allProducts.filter((p) => p.id !== product.value.id),
-)
-type Review = {
-  id: number
-  name: string
-  rating: number
-  comment: string
-  createdAt: string
-}
+const boughtTogether = computed<Product[]>(() => [])
 
-// existing data...
 
 // --- Reviews state ---
 const reviews = ref<Review[]>([
@@ -468,6 +462,7 @@ const averageRating = computed(() => {
   const sum = reviews.value.reduce((acc, r) => acc + r.rating, 0)
   return sum / reviews.value.length
 })
+
 
 function submitReview() {
   if (!newReviewName.value.trim() || !newReviewComment.value.trim()) {

@@ -1,5 +1,14 @@
 export type ProductStatus = 'Active' | 'Hidden' | 'Out of stock'
 export type Availability = 'Cafe' | 'Room' | 'Both'
+
+export type MenuItemSize = {
+  size_id: number
+  name: string
+  shortName: string
+  sellPrice: number
+  originalPrice: number
+}
+
 export type MenuItem = {
   id: number
   sku: string
@@ -7,7 +16,11 @@ export type MenuItem = {
   category: string
   price: number
   status: ProductStatus
-  availability: Availability
-  tags: string[]
+  availability: string
+  tags: { id: number; name: string }[]
+
+  shortDesc?: string
+  sizes?: MenuItemSize[]
+
   updatedAt: string
 }

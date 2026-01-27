@@ -553,3 +553,36 @@
     font-size: 0.9rem;
   }
 }
+
+.item-btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #ddd;
+  color: #777;
+}
+
+.item-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.item-media--disabled img {
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+
