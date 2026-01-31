@@ -1,6 +1,6 @@
 <template>
   <div class="pd-page">
-    <main  v-if="product" class="pd-main">
+    <main v-if="product" class="pd-main">
       <!-- TOP BREADCRUMB -->
       <section class="cs-container pd-breadcrumb">
         <span class="pd-breadcrumb-text">
@@ -22,36 +22,20 @@
             <img :src="currentImage" :alt="product.name" class="pd-image" />
 
             <!-- arrows -->
-            <button
-              v-if="productImages.length > 1"
-              type="button"
-              class="pd-image-nav-btn pd-image-nav-btn--left"
-              @click="prevImage"
-              aria-label="Previous image"
-            >
+            <button v-if="productImages.length > 1" type="button" class="pd-image-nav-btn pd-image-nav-btn--left"
+              @click="prevImage" aria-label="Previous image">
               ‹
             </button>
-            <button
-              v-if="productImages.length > 1"
-              type="button"
-              class="pd-image-nav-btn pd-image-nav-btn--right"
-              @click="nextImage"
-              aria-label="Next image"
-            >
+            <button v-if="productImages.length > 1" type="button" class="pd-image-nav-btn pd-image-nav-btn--right"
+              @click="nextImage" aria-label="Next image">
               ›
             </button>
           </div>
 
           <!-- THUMBNAILS -->
           <div v-if="productImages.length > 1" class="pd-thumb-row">
-            <button
-              v-for="(img, idx) in productImages"
-              :key="img + idx"
-              type="button"
-              class="pd-thumb"
-              :class="{ 'pd-thumb--active': idx === currentImageIndex }"
-              @click="goToImage(idx)"
-            >
+            <button v-for="(img, idx) in productImages" :key="img + idx" type="button" class="pd-thumb"
+              :class="{ 'pd-thumb--active': idx === currentImageIndex }" @click="goToImage(idx)">
               <img :src="img" :alt="`${product.name} ${idx + 1}`" />
             </button>
           </div>
@@ -64,16 +48,12 @@
           <header class="pd-header">
             <div class="pd-title-row">
               <h1 class="pd-title">{{ product?.name }}</h1>
-              <div class="pd-price-pill">฿{{ product.price }}</div>
+              <div class="pd-price-pill">฿{{ displayPrice }}</div>
             </div>
 
             <div class="pd-rating-row">
               <span class="pd-stars">
-                <span
-                  v-for="n in 5"
-                  :key="n"
-                  :class="['pd-star', { 'pd-star--muted': n > product.rating }]"
-                >
+                <span v-for="n in 5" :key="n" :class="['pd-star', { 'pd-star--muted': n > product.rating }]">
                   ★
                 </span>
               </span>
@@ -98,20 +78,30 @@
             </article>
           </section>
 
+          <!-- SIZE SELECTOR -->
+          <div v-if="menuItemsStore.currentItem?.sizes?.length" class="pd-size-section">
+            <p class="pd-size-title">Size</p>
+
+            <div class="pd-size-options">
+              <button v-for="size in menuItemsStore.currentItem.sizes" :key="size.size_id" type="button"
+                class="pd-size-btn" :class="{ 'pd-size-btn--active': size.size_id === selectedSizeId }"
+                @click="selectedSizeId = size.size_id">
+                {{ size.shortName }}
+              </button>
+            </div>
+          </div>
+
+
           <!-- ACTIONS: QTY + ADD TO CART -->
           <footer class="pd-actions">
+
             <div class="pd-qty-control">
               <button type="button" class="pd-qty-btn" @click="decreaseQty">−</button>
               <span class="pd-qty-value">{{ quantity }}</span>
               <button type="button" class="pd-qty-btn" @click="increaseQty">+</button>
             </div>
 
-            <button
-              type="button"
-              class="pd-add-btn"
-              :class="{ 'pd-add-btn--added': isInCart }"
-              @click="toggleCart"
-            >
+            <button type="button" class="pd-add-btn" :class="{ 'pd-add-btn--added': isInCart }" @click="toggleCart">
               <span> {{ isInCart ? 'Added to cart' : 'Add to cart' }} </span>
             </button>
           </footer>
@@ -122,14 +112,8 @@
       <section class="cs-container pd-tabs-section">
         <!-- tab buttons -->
         <div class="pd-tabs">
-          <button
-            v-for="tab in tabList"
-            :key="tab.value"
-            type="button"
-            class="pd-tab-btn"
-            :class="{ 'pd-tab-btn--active': activeTab === tab.value }"
-            @click="activeTab = tab.value"
-          >
+          <button v-for="tab in tabList" :key="tab.value" type="button" class="pd-tab-btn"
+            :class="{ 'pd-tab-btn--active': activeTab === tab.value }" @click="activeTab = tab.value">
             {{ tab.label }}
           </button>
         </div>
@@ -138,11 +122,7 @@
         <div class="pd-tab-panel">
           <!-- INGREDIENTS TABLE -->
           <div v-if="activeTab === 'ingredients'" class="pd-spec-grid">
-            <div
-              v-for="row in ingredientRows"
-              :key="row.left.label + row.right.label"
-              class="pd-spec-row"
-            >
+            <div v-for="row in ingredientRows" :key="row.left.label + row.right.label" class="pd-spec-row">
               <div class="pd-spec-cell">
                 <span class="pd-spec-label">{{ row.left.label }}</span>
                 <span class="pd-spec-value">{{ row.left.value }}</span>
@@ -173,11 +153,8 @@
             <div class="pd-reviews-summary">
               <div>
                 <div class="pd-reviews-stars">
-                  <span
-                    v-for="n in 5"
-                    :key="'avg-' + n"
-                    :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]"
-                  >
+                  <span v-for="n in 5" :key="'avg-' + n"
+                    :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]">
                     ★
                   </span>
                 </div>
@@ -198,11 +175,8 @@
                 </div>
 
                 <div class="pd-review-stars">
-                  <span
-                    v-for="n in 5"
-                    :key="review.id + '-' + n"
-                    :class="['pd-star', { 'pd-star--muted': n > review.rating }]"
-                  >
+                  <span v-for="n in 5" :key="review.id + '-' + n"
+                    :class="['pd-star', { 'pd-star--muted': n > review.rating }]">
                     ★
                   </span>
                 </div>
@@ -222,26 +196,15 @@
 
               <div class="pd-review-form-row">
                 <label class="pd-review-label">Your name</label>
-                <input
-                  v-model="newReviewName"
-                  type="text"
-                  class="pd-review-input"
-                  placeholder="Eg. Aye Chan"
-                  required
-                />
+                <input v-model="newReviewName" type="text" class="pd-review-input" placeholder="Eg. Aye Chan"
+                  required />
               </div>
 
               <div class="pd-review-form-row">
                 <label class="pd-review-label">Your rating</label>
                 <div class="pd-review-stars-input">
-                  <button
-                    v-for="n in 5"
-                    :key="'new-' + n"
-                    type="button"
-                    class="pd-star-btn"
-                    :class="{ 'pd-star-btn--active': n <= newReviewRating }"
-                    @click="newReviewRating = n"
-                  >
+                  <button v-for="n in 5" :key="'new-' + n" type="button" class="pd-star-btn"
+                    :class="{ 'pd-star-btn--active': n <= newReviewRating }" @click="newReviewRating = n">
                     ★
                   </button>
                   <span class="pd-review-rating-hint"> {{ newReviewRating }} / 5 </span>
@@ -250,13 +213,8 @@
 
               <div class="pd-review-form-row">
                 <label class="pd-review-label">Your comment</label>
-                <textarea
-                  v-model="newReviewComment"
-                  rows="3"
-                  class="pd-review-textarea"
-                  placeholder="Tell us what you liked or what could be better…"
-                  required
-                />
+                <textarea v-model="newReviewComment" rows="3" class="pd-review-textarea"
+                  placeholder="Tell us what you liked or what could be better…" required />
               </div>
 
               <button type="submit" class="pd-review-submit">Submit review</button>
@@ -303,7 +261,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 const router = useRouter()
@@ -333,9 +291,45 @@ function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
 
-onMounted(()=>{
+onMounted(() => {
   menuItemsStore.fetchById(productId);
 })
+
+const selectedSizeId = ref<number | null>(null)
+
+  const cheapestSize = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item?.sizes?.length) return null
+
+  return item.sizes.reduce((min, s) =>
+    s.sellPrice < min.sellPrice ? s : min
+  )
+})
+
+watch(
+  cheapestSize,
+  (size) => {
+    if (size) {
+      selectedSizeId.value = size.size_id
+    }
+  },
+  { immediate: true }
+)
+
+
+const selectedSize = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item || !selectedSizeId.value) return null
+
+  return item.sizes.find((s) => s.size_id === selectedSizeId.value) ?? null
+})
+
+const displayPrice = computed(() => {
+  return selectedSize.value?.sellPrice ?? 0
+})
+
+
+
 
 const product = computed(() => {
   const item = menuItemsStore.currentItem
@@ -375,9 +369,9 @@ const ingredientRows = computed<IngredientRow[]>(() => {
       },
       right: item.ingredients[i + 1]
         ? {
-            label: item.ingredients[i + 1].name,
-            value: item.ingredients[i + 1].amount,
-          }
+          label: item.ingredients[i + 1].name,
+          value: item.ingredients[i + 1].amount,
+        }
         : { label: '', value: '' },
     })
   }
@@ -419,8 +413,16 @@ function decreaseQty() {
 
 function toggleCart() {
   isInCart.value = !isInCart.value
-  // later: call your real cart store / API here
+  if (!selectedSize.value) return
+
+  console.log({
+    productId: product.value.id,
+    sizeId: selectedSize.value.size_id,
+    price: selectedSize.value.sellPrice,
+    qty: quantity.value,
+  })
 }
+
 
 // Tabs
 const activeTab = ref<'ingredients' | 'details' | 'reviews'>('ingredients')
