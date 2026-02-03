@@ -124,111 +124,55 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
 
-type OrderStatus = 'New' | 'Preparing' | 'Ready' | 'Completed' | 'Canceled'
-type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
-
-type OrderItem = {
-  name: string
-  quantity: number
-  unitPrice: number
-  total: number
-  note?: string
-}
-
-type OrderDetails = {
-  id: number
-  date: string
-  time: string
-  customer: string
-  channel: 'Cafe' | 'Room' | 'Take-away'
-  status: OrderStatus
-  paymentStatus: PaymentStatus
-  customerNote?: string
-  items: OrderItem[]
-  subtotal: number
-  serviceCharge: number
-  tax: number
-  total: number
-}
-
+/* =======================
+   Router & Store
+======================= */
 const route = useRoute()
 const router = useRouter()
+const ordersStore = useOrdersStore()
 
 const orderId = computed(() => Number(route.params.id))
 
-// Demo data – later you can replace with API call
-const dummyOrders: Record<number, OrderDetails> = {
-  1050: {
-    id: 1050,
-    date: '2025-11-20',
-    time: '11:20',
-    customer: 'Room 1205',
-    channel: 'Room',
-    status: 'New',
-    paymentStatus: 'Unpaid',
-    customerNote: 'Please no sugar in the iced latte.',
-    items: [
-      {
-        name: 'Iced Latte',
-        quantity: 2,
-        unitPrice: 90,
-        total: 180,
-      },
-      {
-        name: 'Chocolate Cake',
-        quantity: 1,
-        unitPrice: 140,
-        total: 140,
-        note: 'Slice for one person',
-      },
-    ],
-    subtotal: 320,
-    serviceCharge: 0,
-    tax: 0,
-    total: 320,
-  },
-  1049: {
-    id: 1049,
-    date: '2025-11-20',
-    time: '11:10',
-    customer: 'Walk-in',
-    channel: 'Cafe',
-    status: 'Completed',
-    paymentStatus: 'Paid (Card)',
-    customerNote: '',
-    items: [
-      {
-        name: 'Gourmet Burger set',
-        quantity: 1,
-        unitPrice: 260,
-        total: 260,
-      },
-    ],
-    subtotal: 260,
-    serviceCharge: 0,
-    tax: 0,
-    total: 260,
-  },
-  // add more dummy orders as needed
-}
-
-const order = computed<OrderDetails | null>(() => {
-  const id = orderId.value
-  return dummyOrders[id] ?? null
+onMounted(async () => {
+  await ordersStore.fetchById(orderId.value)
 })
 
-// --- update form state ---
-const statusOptions: OrderStatus[] = ['New', 'Preparing', 'Ready', 'Completed', 'Canceled']
-const paymentStatusOptions: PaymentStatus[] = ['Unpaid', 'Paid (Cash)', 'Paid (Card)', 'Paid (QR)']
+/* =======================
+   Order (from backend)
+======================= */
+const order = computed(() => ordersStore.currentOrder)
 
-const editStatus = ref<OrderStatus>('New')
+/* =======================
+   Payment (frontend-only for now)
+======================= */
+type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
+
+const paymentStatusOptions: PaymentStatus[] = [
+  'Unpaid',
+  'Paid (Cash)',
+  'Paid (Card)',
+  'Paid (QR)',
+]
+
+/* =======================
+   Status Update Form
+======================= */
+const statusOptions: OrderStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'PREPARING',
+  'SERVED',
+  'CANCELLED',
+]
+
+const editStatus = ref<OrderStatus>('PENDING')
 const editPaymentStatus = ref<PaymentStatus>('Unpaid')
 const lastUpdateMessage = ref('')
 
-// sync selects whenever order changes
 watch(
   order,
   (o) => {
@@ -240,29 +184,35 @@ watch(
   { immediate: true },
 )
 
-function applyOrderUpdates() {
+/* =======================
+   Update Order (API)
+======================= */
+async function applyOrderUpdates() {
   if (!order.value) return
 
-  // mutate current order (dummy data or later your API model)
-  order.value.status = editStatus.value
-  order.value.paymentStatus = editPaymentStatus.value
+  await ordersStore.update(order.value.id, {
+    status: editStatus.value,
+  })
 
-  // here, in real app, call your API to persist changes
-  // await api.updateOrder(order.value.id, { status: editStatus.value, paymentStatus: editPaymentStatus.value })
-
-  lastUpdateMessage.value = 'Order updated (demo only – not persisted).'
+  lastUpdateMessage.value = 'Order updated successfully.'
 }
 
+/* =======================
+   Navigation
+======================= */
 function goBack() {
   router.push({ name: 'admin-orders' })
 }
 
+/* =======================
+   Status UI helper
+======================= */
 function statusClass(status: OrderStatus) {
   return {
-    'status-pill--new': status === 'New',
-    'status-pill--prep': status === 'Preparing',
-    'status-pill--ready': status === 'Ready',
-    'status-pill--paid': status === 'Completed',
+    'status-pill--new': status === 'PENDING',
+    'status-pill--prep': status === 'PREPARING',
+    'status-pill--ready': status === 'SERVED',
+    'status-pill--paid': status === 'CONFIRMED',
   }
 }
 </script>

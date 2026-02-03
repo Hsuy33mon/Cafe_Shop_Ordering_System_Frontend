@@ -102,9 +102,9 @@
 </template>
 
 <script setup lang="ts">
+import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 
 type TableStatus = 'Available' | 'Occupied' | 'Reserved' | 'Cleaning' | 'Out of service'
 
