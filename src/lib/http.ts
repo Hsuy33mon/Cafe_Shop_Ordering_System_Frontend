@@ -2,9 +2,9 @@
 import axios from 'axios'
 import router from '@/router'
 import { useAuthStore } from '@/stores/useAuthStore'
-
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 export const http = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 
