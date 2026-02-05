@@ -83,11 +83,11 @@
 
             <div class="radio-row">
               <label class="radio-pill">
-                <input type="radio" name="orderType" value="TABLE" v-model="orderType" />
+                <input type="radio" name="orderTypeMobile" value="TABLE" v-model="orderType" />
                 <span>Table</span>
               </label>
 
-              <label class="radio">
+              <label class="radio-pill">
                 <input type="radio" name="orderTypeMobile" value="ROOM" v-model="orderType" />
                 <span>Room</span>
               </label>
@@ -133,7 +133,8 @@
             </div>
 
             <div class="video-frame">
-              <video ref="videoEl" class="video" playsinline muted></video>
+              <!-- ✅ autoplay helps iOS -->
+              <video ref="videoEl" class="video" playsinline autoplay muted></video>
             </div>
 
             <div class="modal-actions">
@@ -149,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { useOrderSessionStore } from '@/stores/orderSession'
@@ -159,18 +160,19 @@ type OrderType = 'TABLE' | 'ROOM'
 const router = useRouter()
 const route = useRoute()
 const session = useOrderSessionStore()
-session.hydrate()
 
 const customerName = ref(session.customerName || '')
 const orderType = ref<OrderType>((session.orderType as OrderType) || 'TABLE')
-const placeNumber = ref(session.placeNumber || session.tableNumber || '') // fallback for old storage
+const placeNumber = ref(session.placeNumber || session.tableNumber || '')
 
 const errorMsg = ref('')
 const manualMode = ref(false)
 
 const scanning = ref(false)
 const videoEl = ref<HTMLVideoElement | null>(null)
+
 let reader: BrowserMultiFormatReader | null = null
+let activeStream: MediaStream | null = null
 
 // responsive
 const isMobile = ref(false)
@@ -185,9 +187,7 @@ onMounted(() => {
   session.hydrate()
 
   const hasRedirect = typeof route.query.redirect === 'string' && route.query.redirect.length > 0
-  if (!hasRedirect) {
-    session.clear()
-  }
+  if (!hasRedirect) session.clear()
 })
 
 onBeforeUnmount(() => {
@@ -197,23 +197,13 @@ onBeforeUnmount(() => {
 
 const placeLabel = computed(() => (orderType.value === 'ROOM' ? 'Room number' : 'Table number'))
 const placeInputId = computed(() => (orderType.value === 'ROOM' ? 'room' : 'table'))
-const placeInputIdMobile = computed(() =>
-  orderType.value === 'ROOM' ? 'roomMobile' : 'tableMobile',
-)
+const placeInputIdMobile = computed(() => (orderType.value === 'ROOM' ? 'roomMobile' : 'tableMobile'))
 
 const canContinueDesktop = computed(() => {
-  return (
-    customerName.value.trim().length >= 2 &&
-    (orderType.value === 'TABLE' || orderType.value === 'ROOM') &&
-    placeNumber.value.trim().length >= 1
-  )
+  return customerName.value.trim().length >= 2 && placeNumber.value.trim().length >= 1
 })
 const canContinueMobile = computed(() => {
-  return (
-    customerName.value.trim().length >= 2 &&
-    (orderType.value === 'TABLE' || orderType.value === 'ROOM') &&
-    placeNumber.value.trim().length >= 1
-  )
+  return customerName.value.trim().length >= 2 && placeNumber.value.trim().length >= 1
 })
 
 function toggleManual() {
@@ -233,31 +223,25 @@ function toggleManual() {
 function parseOrderFromQr(text: string): { orderType?: OrderType; placeNumber?: string } | null {
   const t = text.trim()
 
-  // 1) PREFIX: TABLE:xx / ROOM:xx
   const m1 = t.match(/^(TABLE|ROOM)\s*:\s*([A-Za-z0-9-]{1,10})$/i)
   if (m1?.[1] && m1?.[2]) {
     return { orderType: m1[1].toUpperCase() as OrderType, placeNumber: m1[2] }
   }
 
-  // 2) URL style params: type + no
   const typeParam = t.match(/(?:\?|&)type=(TABLE|ROOM)/i)?.[1]
   const noParam = t.match(/(?:\?|&)(?:no|number)=([A-Za-z0-9-]{1,10})/i)?.[1]
   if (typeParam && noParam) {
     return { orderType: typeParam.toUpperCase() as OrderType, placeNumber: noParam }
   }
 
-  // 3) URL style: table= / room=
   const tableParam = t.match(/(?:\?|&)table=([A-Za-z0-9-]{1,10})/i)?.[1]
   if (tableParam) return { orderType: 'TABLE', placeNumber: tableParam }
 
   const roomParam = t.match(/(?:\?|&)room=([A-Za-z0-9-]{1,10})/i)?.[1]
   if (roomParam) return { orderType: 'ROOM', placeNumber: roomParam }
 
-  // 4) Single token: "12" or "A12"
   const m4 = t.match(/^([A-Za-z0-9-]{1,10})$/)
-  if (m4?.[1]) {
-    return { placeNumber: m4[1] } // type fallback to current selection
-  }
+  if (m4?.[1]) return { placeNumber: m4[1] }
 
   return null
 }
@@ -266,14 +250,33 @@ async function openScanner() {
   errorMsg.value = ''
   scanning.value = true
 
-  if (!videoEl.value) return
+  // ✅ wait for modal + video to mount
+  await nextTick()
+
+  if (!videoEl.value) {
+    errorMsg.value = 'Camera view not ready. Please try again.'
+    scanning.value = false
+    return
+  }
+
+  // clean previous session if any
+  stopScanner()
+
   reader = new BrowserMultiFormatReader()
 
   try {
-    const devices = await BrowserMultiFormatReader.listVideoInputDevices()
-    const deviceId = devices?.[0]?.deviceId
+    // ✅ request permission first (fix iOS + avoids empty device list)
+    activeStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    })
 
-    await reader.decodeFromVideoDevice(deviceId, videoEl.value, (result) => {
+    // attach stream to video
+    videoEl.value.srcObject = activeStream
+    await videoEl.value.play()
+
+    // decode QR from stream
+    await reader.decodeFromStream(activeStream, videoEl.value, (result) => {
       if (!result) return
 
       const raw = result.getText()
@@ -289,14 +292,12 @@ async function openScanner() {
 
       closeScanner()
 
-      if (customerName.value.trim().length >= 2) {
-        onContinue()
-      } else {
-        errorMsg.value = `${placeLabel.value} detected. Please enter your name to continue.`
-      }
+      if (customerName.value.trim().length >= 2) onContinue()
+      else errorMsg.value = `${placeLabel.value} detected. Please enter your name to continue.`
     })
-  } catch {
-    errorMsg.value = 'Camera permission denied or camera not available.'
+  } catch (e) {
+    errorMsg.value =
+      'Camera permission denied or camera not available. (Tip: must be HTTPS / Safari, not in-app browser)'
     closeScanner()
   }
 }
@@ -307,10 +308,22 @@ function closeScanner() {
 }
 
 function stopScanner() {
+  // stop ZXing
   try {
     reader?.reset()
   } catch {}
   reader = null
+
+  // stop camera tracks
+  try {
+    activeStream?.getTracks().forEach((t) => t.stop())
+  } catch {}
+  activeStream = null
+
+  // clear video element
+  try {
+    if (videoEl.value) videoEl.value.srcObject = null
+  } catch {}
 }
 
 function onContinue() {
