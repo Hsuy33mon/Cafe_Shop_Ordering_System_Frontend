@@ -21,10 +21,11 @@
         <!-- STATUS -->
         <select v-model="statusFilter" class="filter-select">
           <option value="">All statuses</option>
-          <option value="New">New</option>
-          <option value="Preparing">Preparing</option>
-          <option value="Ready">Ready</option>
-          <option value="Completed">Completed</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="PREPARING">Preparing</option>
+          <option value="READY">Ready</option>
+          <option value="COMPLETED">Completed</option>
           <option value="Canceled">Canceled</option>
         </select>
 
@@ -111,19 +112,27 @@
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
+import { useRoute } from 'vue-router'
 
-/* =======================
-   Store
-======================= */
+const route = useRoute()
+
 const ordersStore = useOrdersStore()
+
+const tableNoFilter = computed<string | null>(() => {
+  const v = route.query.tableNo
+  return typeof v === 'string' ? v : null
+})
+
+// const orderPlaceIdFilter = computed<number | null>(() => {
+//   const v = route.query.orderPlaceId
+//   return v ? Number(v) : null
+// })
 
 onMounted(() => {
   ordersStore.fetchAll()
 })
 
-/* =======================
-   Banner state (optional)
-======================= */
+
 const hasNewOrders = computed(() =>
   ordersStore.items.some((o) => o.status === 'PENDING'),
 )
@@ -134,14 +143,14 @@ const newOrderCount = computed(() =>
 
 const currentPage = ref(1)
 
-/* =======================
-   Types used by table
-======================= */
+
 type Channel = 'Cafe' | 'Room' | 'Take-away'
 type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
 
 type OrderRow = {
   id: number
+  orderPlaceId: number | null
+  tableNo: string | null
   date: string
   time: string
   customer: string
@@ -152,9 +161,7 @@ type OrderRow = {
   status: OrderStatus
 }
 
-/* =======================
-   Columns
-======================= */
+
 const orderColumns: TableColumn[] = [
   { key: 'id', label: '#', width: '70px', align: 'left' },
   { key: 'date', label: 'Date' },
@@ -169,9 +176,7 @@ const orderColumns: TableColumn[] = [
   { key: 'actions', label: '', align: 'right' },
 ]
 
-/* =======================
-   FILTER STATE
-======================= */
+
 const search = ref('')
 const statusFilter = ref('')
 const channelFilter = ref('')
@@ -179,12 +184,12 @@ const paymentFilter = ref('')
 const startDateFilter = ref('')
 const endDateFilter = ref('')
 
-/* =======================
-   MAP backend → table rows
-======================= */
+
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o) => ({
     id: o.id,
+    orderPlaceId: o.orderPlaceId,
+    tableNo: o.tableNo,
     date: o.date,
     time: o.time,
     customer: o.customer,
@@ -196,9 +201,7 @@ const orders = computed<OrderRow[]>(() =>
   })),
 )
 
-/* =======================
-   FILTERED DATA
-======================= */
+
 const filteredOrders = computed(() => {
   const s = search.value.trim().toLowerCase()
   const start = startDateFilter.value
@@ -215,18 +218,28 @@ const filteredOrders = computed(() => {
     const matchesChannel = !channelFilter.value || o.channel === channelFilter.value
     const matchesPayment = !paymentFilter.value || o.paymentStatus === paymentFilter.value
 
+    const matchesTable =
+    !tableNoFilter.value ||
+    o.tableNo === tableNoFilter.value
+
+
     let matchesDate = true
     if (start && end) matchesDate = o.date >= start && o.date <= end
     else if (start) matchesDate = o.date >= start
     else if (end) matchesDate = o.date <= end
 
-    return matchesSearch && matchesStatus && matchesChannel && matchesPayment && matchesDate
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesChannel &&
+      matchesPayment &&
+      matchesTable &&
+      matchesDate
+    )
   })
 })
 
-/* =======================
-   STATUS UI HELPERS
-======================= */
+
 function statusClass(status: OrderStatus) {
   return {
     'status-pill--new': status === 'PENDING',
@@ -236,9 +249,6 @@ function statusClass(status: OrderStatus) {
   }
 }
 
-/* =======================
-   STATUS UPDATE DIALOG
-======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<OrderRow | null>(null)
 const statusToUpdate = ref<OrderStatus>('PENDING')
@@ -247,9 +257,11 @@ const statusOptions: OrderStatus[] = [
   'PENDING',
   'CONFIRMED',
   'PREPARING',
-  'SERVED',
-  'CANCELLED',
+  'READY',
+  'COMPLETED',
+  'CANCELLED'
 ]
+
 
 function openStatusDialog(order: OrderRow) {
   statusTarget.value = order
@@ -270,21 +282,18 @@ async function confirmStatusUpdate() {
   statusDialogVisible.value = false
 }
 
-/* =======================
-   CANCEL ORDER
-======================= */
+
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
 }
 
-/* =======================
-   VIEW LATEST
-======================= */
 function onViewLatest() {
   statusFilter.value = 'PENDING'
   currentPage.value = 1
 }
+
+
 </script>
 
 <style scoped src="@/styles/admin/orders.css"></style>

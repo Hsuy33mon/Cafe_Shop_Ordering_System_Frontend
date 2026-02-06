@@ -6,10 +6,33 @@
       <div class="order-header-left">
         <button class="btn-link" @click="goBack">← Back to orders</button>
         <h1 class="order-title">Order #{{ orderId }}</h1>
-        <p class="order-subtitle" v-if="order">
+        <!-- <p class="order-subtitle" v-if="order">
           {{ order.date }} · {{ order.time }} · {{ order.channel }} ·
           {{ order.customer }}
-        </p>
+        </p> -->
+
+        <div class="order-subtitle receipt-meta" v-if="order">
+  <div class="receipt-row">
+    <span class="receipt-label">Date</span>
+    <span class="receipt-value">{{ order.date }}</span>
+  </div>
+
+  <div class="receipt-row">
+    <span class="receipt-label">Time</span>
+    <span class="receipt-value">{{ order.time }}</span>
+  </div>
+
+  <div class="receipt-row">
+    <span class="receipt-label">Channel</span>
+    <span class="receipt-value">{{ order.channel }}</span>
+  </div>
+
+  <div class="receipt-row">
+    <span class="receipt-label">Customer</span>
+    <span class="receipt-value">{{ order.customer }}</span>
+  </div>
+</div>
+
       </div>
 
       <div class="order-header-right" v-if="order">
@@ -35,8 +58,9 @@
           <thead>
             <tr>
               <th>Item</th>
-              <th class="col-qty">Qty</th>
+              <th>Size</th>
               <th class="col-price">Price (฿)</th>
+              <th class="col-qty">Qty</th>
               <th class="col-total">Total (฿)</th>
             </tr>
           </thead>
@@ -48,8 +72,13 @@
                   {{ item.note }}
                 </div>
               </td>
-              <td class="col-qty">{{ item.quantity }}</td>
+              <td>
+                <span v-if="item.size" class="item-size">
+                {{ item.size }}
+                </span>
+              </td>
               <td class="col-price">{{ item.unitPrice }}</td>
+              <td class="col-qty">{{ item.quantity }}</td>
               <td class="col-total">{{ item.total }}</td>
             </tr>
           </tbody>

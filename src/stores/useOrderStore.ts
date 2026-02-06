@@ -11,6 +11,7 @@ export type OrderStatus =
 
 export type OrderItem = {
   name: string
+  size?: string
   quantity: number
   unitPrice: number
   total: number
@@ -19,6 +20,8 @@ export type OrderItem = {
 
 export type Order = {
   id: number
+  orderPlaceId: number | null
+  tableNo: string | null
   date: string
   time: string
   customer: string
@@ -39,16 +42,20 @@ function mapFromApi(x: any): Order {
 
   return {
     id: Number(x.id),
+    orderPlaceId: x.orderPlaceId != null ? Number(x.orderPlaceId) : null,
+    // orderPlaceId: x.orderPlaceId != null? Number(x.orderPlaceId): x.orderPlace?.id != null? Number(x.orderPlace.id): null,
+    tableNo: x.orderPlace?.no ?? null,
     date: created.toISOString().slice(0, 10),
     time: created.toTimeString().slice(0, 5),
-    customer: x.orderPlaceId ? `Place ${x.orderPlaceId}` : 'Walk-in',
+    customer: x.customerName,
     channel: 'Cafe',
     status: x.status,
     paymentStatus: 'Unpaid',
     customerNote: x.note,
     items: [
       {
-        name: `MenuItemSize #${x.menuItemSizeId}`,
+        name: x.menuItem?.name ?? 'Unknown item',
+        size: x.size?.shortName ?? x.size?.name ?? null,
         quantity: x.qty,
         unitPrice: Number(x.unitPrice),
         total: Number(x.totalPrice),

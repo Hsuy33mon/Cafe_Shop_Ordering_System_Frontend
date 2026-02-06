@@ -103,8 +103,9 @@
 
 <script setup lang="ts">
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
 
 type TableStatus = 'Available' | 'Occupied' | 'Reserved' | 'Cleaning' | 'Out of service'
 
@@ -119,8 +120,19 @@ type TableRow = {
   note?: string
 }
 
+/* =======================
+   Router & Store
+======================= */
 const router = useRouter()
+const orderPlacesStore = useOrderPlacesStore()
 
+onMounted(() => {
+  orderPlacesStore.fetchWithCurrentOrders()
+})
+
+/* =======================
+   Columns
+======================= */
 const tableColumns: TableColumn[] = [
   { key: 'name', label: 'Table', width: '90px' },
   { key: 'area', label: 'Area / zone' },
@@ -132,100 +144,36 @@ const tableColumns: TableColumn[] = [
   { key: 'actions', label: '', width: '150px', align: 'right' },
 ]
 
-// --- dummy data: later replace via API ---
-const tables = ref<TableRow[]>([
-  {
-    id: 1,
-    name: 'T01',
-    area: 'Cafe – Window',
-    capacity: 2,
-    status: 'Occupied',
-    currentOrder: 1050,
-    since: '11:20',
-    note: 'Couple · long stay',
-  },
-  {
-    id: 2,
-    name: 'T02',
-    area: 'Cafe – Window',
-    capacity: 2,
-    status: 'Available',
-    currentOrder: null,
-    since: '10:45',
-  },
-  {
-    id: 3,
-    name: 'T03',
-    area: 'Cafe – Center',
-    capacity: 4,
-    status: 'Reserved',
-    currentOrder: null,
-    since: '12:00',
-    note: 'Birthday 12:30',
-  },
-  {
-    id: 4,
-    name: 'T04',
-    area: 'Cafe – Center',
-    capacity: 4,
-    status: 'Occupied',
-    currentOrder: 1049,
-    since: '11:10',
-  },
-  {
-    id: 5,
-    name: 'T05',
-    area: 'Terrace',
-    capacity: 4,
-    status: 'Cleaning',
-    currentOrder: null,
-    since: '11:05',
-  },
-  {
-    id: 6,
-    name: 'T06',
-    area: 'Terrace',
-    capacity: 2,
-    status: 'Available',
-    currentOrder: null,
-    since: '10:15',
-  },
-  {
-    id: 7,
-    name: 'Room 1205',
-    area: 'Hotel – Floor 12',
-    capacity: 2,
-    status: 'Occupied',
-    currentOrder: 1051,
-    since: '11:25',
-    note: 'Room service',
-  },
-  {
-    id: 8,
-    name: 'Room 907',
-    area: 'Hotel – Floor 9',
-    capacity: 2,
-    status: 'Available',
-    currentOrder: null,
-    since: '09:30',
-  },
-  {
-    id: 9,
-    name: 'T07',
-    area: 'Cafe – Bar',
-    capacity: 1,
-    status: 'Out of service',
-    currentOrder: null,
-    since: 'Yesterday',
-    note: 'Broken chair',
-  },
-])
+/* =======================
+   Map backend → UI rows
+======================= */
+const tables = computed<TableRow[]>(() =>
+  orderPlacesStore.items.map((p) => {
+    const activeOrder = p.activeOrders?.[0]
+    const occupied = !!activeOrder
 
-// --- filters ---
+    return {
+      id: p.id,
+      name: p.no,
+      area: p.type,
+      capacity: p.seat ?? 0,
+      status: occupied ? 'Occupied' : p.status === 'ACTIVE' ? 'Available' : 'Out of service',
+      currentOrder: activeOrder?.id ?? null,
+      since: activeOrder?.createdAt
+        ? new Date(activeOrder.createdAt).toTimeString().slice(0, 5)
+        : '-',
+      note: p.description,
+    }
+  }),
+)
+
+/* =======================
+   Filters
+======================= */
 const search = ref('')
-const areaFilter = ref<string>('')
-const statusFilter = ref<string>('')
-const minCapacity = ref<number>(0)
+const areaFilter = ref('')
+const statusFilter = ref('')
+const minCapacity = ref(0)
 
 const areaOptions = computed(() => {
   const set = new Set<string>()
@@ -243,6 +191,7 @@ const statusOptions: TableStatus[] = [
 
 const filteredTables = computed(() => {
   const s = search.value.trim().toLowerCase()
+  
 
   return tables.value.filter((t) => {
     const matchesSearch =
@@ -259,16 +208,26 @@ const filteredTables = computed(() => {
   })
 })
 
-// counts for header pills
-const availableCount = computed(() => tables.value.filter((t) => t.status === 'Available').length)
-const occupiedCount = computed(() => tables.value.filter((t) => t.status === 'Occupied').length)
+/* =======================
+   Header counts
+======================= */
+const availableCount = computed(
+  () => tables.value.filter((t) => t.status === 'Available').length,
+)
+const occupiedCount = computed(
+  () => tables.value.filter((t) => t.status === 'Occupied').length,
+)
 
-// page-change hook (for analytics / later API pagination)
+/* =======================
+   Pagination hook
+======================= */
 function onPageChange(page: number) {
   console.log('Tables page →', page)
 }
 
-// --- status dialog logic ---
+/* =======================
+   Status Dialog (UI only)
+======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<TableRow | null>(null)
 const statusToUpdate = ref<TableStatus>('Available')
@@ -288,10 +247,12 @@ function confirmStatusUpdate() {
   if (!statusTarget.value) return
   statusTarget.value.status = statusToUpdate.value
   statusDialogVisible.value = false
-  // TODO: call API in real app
+  // TODO: hook to backend when OrderPlace status update API exists
 }
 
-// status → css class
+/* =======================
+   Status → CSS
+======================= */
 function statusClass(status: TableStatus) {
   return {
     'status-pill--new': status === 'Available',
@@ -301,15 +262,20 @@ function statusClass(status: TableStatus) {
   }
 }
 
-// navigate to order (if you have admin order route)
+/* =======================
+   Go to Order
+======================= */
 function goToOrder(row: TableRow) {
-  if (!row.currentOrder) return
   router.push({
-    name: 'admin-orders' /* or order details route */,
-    query: { focus: row.currentOrder },
+    name: 'admin-orders',
+    query: {
+      tableNo: row.name,
+    },
   })
 }
+
 </script>
+
 
 <!-- shared filters/status/button styles: same file used by Orders + Menu items -->
 <!-- <style src="@/styles/admin/orders-menu-common.css"></style> -->

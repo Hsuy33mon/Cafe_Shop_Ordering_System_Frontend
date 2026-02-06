@@ -169,6 +169,33 @@
   margin-top: 0.3rem; /* page-specific spacing */
 }
 
+.receipt-meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280; /* muted */
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  line-height: 1.6;
+}
+
+.receipt-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.receipt-value {
+  text-align: right;
+  color: #111827;
+}
+
+.receipt-row {
+  border-bottom: 1px dotted #e5e7eb;
+}
+
+
 /* back link button uses .btn-link from admin-common.css */
 
 /* responsive */
