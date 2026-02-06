@@ -102,21 +102,25 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const isAdminRoute = to.path.startsWith('/admin')
   const token = localStorage.getItem('token')
+  const isAdminRoute = to.path.startsWith('/admin')
+  const isLoginRoute = to.name === 'login' || to.path.startsWith('/login')
 
   if (isAdminRoute && !token) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  if (to.name === 'login' && token) {
-    return { name: 'admin-dashboard' }
+  if (isLoginRoute) {
+    if (token) return { name: 'admin-dashboard' }
+    return true
   }
 
   if (!isAdminRoute) {
     const session = useOrderSessionStore()
     session.hydrate()
+
     if (to.name === 'start-order') return true
+
     if (!session.isReady) {
       return { name: 'start-order', query: { redirect: to.fullPath } }
     }

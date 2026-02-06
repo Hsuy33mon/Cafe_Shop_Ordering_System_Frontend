@@ -23,7 +23,6 @@ function mapFromApi(x: any): MenuItemApi {
   }
 }
 
-
 function axiosErrorMessage(e: any): string {
   const data = e?.response?.data
   return (

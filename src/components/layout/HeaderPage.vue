@@ -27,7 +27,6 @@ function closeMobile() {
   isMobileMenuOpen.value = false
 }
 
-// ✅ active helper
 function isActive(basePath: string, exact = true) {
   if (exact) return route.path === basePath
   return route.path === basePath || route.path.startsWith(basePath + '/')
@@ -57,19 +56,10 @@ function isActive(basePath: string, exact = true) {
           About
         </RouterLink>
 
-        <RouterLink
-          to="/products"
-          class="nav-link"
-          :class="{ 'nav-link--active': isActive('/products') }"
-        >
+        <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
           Menu
         </RouterLink>
 
-        <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
-          Shop
-        </RouterLink>
-
-        <!-- ✅ inclusive for /orders and /orders/:id -->
         <RouterLink
           to="/orders"
           class="nav-link"
@@ -126,18 +116,11 @@ function isActive(basePath: string, exact = true) {
           >About</RouterLink
         >
         <RouterLink
-          to="/products"
-          class="mobile-link"
-          :class="{ 'mobile-link--active': isActive('/products') }"
-          @click="closeMobile"
-          >Menu</RouterLink
-        >
-        <RouterLink
           to="/shop"
           class="mobile-link"
           :class="{ 'mobile-link--active': isActive('/shop') }"
           @click="closeMobile"
-          >Shop</RouterLink
+          >Menu</RouterLink
         >
         <RouterLink
           to="/orders"

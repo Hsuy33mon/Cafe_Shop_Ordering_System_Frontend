@@ -28,18 +28,18 @@
             />
           </div>
 
-            <div class="category-tabs">
-              <button
-                v-for="category in allCategories"
-                :key="category.value"
-                type="button"
-                class="tab-btn"
-                :class="{ 'tab-btn--active': selectedCategory === category.value }"
-                @click="selectedCategory = category.value"
-              >
-                {{ category.label }}
-              </button>
-            </div>
+          <div class="category-tabs">
+            <button
+              v-for="category in allCategories"
+              :key="category.value"
+              type="button"
+              class="tab-btn"
+              :class="{ 'tab-btn--active': selectedCategory === category.value }"
+              @click="selectedCategory = category.value"
+            >
+              {{ category.label }}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -53,23 +53,22 @@
             :style="{ '--stagger': index }"
           >
             <div
-  class="item-media"
-  :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
-  @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)"
->
-  <img :src="item.imageUrl" :alt="item.name" class="item-image" />
+              class="item-media"
+              :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
+              @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)"
+            >
+              <img :src="item.imageUrl" :alt="item.name" class="item-image" />
 
-  <!-- TAG BADGE (Season, Winter, etc.) -->
-  <div v-if="item.badge && item.status !== 'OUT_OF_STOCK'" class="item-badge">
-    {{ item.badge }}
-  </div>
+              <!-- TAG BADGE (Season, Winter, etc.) -->
+              <div v-if="item.badge && item.status !== 'OUT_OF_STOCK'" class="item-badge">
+                {{ item.badge }}
+              </div>
 
-  <!-- OUT OF STOCK OVERLAY -->
-  <div v-if="item.status === 'OUT_OF_STOCK'" class="out-of-stock-overlay">
-    Out of stock
-  </div>
-</div>
-
+              <!-- OUT OF STOCK OVERLAY -->
+              <div v-if="item.status === 'OUT_OF_STOCK'" class="out-of-stock-overlay">
+                Out of stock
+              </div>
+            </div>
 
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>
@@ -108,15 +107,15 @@
                   @click="toggleCart(item)"
                 > -->
                 <button
-                type="button"
-                class="item-btn"
-                :class="{
+                  type="button"
+                  class="item-btn"
+                  :class="{
                     'item-btn--added': isInCart(item.id),
-                    'item-btn--disabled': item.status === 'OUT_OF_STOCK'
-                }"
-                :disabled="item.status === 'OUT_OF_STOCK'"
-                @click="item.status !== 'OUT_OF_STOCK' && toggleCart(item)">
-
+                    'item-btn--disabled': item.status === 'OUT_OF_STOCK',
+                  }"
+                  :disabled="item.status === 'OUT_OF_STOCK'"
+                  @click="item.status !== 'OUT_OF_STOCK' && toggleCart(item)"
+                >
                   <span>
                     {{ isInCart(item.id) ? 'Added' : 'Add to bag' }}
                   </span>
@@ -195,10 +194,10 @@ const { items: menuItems } = storeToRefs(menuItemsStore)
 const { items: categories } = storeToRefs(categoriesStore)
 
 onMounted(() => {
-  if(!menuItems.value.length){
+  if (!menuItems.value.length) {
     menuItemsStore.fetchAll()
   }
-  if(!categories.value.length){
+  if (!categories.value.length) {
     categoriesStore.fetchAll()
   }
 })
@@ -207,7 +206,7 @@ const items = computed<ShopItem[]>(() =>
   menuItems.value
     .filter((i) => i.status !== 'INACTIVE')
     .map((i) => {
-      const firstSize = i.sizes?.[0]   // 👈 from backend
+      const firstSize = i.sizes?.[0] // 👈 from backend
       const firstTag = i.tags?.[0]
 
       return {
@@ -218,25 +217,21 @@ const items = computed<ShopItem[]>(() =>
         description: i.shortDesc || 'CafeShop special',
         badge: firstTag?.name,
 
-        size: firstSize
-          ? `${firstSize.shortName ? ` ${firstSize.shortName}` : ''}`
-          : undefined,
+        size: firstSize ? `${firstSize.shortName ? ` ${firstSize.shortName}` : ''}` : undefined,
 
         imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
         rating: 4.5,
         status: i.status,
       }
-    })
+    }),
 )
-
 
 const allCategories = computed(() => [
   { value: 'all', label: 'All items' },
-  ...categories.value
-    .map((c) => ({
-      value: c.slug,
-      label: c.name,
-    })),
+  ...categories.value.map((c) => ({
+    value: c.slug,
+    label: c.name,
+  })),
 ])
 
 function goToDetails(id: number) {
@@ -320,8 +315,6 @@ function starType(rating: number, starNumber: number): 'full' | 'half' | 'empty'
   if (r >= starNumber - 0.5) return 'half'
   return 'empty'
 }
-
-
 </script>
 
 <style scoped src="@/styles/customer/shop-item.css"></style>

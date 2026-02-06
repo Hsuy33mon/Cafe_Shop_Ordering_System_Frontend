@@ -1,6 +1,6 @@
 <template>
   <div class="pd-page">
-    <main  v-if="product" class="pd-main">
+    <main v-if="product" class="pd-main">
       <!-- TOP BREADCRUMB -->
       <section class="cs-container pd-breadcrumb">
         <span class="pd-breadcrumb-text">
@@ -333,8 +333,8 @@ function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
 
-onMounted(()=>{
-  menuItemsStore.fetchById(productId);
+onMounted(() => {
+  menuItemsStore.fetchById(productId)
 })
 
 const product = computed(() => {
@@ -360,7 +360,6 @@ const product = computed(() => {
   }
 })
 
-
 const ingredientRows = computed<IngredientRow[]>(() => {
   const item = menuItemsStore.currentItem
   if (!item?.ingredients?.length) return []
@@ -384,7 +383,6 @@ const ingredientRows = computed<IngredientRow[]>(() => {
 
   return rows
 })
-
 
 // const product = computed(() => allProducts.find((p) => p.id === productId) ?? allProducts[0])
 
@@ -433,7 +431,6 @@ const tabList = [
 // Bought-together mock
 const boughtTogether = computed<Product[]>(() => [])
 
-
 // --- Reviews state ---
 const reviews = ref<Review[]>([
   {
@@ -462,7 +459,6 @@ const averageRating = computed(() => {
   const sum = reviews.value.reduce((acc, r) => acc + r.rating, 0)
   return sum / reviews.value.length
 })
-
 
 function submitReview() {
   if (!newReviewName.value.trim() || !newReviewComment.value.trim()) {

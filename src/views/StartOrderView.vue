@@ -184,10 +184,13 @@ onMounted(() => {
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
 
-  session.hydrate()
+  session.clear()
 
-  const hasRedirect = typeof route.query.redirect === 'string' && route.query.redirect.length > 0
-  if (!hasRedirect) session.clear()
+  customerName.value = ''
+  orderType.value = 'TABLE'
+  placeNumber.value = ''
+  errorMsg.value = ''
+  manualMode.value = false
 })
 
 onBeforeUnmount(() => {
@@ -197,7 +200,9 @@ onBeforeUnmount(() => {
 
 const placeLabel = computed(() => (orderType.value === 'ROOM' ? 'Room number' : 'Table number'))
 const placeInputId = computed(() => (orderType.value === 'ROOM' ? 'room' : 'table'))
-const placeInputIdMobile = computed(() => (orderType.value === 'ROOM' ? 'roomMobile' : 'tableMobile'))
+const placeInputIdMobile = computed(() =>
+  orderType.value === 'ROOM' ? 'roomMobile' : 'tableMobile',
+)
 
 const canContinueDesktop = computed(() => {
   return customerName.value.trim().length >= 2 && placeNumber.value.trim().length >= 1
@@ -250,7 +255,6 @@ async function openScanner() {
   errorMsg.value = ''
   scanning.value = true
 
-  // ✅ wait for modal + video to mount
   await nextTick()
 
   if (!videoEl.value) {
@@ -259,13 +263,11 @@ async function openScanner() {
     return
   }
 
-  // clean previous session if any
   stopScanner()
 
   reader = new BrowserMultiFormatReader()
 
   try {
-    // ✅ request permission first (fix iOS + avoids empty device list)
     activeStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' } },
       audio: false,
