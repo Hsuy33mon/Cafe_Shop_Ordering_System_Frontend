@@ -64,7 +64,7 @@
           <header class="pd-header">
             <div class="pd-title-row">
               <h1 class="pd-title">{{ product?.name }}</h1>
-              <div class="pd-price-pill">฿{{ product.price }}</div>
+              <div class="pd-price-pill">฿{{ displayPrice }}</div>
             </div>
 
             <div class="pd-rating-row">
@@ -97,6 +97,24 @@
               </div>
             </article>
           </section>
+
+          <!-- SIZE SELECTOR -->
+          <div v-if="menuItemsStore.currentItem?.sizes?.length" class="pd-size-section">
+            <p class="pd-size-title">Size</p>
+
+            <div class="pd-size-options">
+              <button
+                v-for="size in menuItemsStore.currentItem.sizes"
+                :key="size.size_id"
+                type="button"
+                class="pd-size-btn"
+                :class="{ 'pd-size-btn--active': size.size_id === selectedSizeId }"
+                @click="selectedSizeId = size.size_id"
+              >
+                {{ size.shortName }}
+              </button>
+            </div>
+          </div>
 
           <!-- ACTIONS: QTY + ADD TO CART -->
           <footer class="pd-actions">
@@ -303,7 +321,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 const router = useRouter()
@@ -335,6 +353,36 @@ function goToDetails(id: number) {
 
 onMounted(() => {
   menuItemsStore.fetchById(productId)
+})
+
+const selectedSizeId = ref<number | null>(null)
+
+const cheapestSize = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item?.sizes?.length) return null
+
+  return item.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
+})
+
+watch(
+  cheapestSize,
+  (size) => {
+    if (size) {
+      selectedSizeId.value = size.size_id
+    }
+  },
+  { immediate: true },
+)
+
+const selectedSize = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item || !selectedSizeId.value) return null
+
+  return item.sizes.find((s) => s.size_id === selectedSizeId.value) ?? null
+})
+
+const displayPrice = computed(() => {
+  return selectedSize.value?.sellPrice ?? 0
 })
 
 const product = computed(() => {
@@ -417,7 +465,14 @@ function decreaseQty() {
 
 function toggleCart() {
   isInCart.value = !isInCart.value
-  // later: call your real cart store / API here
+  if (!selectedSize.value) return
+
+  console.log({
+    productId: product.value.id,
+    sizeId: selectedSize.value.size_id,
+    price: selectedSize.value.sellPrice,
+    qty: quantity.value,
+  })
 }
 
 // Tabs

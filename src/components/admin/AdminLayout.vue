@@ -29,10 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import AdminFooter from '@/components/admin/AdminFooter.vue'
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 import AdminTopbar from '@/components/admin/AdminTopbar.vue'
-import AdminFooter from '@/components/admin/AdminFooter.vue'
+import { ref } from 'vue'
 
 type SidebarItem = {
   key: string

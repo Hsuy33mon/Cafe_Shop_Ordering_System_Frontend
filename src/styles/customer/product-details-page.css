@@ -627,3 +627,31 @@
   object-fit: cover;
   display: block;
 }
+
+.pd-size-section {
+  margin: 12px 0;
+}
+
+.pd-size-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.pd-size-options {
+  display: flex;
+  gap: 8px;
+}
+
+.pd-size-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pd-size-btn--active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}

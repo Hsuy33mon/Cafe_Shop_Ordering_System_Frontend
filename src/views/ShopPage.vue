@@ -206,18 +206,20 @@ const items = computed<ShopItem[]>(() =>
   menuItems.value
     .filter((i) => i.status !== 'INACTIVE')
     .map((i) => {
-      const firstSize = i.sizes?.[0] // 👈 from backend
+      const cheapestSize = i.sizes?.length
+        ? i.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
+        : null
       const firstTag = i.tags?.[0]
 
       return {
         id: i.id,
         name: i.name,
         category: i.category.toLowerCase(),
-        price: i.price,
+        price: cheapestSize?.sellPrice ?? i.price,
         description: i.shortDesc || 'CafeShop special',
         badge: firstTag?.name,
 
-        size: firstSize ? `${firstSize.shortName ? ` ${firstSize.shortName}` : ''}` : undefined,
+        size: cheapestSize?.shortName ? `Size ${cheapestSize.shortName}` : undefined,
 
         imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
         rating: 4.5,
