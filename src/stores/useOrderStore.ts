@@ -16,6 +16,15 @@ export type OrderItem = {
   unitPrice: number
   total: number
   note?: string
+  orderIngredients?: OrderIngredient[]
+}
+
+export type OrderIngredient = {
+  id: number
+  ingredientId: number
+  ingredientName: string
+  qty: number
+  note?: string | null
 }
 
 export type Order = {
@@ -49,7 +58,7 @@ function mapFromApi(x: any): Order {
     customer: x.customerName,
     channel: 'Cafe',
     status: x.status,
-    paymentStatus: 'Unpaid',
+    paymentStatus: x.paymentStatus ?? 'UNPAID',
     customerNote: x.note,
     items: [
       {
@@ -59,6 +68,14 @@ function mapFromApi(x: any): Order {
         unitPrice: Number(x.unitPrice),
         total: Number(x.totalPrice),
         note: x.note,
+        orderIngredients: Array.isArray(x.orderIngredients) ? x.orderIngredients.map((oi: any) => ({
+          id: oi.id,
+          ingredientId: oi.ingredientId,
+          ingredientName: oi.ingredientName,
+          qty: Number(oi.qty),
+          note: oi.note,
+        }))
+      : [],
       },
     ],
     subtotal: Number(x.totalPrice),
@@ -117,26 +134,57 @@ export const useOrdersStore = defineStore('orders', {
         this.loading = false
       }
     },
+    async updateOrderItem(orderId: number, itemId: number, payload: any) {
+  await http.put(`/api/admin/orders/${orderId}/items/${itemId}`, payload)
+},
+async update(
+  id: number,
+  payload: {
+    status?: OrderStatus
+    paymentStatus?: string
+    paymentType?: string
+  },
+) {
+  this.loading = true
+  this.error = null
+  try {
+    const res = await http.put(`/api/admin/orders/${id}`, payload)
 
-    async update(id: number, payload: { status?: OrderStatus }) {
-      this.loading = true
-      this.error = null
-      try {
-        const res = await http.put(`/api/admin/orders/${id}`, payload)
+    const updated = mapFromApi(res.data)
 
-        const updated = mapFromApi(res.data)
-        const idx = this.items.findIndex((x) => x.id === id)
-        if (idx !== -1) this.items[idx] = updated
-        if (this.currentOrder?.id === id) this.currentOrder = updated
+    const idx = this.items.findIndex((x) => x.id === id)
+    if (idx !== -1) this.items[idx] = updated
+    if (this.currentOrder?.id === id) this.currentOrder = updated
 
-        return res.data
-      } catch (e: any) {
-        this.error = axiosErrorMessage(e)
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
+    return res.data
+  } catch (e: any) {
+    this.error = axiosErrorMessage(e)
+    throw e
+  } finally {
+    this.loading = false
+  }
+},
+
+
+    // async update(id: number, payload: { status?: OrderStatus }) {
+    //   this.loading = true
+    //   this.error = null
+    //   try {
+    //     const res = await http.put(`/api/admin/orders/${id}`, payload)
+
+    //     const updated = mapFromApi(res.data)
+    //     const idx = this.items.findIndex((x) => x.id === id)
+    //     if (idx !== -1) this.items[idx] = updated
+    //     if (this.currentOrder?.id === id) this.currentOrder = updated
+
+    //     return res.data
+    //   } catch (e: any) {
+    //     this.error = axiosErrorMessage(e)
+    //     throw e
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
 
     async remove(id: number) {
       this.loading = true

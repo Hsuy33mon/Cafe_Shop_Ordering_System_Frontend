@@ -203,3 +203,48 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------- INGREDIENTS TABLE ---------- */
+
+.ingredients-wrapper {
+  padding: 0;
+  background: #fafafa;
+}
+
+/* full width like items */
+.ingredients-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* header style (match items) */
+.ingredients-table thead th {
+  text-align: left;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* body cells */
+.ingredients-table tbody td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #111827;
+}
+
+/* last row border cleanup */
+.ingredients-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* numeric columns alignment */
+.ingredients-table th:nth-child(3),
+.ingredients-table td:nth-child(3),
+.ingredients-table th:nth-child(5),
+.ingredients-table td:nth-child(5) {
+  text-align: right;
+}

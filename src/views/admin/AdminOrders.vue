@@ -75,7 +75,7 @@
       </template>
 
       <template #cell-actions="{ row }">
-        <button class="btn-link" @click="openStatusDialog(row)">Update</button>
+        <!-- <button class="btn-link" @click="openStatusDialog(row)">Update</button> -->
         <button class="btn-link btn-link--danger" @click="cancelOrder(row)">Cancel</button>
       </template>
     </AdminTable>

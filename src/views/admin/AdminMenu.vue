@@ -109,7 +109,6 @@ const productColumns: TableColumn[] = [
   { key: 'price', label: 'Price (฿)', align: 'right', width: '120px' },
   { key: 'status', label: 'Status', width: '120px' },
   { key: 'tags', label: 'Tags' },
-  { key: 'updatedAt', label: 'Updated' },
   { key: 'actions', label: '', align: 'right', width: '140px' },
 ]
 

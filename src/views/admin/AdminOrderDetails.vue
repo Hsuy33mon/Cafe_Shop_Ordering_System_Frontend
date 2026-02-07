@@ -6,11 +6,6 @@
       <div class="order-header-left">
         <button class="btn-link" @click="goBack">← Back to orders</button>
         <h1 class="order-title">Order #{{ orderId }}</h1>
-        <!-- <p class="order-subtitle" v-if="order">
-          {{ order.date }} · {{ order.time }} · {{ order.channel }} ·
-          {{ order.customer }}
-        </p> -->
-
         <div class="order-subtitle receipt-meta" v-if="order">
           <div class="receipt-row">
             <span class="receipt-label">Date</span>
@@ -64,22 +59,45 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in order.items" :key="item.name">
-              <td>
-                <div class="item-name">{{ item.name }}</div>
-                <div v-if="item.note" class="item-note">
-                  {{ item.note }}
-                </div>
-              </td>
-              <td>
-                <span v-if="item.size" class="item-size">
-                  {{ item.size }}
-                </span>
-              </td>
-              <td class="col-price">{{ item.unitPrice }}</td>
-              <td class="col-qty">{{ item.quantity }}</td>
-              <td class="col-total">{{ item.total }}</td>
-            </tr>
+            <template v-for="item in order.items" :key="item.id">
+              <tr>
+                <td>
+                  <div class="item-name">{{ item.name }}</div>
+                </td>
+                <td>
+                  <span class="item-size">{{ item.size || '-' }}</span>
+                </td>
+                <td class="col-price">{{ item.unitPrice }}</td>
+                <td class="col-qty">{{ item.quantity }}</td>
+                <td class="col-total">{{ item.total }}</td>
+              </tr>
+              <h2 class="panel-title">Ingredients</h2>
+              <tr v-if="item.orderIngredients?.length">
+                <td colspan="5" class="ingredients-wrapper">
+                  <table class="ingredients-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Price (฿)</th>
+                        <th>Note</th>
+                        <th>Qty</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="ing in item.orderIngredients" :key="ing.id">
+                        <td>{{ ing.ingredientName }}</td>
+                        <td>{{ getIngredientAmount(item, ing.ingredientId) }}</td>
+                        <td>{{ getIngredientPrice(item, ing.ingredientId) }}</td>
+                        <td>{{ ing.note || '-' }}</td>
+                        <td>{{ ing.qty }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </template>
+
           </tbody>
         </table>
       </article>
@@ -91,22 +109,26 @@
           <h2 class="panel-title">Summary</h2>
 
           <dl class="summary-list">
-            <div class="summary-row">
-              <dt>Subtotal</dt>
-              <dd>฿{{ order.subtotal }}</dd>
-            </div>
-            <div class="summary-row">
-              <dt>Service charge</dt>
-              <dd>฿{{ order.serviceCharge }}</dd>
-            </div>
-            <div class="summary-row">
-              <dt>Tax</dt>
-              <dd>฿{{ order.tax }}</dd>
-            </div>
             <div class="summary-row summary-row--total">
-              <dt>Total</dt>
+              <dt>Subtotal</dt>
               <dd>฿{{ order.total }}</dd>
             </div>
+
+            <div class="summary-row">
+              <dt>Items</dt>
+              <dd>฿{{ itemsTotal }}</dd>
+            </div>
+
+            <div class="summary-row">
+              <dt>Ingredients</dt>
+              <dd>฿{{ ingredientsTotal }}</dd>
+            </div>
+
+            <div class="summary-row summary-row--total">
+              <dt>Total</dt>
+              <dd>฿{{ grandTotal }}</dd>
+            </div>
+
           </dl>
         </article>
 
@@ -118,6 +140,8 @@
           </p>
         </article>
 
+
+
         <!-- STATUS / PAYMENT UPDATE -->
         <article class="panel order-manage-panel">
           <h2 class="panel-title">Status & payment</h2>
@@ -126,21 +150,33 @@
             <span class="manage-label">Order status</span>
             <select v-model="editStatus" class="manage-select">
               <option v-for="opt in statusOptions" :key="opt" :value="opt">
-                {{ opt }}
+                {{ STATUS_LABELS[opt] }}
               </option>
+
             </select>
           </label>
 
           <label class="manage-field">
-            <span class="manage-label">Payment status / type</span>
+            <span class="manage-label">Payment status</span>
             <select v-model="editPaymentStatus" class="manage-select">
-              <option v-for="opt in paymentStatusOptions" :key="opt" :value="opt">
-                {{ opt }}
-              </option>
+              <option value="UNPAID">Unpaid</option>
+              <option value="PAID">Paid</option>
             </select>
           </label>
 
-          <button class="manage-btn-primary" @click="applyOrderUpdates">Update order</button>
+          <label class="manage-field">
+            <span class="manage-label">Payment type</span>
+            <select v-model="editPaymentType" class="manage-select" :disabled="editPaymentStatus === 'UNPAID'">
+              <option value="CASH">Cash</option>
+              <option value="CARD">Card</option>
+              <option value="QR">QR</option>
+            </select>
+          </label>
+
+          <button class="manage-btn-primary" @click="applyOrderUpdate">
+            Update order
+          </button>
+
 
           <p v-if="lastUpdateMessage" class="manage-hint">
             {{ lastUpdateMessage }}
@@ -152,9 +188,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 /* =======================
    Router & Store
@@ -162,6 +198,23 @@ import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
 const route = useRoute()
 const router = useRouter()
 const ordersStore = useOrdersStore()
+
+const itemsTotal = computed(() =>
+  order.value?.items.reduce(
+    (sum: number, item: any) => sum + item.total,
+    0,
+  ) || 0,
+)
+
+
+const ingredientsTotal = computed(() =>
+  order.value?.items.reduce(
+    (sum: number, item: any) => sum + ingredientTotalForItem(item),
+    0,
+  ) || 0,
+)
+
+const grandTotal = computed(() => itemsTotal.value + ingredientsTotal.value)
 
 const orderId = computed(() => Number(route.params.id))
 
@@ -177,42 +230,72 @@ const order = computed(() => ordersStore.currentOrder)
 /* =======================
    Payment (frontend-only for now)
 ======================= */
-type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
+type PaymentStatus = 'UNPAID' | 'PAID'
+type PaymentType = 'CASH' | 'CARD' | 'QR'
 
-const paymentStatusOptions: PaymentStatus[] = ['Unpaid', 'Paid (Cash)', 'Paid (Card)', 'Paid (QR)']
+// const paymentStatusOptions: PaymentStatus[] = ['UNPAID', 'PAID']
+// const paymentTypeOptions: PaymentType[] = ['CASH', 'CARD', 'QR']
+
 
 /* =======================
    Status Update Form
 ======================= */
-const statusOptions: OrderStatus[] = ['PENDING', 'CONFIRMED', 'PREPARING', 'SERVED', 'CANCELLED']
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  PREPARING: 'Preparing',
+  READY: 'Ready to serve',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+}
+const statusOptions: OrderStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'PREPARING',
+  'READY',
+  'COMPLETED',
+  'CANCELLED',
+]
+
 
 const editStatus = ref<OrderStatus>('PENDING')
-const editPaymentStatus = ref<PaymentStatus>('Unpaid')
 const lastUpdateMessage = ref('')
+const editPaymentStatus = ref<PaymentStatus>('UNPAID')
+const editPaymentType = ref<PaymentType>('CASH')
 
-watch(
-  order,
-  (o) => {
-    if (!o) return
-    editStatus.value = o.status
-    editPaymentStatus.value = o.paymentStatus
-    lastUpdateMessage.value = ''
-  },
-  { immediate: true },
-)
+
+watch(order, (o) => {
+  if (!o) return
+
+  editStatus.value = o.status
+  editPaymentStatus.value = o.paymentStatus
+  // ✅ only set payment type if paid
+  editPaymentType.value = 'CASH'
+})
 
 /* =======================
    Update Order (API)
 ======================= */
-async function applyOrderUpdates() {
+async function applyOrderUpdate() {
   if (!order.value) return
 
-  await ordersStore.update(order.value.id, {
-    status: editStatus.value,
-  })
+  lastUpdateMessage.value = ''
 
-  lastUpdateMessage.value = 'Order updated successfully.'
+  try {
+    await ordersStore.update(order.value.id, {
+      status: editStatus.value,
+      paymentStatus: editPaymentStatus.value,
+      paymentType: editPaymentType.value,
+    })
+
+    lastUpdateMessage.value = 'Order updated successfully.'
+  } catch (e) {
+    console.error(e)
+    lastUpdateMessage.value = 'Failed to update order. Please try again.'
+  }
 }
+
+
 
 /* =======================
    Navigation
@@ -228,10 +311,38 @@ function statusClass(status: OrderStatus) {
   return {
     'status-pill--new': status === 'PENDING',
     'status-pill--prep': status === 'PREPARING',
-    'status-pill--ready': status === 'SERVED',
-    'status-pill--paid': status === 'CONFIRMED',
+    'status-pill--ready': status === 'READY',
+    'status-pill--paid': status === 'COMPLETED',
+    'status-pill--cancel': status === 'CANCELLED',
   }
 }
+
+
+function getIngredientAmount(item: any, ingredientId: number) {
+  return (
+    item.menuItem?.ingredients?.find((i: any) => i.id === ingredientId)
+      ?.amount || '-'
+  )
+}
+
+function getIngredientPrice(item: any, ingredientId: number) {
+  return (
+    item.menuItem?.ingredients?.find((i: any) => i.id === ingredientId)
+      ?.price || 0
+  )
+}
+
+function ingredientTotalForItem(item: any) {
+  if (!item.orderIngredients) return 0
+
+  return item.orderIngredients.reduce((sum: number, ing: any) => {
+    const price = getIngredientPrice(item, ing.ingredientId)
+    return sum + price * ing.qty
+  }, 0)
+}
+
+
+
 </script>
 
 <style scoped src="@/styles/admin/order-details.css"></style>

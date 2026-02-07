@@ -402,15 +402,14 @@ onMounted(async () => {
   form.tagIds = item.tags?.map((t: any) => t.id) ?? []
 
   // SIZES
-  sizes.value = item.sizes.length
-    ? item.sizes.map((s: any) => ({
-        id: Date.now() + Math.random(),
-        sizeId: s.size_id,
-        sellPrice: s.sellPrice,
-        originalPrice: s.originalPrice,
-        desc: s.description ?? '',
-      }))
-    : [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
+  sizes.value = item.sizes.map((s: any) => ({
+  id: Date.now() + Math.random(),
+  sizeId: s.id,
+  sellPrice: s.sellPrice,
+  originalPrice: s.originalPrice,
+  desc: s.description ?? '',
+}))
+
   // sizes.value = item.sizes.map((s: any) => ({
   //   id: s.id,
   //   sizeId: s.sizeId,

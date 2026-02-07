@@ -64,8 +64,7 @@
       <!-- Actions -->
       <template #cell-actions="{ row }">
         <div class="table-actions">
-          <button class="btn-link btn-link--primary" @click="openStatusDialog(row)">Update</button>
-
+          <button class="btn-link btn-link--primary" @click="openEditDialog(row)">Update</button>
           <button v-if="row.currentOrder" class="btn-link" @click="goToOrder(row)">
             View order
           </button>
@@ -73,31 +72,61 @@
       </template>
     </AdminTable>
 
-    <!-- STATUS UPDATE DIALOG -->
-    <div v-if="statusDialogVisible" class="modal-backdrop">
-      <div class="modal">
-        <h3 class="modal-title">Update table · {{ statusTarget?.name }}</h3>
+    <!-- EDIT TABLE DIALOG -->
+<div v-if="editDialogVisible" class="modal-backdrop">
+  <div class="modal modal--wide">
+    <h3 class="modal-title">Update table</h3>
 
-        <p class="modal-text">
-          Current status:
-          <strong>{{ statusTarget?.status }}</strong>
-        </p>
+    <label class="modal-label">
+      Table number
+      <input v-model="editForm.name" class="modal-input" />
+    </label>
 
-        <label class="modal-label">
-          New status
-          <select v-model="statusToUpdate" class="modal-select">
-            <option v-for="opt in statusOptions" :key="opt" :value="opt">
-              {{ opt }}
-            </option>
-          </select>
-        </label>
+    <label class="modal-label">
+      Area / zone
+      <input v-model="editForm.area" class="modal-input" />
+    </label>
 
-        <div class="modal-actions">
-          <button class="modal-btn modal-btn--primary" @click="confirmStatusUpdate">Update</button>
-          <button class="modal-btn" @click="closeStatusDialog">Cancel</button>
-        </div>
-      </div>
+    <label class="modal-label">
+      Seats
+      <input
+        v-model.number="editForm.capacity"
+        type="number"
+        min="1"
+        class="modal-input"
+      />
+    </label>
+
+    <label class="modal-label">
+      Status
+      <select v-model="editForm.status" class="modal-select">
+        <option v-for="opt in statusOptions" :key="opt" :value="opt">
+          {{ opt }}
+        </option>
+      </select>
+    </label>
+
+    <label class="modal-label">
+      Note
+      <textarea
+        v-model="editForm.note"
+        rows="3"
+        class="modal-textarea"
+        placeholder="Optional note for staff"
+      />
+    </label>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn--primary" @click="confirmEdit">
+        Save changes
+      </button>
+      <button class="modal-btn" @click="closeEditDialog">
+        Cancel
+      </button>
     </div>
+  </div>
+</div>
+
   </main>
 </template>
 
@@ -107,7 +136,21 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
 
-type TableStatus = 'Available' | 'Occupied' | 'Reserved' | 'Cleaning' | 'Out of service'
+type TableStatus = 'Active' | 'Inactive'
+const statusOptions: TableStatus[] = ['Active', 'Inactive']
+
+type TableEditForm = {
+  id: number
+  name: string
+  area: string
+  capacity: number
+  status: TableStatus
+  note?: string
+}
+
+const editDialogVisible = ref(false)
+const editForm = ref<TableEditForm | null>(null)
+
 
 type TableRow = {
   id: number
@@ -119,6 +162,47 @@ type TableRow = {
   since: string
   note?: string
 }
+
+function openEditDialog(row: TableRow) {
+  editForm.value = {
+    id: row.id,
+    name: row.name,
+    area: row.area,
+    capacity: row.capacity,
+    status: row.status,
+    note: row.note ?? '',
+  }
+  editDialogVisible.value = true
+}
+
+function closeEditDialog() {
+  editDialogVisible.value = false
+  editForm.value = null
+}
+
+function toApiStatus(status: TableStatus): OrderPlaceStatus {
+  return status === 'Active' ? 'ACTIVE' : 'INACTIVE'
+}
+
+
+async function confirmEdit() {
+  if (!editForm.value) return
+
+  try {
+    await orderPlacesStore.updateOrderPlace(editForm.value.id, {
+      no: editForm.value.name,
+      type: editForm.value.area,
+      seat: editForm.value.capacity,
+      status: toApiStatus(editForm.value.status),
+      description: editForm.value.note,
+    })
+
+    editDialogVisible.value = false
+  } catch (e) {
+    alert(orderPlacesStore.error || 'Update failed')
+  }
+}
+
 
 /* =======================
    Router & Store
@@ -148,24 +232,22 @@ const tableColumns: TableColumn[] = [
    Map backend → UI rows
 ======================= */
 const tables = computed<TableRow[]>(() =>
-  orderPlacesStore.items.map((p) => {
-    const activeOrder = p.activeOrders?.[0]
-    const occupied = !!activeOrder
-
-    return {
+  orderPlacesStore.items
+    .filter(p => p.status !== 'DELETED')
+    .map((p) => ({
       id: p.id,
       name: p.no,
       area: p.type,
       capacity: p.seat ?? 0,
-      status: occupied ? 'Occupied' : p.status === 'ACTIVE' ? 'Available' : 'Out of service',
-      currentOrder: activeOrder?.id ?? null,
-      since: activeOrder?.createdAt
-        ? new Date(activeOrder.createdAt).toTimeString().slice(0, 5)
+      status: p.status === 'ACTIVE' ? 'Active' : 'Inactive',
+      currentOrder: p.activeOrders?.[0]?.id ?? null,
+      since: p.activeOrders?.[0]?.createdAt
+        ? new Date(p.activeOrders[0].createdAt).toTimeString().slice(0, 5)
         : '-',
       note: p.description,
-    }
-  }),
+    }))
 )
+
 
 /* =======================
    Filters
@@ -180,14 +262,6 @@ const areaOptions = computed(() => {
   tables.value.forEach((t) => set.add(t.area))
   return Array.from(set).sort()
 })
-
-const statusOptions: TableStatus[] = [
-  'Available',
-  'Occupied',
-  'Reserved',
-  'Cleaning',
-  'Out of service',
-]
 
 const filteredTables = computed(() => {
   const s = search.value.trim().toLowerCase()
@@ -250,12 +324,11 @@ function confirmStatusUpdate() {
 ======================= */
 function statusClass(status: TableStatus) {
   return {
-    'status-pill--new': status === 'Available',
-    'status-pill--prep': status === 'Reserved' || status === 'Cleaning',
-    'status-pill--ready': status === 'Occupied',
-    'status-pill--paid': status === 'Out of service',
+    'status-pill--active': status === 'Active',
+    'status-pill--inactive': status === 'Inactive',
   }
 }
+
 
 /* =======================
    Go to Order

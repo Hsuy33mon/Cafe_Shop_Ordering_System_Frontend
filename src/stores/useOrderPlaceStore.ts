@@ -4,6 +4,14 @@ import type { Order } from './useOrderStore'
 
 export type OrderPlaceStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED'
 
+export type UpdateOrderPlacePayload = {
+  no: string
+  type: string
+  seat?: number
+  status: OrderPlaceStatus
+  description?: string
+}
+
 export type OrderPlace = {
   id: number
   no: string
@@ -71,5 +79,29 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
         this.loading = false
       }
     },
+async updateOrderPlace(id: number, payload: UpdateOrderPlacePayload) {
+  this.loading = true
+  this.error = null
+
+  try {
+    const res = await http.put(`/api/admin/order-places/${id}`, payload)
+    const updated = mapFromApi(res.data)
+
+    const index = this.items.findIndex(i => i.id === id)
+    if (index !== -1) {
+      this.items[index] = {
+        ...this.items[index],      // 👈 keep activeOrders
+        ...updated,                // 👈 override editable fields
+        activeOrders: this.items[index].activeOrders,
+      }
+    }
+  } catch (e: any) {
+    this.error = axiosErrorMessage(e)
+    throw e
+  } finally {
+    this.loading = false
+  }
+}
+
   },
 })

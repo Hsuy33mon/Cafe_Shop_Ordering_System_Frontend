@@ -4,24 +4,29 @@ import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
 type MenuItemApi = any
 
-function mapFromApi(x: any): MenuItemApi {
-  const firstSize = x.sizes?.[0]
-
+function mapFromApi(x: any) {
   return {
     id: Number(x.id),
-    sku: String(x.sku ?? ''),
-    name: String(x.name ?? ''),
-    category: String(x.categoryName ?? ''),
-    price: Number(firstSize?.sellPrice ?? 0),
+    sku: x.sku ?? '',
+    name: x.name ?? '',
+
+    // ✅ REQUIRED FOR EDIT FORM
+    categoryId: x.categoryId,
+    availableIn: x.availableIn,
     status: x.status,
-    availability: x.availableIn,
+    internalNote: x.internalNote ?? '',
+    shortDesc: x.shortDesc ?? '',
+
+    // for table
+    category: x.categoryName ?? '',
+    price: x.sizes?.[0]?.sellPrice ?? 0,
+
     tags: Array.isArray(x.tags) ? x.tags : [],
-    shortDesc: x.shortDesc,
-    sizes: x.sizes,
+    sizes: x.sizes ?? [],
     ingredients: x.ingredients ?? [],
-    updatedAt: String(x.updatedAt ?? ''),
   }
 }
+
 
 function axiosErrorMessage(e: any): string {
   const data = e?.response?.data
@@ -76,14 +81,16 @@ export const useMenuItemsStore = defineStore('menuItems', {
     },
 
     async fetchById(id: number) {
-      try {
-        const res = await http.get(`/api/admin/menu-items/${id}`)
-        this.currentItem = mapFromApi(res.data)
-      } catch (e: any) {
-        this.error = axiosErrorMessage(e)
-        throw e
-      }
-    },
+  try {
+    const res = await http.get(`/api/admin/menu-items/${id}`)
+    const item = mapFromApi(res.data)
+    this.currentItem = item
+    return item // ✅ THIS WAS MISSING
+  } catch (e: any) {
+    this.error = axiosErrorMessage(e)
+    throw e
+  }
+},
 
     async create(payload: any) {
       this.loading = true
