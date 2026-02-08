@@ -125,12 +125,13 @@
 
             <div class="ingredients-table">
               <div class="ingredients-header">
-                <span>Size</span>
-                <span>Sell price (฿)</span>
-                <span>Original price (฿)</span>
-                <span>Note</span>
-                <span></span>
-              </div>
+  <span>Ingredient</span>
+  <span>Amount</span>
+  <span>Price (฿)</span>
+  <span>Note</span>
+  <span></span>
+</div>
+
 
               <div v-for="(row, index) in sizes" :key="row.id" class="sizes-row">
                 <select v-model="row.sizeId" class="field-input" required>
@@ -456,13 +457,24 @@ function setActiveImage(index: number) {
 
 /* ---------- INGREDIENTS ---------- */
 
-type IngredientRow = { id: number; name: string; amount: string; note: string }
-const ingredients = ref<IngredientRow[]>([{ id: 1, name: '', amount: '', note: '' }])
+type IngredientRow = {
+  id: number
+  name: string
+  amount: string
+  price: number | null
+  note: string
+}
+
+const ingredients = ref<IngredientRow[]>([
+  { id: 1, name: '', amount: '', price: null, note: '' },
+])
+
 
 function addIngredientRow() {
   const id = Date.now() + Math.random()
-  ingredients.value.push({ id, name: '', amount: '', note: '' })
+  ingredients.value.push({ id, name: '', amount: '', price: null, note: '' })
 }
+
 
 function removeIngredientRow(index: number) {
   if (ingredients.value.length === 1) return
@@ -487,16 +499,12 @@ function normalizeSizeRows() {
 
 function normalizeIngredientRows() {
   return ingredients.value
+    .filter((r) => r.name.trim().length > 0)
     .map((r) => ({
       name: r.name.trim(),
-      amount: r.amount.trim(),
-      note: r.note.trim(),
-    }))
-    .filter((x) => x.name.length > 0)
-    .map((x) => ({
-      name: x.name,
-      amount: x.amount || null,
-      note: x.note || null,
+      amount: r.amount?.trim() || null,
+      price: r.price ?? null,
+      note: r.note?.trim() || null,
     }))
 }
 
