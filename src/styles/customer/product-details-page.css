@@ -655,3 +655,42 @@
   color: #fff;
   border-color: #111;
 }
+
+.pd-ingredients-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pd-ingredients-header,
+.pd-ingredients-row {
+  display: grid;
+  grid-template-columns: 32px 1.5fr 1fr 1fr;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.pd-ingredients-header {
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+
+.pd-ingredients-row {
+  background: #fafafa;
+  border-radius: 10px;
+}
+
+.pd-ing-name {
+  font-weight: 500;
+}
+
+.pd-ing-note {
+  color: #888;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.pd-ing-price {
+  font-weight: 600;
+}

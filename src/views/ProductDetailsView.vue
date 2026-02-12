@@ -155,22 +155,45 @@
         <!-- tab content -->
         <div class="pd-tab-panel">
           <!-- INGREDIENTS TABLE -->
-          <div v-if="activeTab === 'ingredients'" class="pd-spec-grid">
-            <div
-              v-for="row in ingredientRows"
-              :key="row.left.label + row.right.label"
-              class="pd-spec-row"
-            >
-              <div class="pd-spec-cell">
-                <span class="pd-spec-label">{{ row.left.label }}</span>
-                <span class="pd-spec-value">{{ row.left.value }}</span>
-              </div>
-              <div class="pd-spec-cell">
-                <span class="pd-spec-label">{{ row.right.label }}</span>
-                <span class="pd-spec-value">{{ row.right.value }}</span>
-              </div>
-            </div>
-          </div>
+          <div v-if="activeTab === 'ingredients'" class="pd-ingredients-table">
+  <!-- header -->
+  <div class="pd-ingredients-header">
+    <span></span>
+    <span>Name</span>
+    <span>Amount</span>
+    <span>Price</span>
+  </div>
+
+  <!-- rows -->
+  <div
+    v-for="ingredient in menuItemsStore.currentItem?.ingredients"
+    :key="ingredient.id"
+    class="pd-ingredients-row"
+  >
+    <!-- checkbox -->
+    <input
+      type="checkbox"
+      :disabled="!ingredient.active"
+      :checked="selectedIngredientIds.includes(ingredient.id)"
+      @change="toggleIngredient(ingredient.id)"
+    />
+
+    <!-- name + note -->
+    <div class="pd-ing-name">
+      {{ ingredient.name }}
+      <small v-if="ingredient.note" class="pd-ing-note">
+        ({{ ingredient.note }})
+      </small>
+    </div>
+
+    <!-- amount -->
+    <span>{{ ingredient.amount }}</span>
+
+    <!-- price -->
+    <span class="pd-ing-price">฿{{ ingredient.price.toFixed(2) }}</span>
+  </div>
+</div>
+
 
           <!-- PRODUCT DETAILS -->
           <div v-else-if="activeTab === 'details'" class="pd-text-panel">
@@ -327,6 +350,7 @@ import { useMenuItemsStore } from '../stores/useMenuItemStore'
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 
+
 type Product = {
   id: number
   name: string
@@ -356,6 +380,18 @@ onMounted(() => {
 })
 
 const selectedSizeId = ref<number | null>(null)
+const selectedIngredientIds = ref<number[]>([])
+
+function toggleIngredient(id: number) {
+  if (selectedIngredientIds.value.includes(id)) {
+    selectedIngredientIds.value = selectedIngredientIds.value.filter(
+      (x) => x !== id,
+    )
+  } else {
+    selectedIngredientIds.value.push(id)
+  }
+}
+
 
 const cheapestSize = computed(() => {
   const item = menuItemsStore.currentItem
@@ -365,6 +401,7 @@ const cheapestSize = computed(() => {
 })
 
 watch(
+
   cheapestSize,
   (size) => {
     if (size) {

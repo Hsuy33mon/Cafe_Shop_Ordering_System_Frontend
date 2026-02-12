@@ -44,26 +44,14 @@
               <label class="media-upload">
                 <span class="media-upload-title">Images</span>
                 <span class="media-upload-sub"> Click to choose or drop images (JPG / PNG) </span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  class="media-upload-input"
-                  @change="onImageSelect"
-                />
+                <input type="file" multiple accept="image/*" class="media-upload-input" @change="onImageSelect" />
               </label>
             </div>
 
             <!-- thumbnails -->
             <div v-if="images.length" class="media-thumbs">
-              <button
-                v-for="(img, index) in images"
-                :key="img.id"
-                type="button"
-                class="media-thumb"
-                :class="{ 'media-thumb--active': index === activeImageIndex }"
-                @click="setActiveImage(index)"
-              >
+              <button v-for="(img, index) in images" :key="img.id" type="button" class="media-thumb"
+                :class="{ 'media-thumb--active': index === activeImageIndex }" @click="setActiveImage(index)">
                 <img :src="img.url" alt="Thumbnail" />
               </button>
             </div>
@@ -73,37 +61,20 @@
           <div class="field field--row">
             <div class="field-group">
               <label class="field-label" for="sku">SKU</label>
-              <input
-                id="sku"
-                v-model="form.sku"
-                type="text"
-                class="field-input"
-                placeholder="e.g. DRK-006"
-              />
+              <input id="sku" v-model="form.sku" type="text" class="field-input" placeholder="e.g. DRK-006" />
             </div>
 
             <div class="field-group field-group--grow">
               <label class="field-label" for="name">Product name</label>
-              <input
-                id="name"
-                v-model="form.name"
-                type="text"
-                class="field-input"
-                placeholder="e.g. Salmon Salad"
-                required
-              />
+              <input id="name" v-model="form.name" type="text" class="field-input" placeholder="e.g. Salmon Salad"
+                required />
             </div>
           </div>
 
           <div class="field field--row">
             <div class="field-group field-group--grow">
               <label class="field-label" for="categoryId">Category</label>
-              <select
-                id="categoryId"
-                v-model="form.categoryId"
-                class="field-input field-select"
-                required
-              >
+              <select id="categoryId" v-model="form.categoryId" class="field-input field-select" required>
                 <option disabled :value="null">Select category</option>
 
                 <option v-for="c in categoryStore.items" :key="c.id" :value="c.id">
@@ -125,13 +96,12 @@
 
             <div class="ingredients-table">
               <div class="ingredients-header">
-  <span>Ingredient</span>
-  <span>Amount</span>
-  <span>Price (฿)</span>
-  <span>Note</span>
-  <span></span>
-</div>
-
+                <span>Size</span>
+                <span>Sell price (฿)</span>
+                <span>Original price (฿)</span>
+                <span>Note</span>
+                <span></span>
+              </div>
 
               <div v-for="(row, index) in sizes" :key="row.id" class="sizes-row">
                 <select v-model="row.sizeId" class="field-input" required>
@@ -142,39 +112,16 @@
                   </option>
                 </select>
 
-                <input
-                  v-model.number="row.sellPrice"
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="field-input field-input--right"
-                  placeholder="120"
-                  required
-                />
+                <input v-model.number="row.sellPrice" type="number" min="0" step="1"
+                  class="field-input field-input--right" placeholder="120" required />
 
-                <input
-                  v-model.number="row.originalPrice"
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="field-input field-input--right"
-                  placeholder="150"
-                />
+                <input v-model.number="row.originalPrice" type="number" min="0" step="1"
+                  class="field-input field-input--right" placeholder="150" />
 
-                <input
-                  v-model="row.desc"
-                  type="text"
-                  class="field-input"
-                  placeholder="e.g. Regular"
-                />
+                <input v-model="row.desc" type="text" class="field-input" placeholder="e.g. Regular" />
 
-                <button
-                  type="button"
-                  class="sizes-remove"
-                  @click="removeSizeRow(index)"
-                  :disabled="sizes.length === 1"
-                  title="Remove row"
-                >
+                <button type="button" class="sizes-remove" @click="removeSizeRow(index)" :disabled="sizes.length === 1"
+                  title="Remove row">
                   ✕
                 </button>
               </div>
@@ -185,13 +132,8 @@
 
           <div class="field">
             <label class="field-label" for="shortDesc">Short description</label>
-            <textarea
-              id="shortDesc"
-              v-model="form.shortDesc"
-              class="field-input field-textarea"
-              rows="3"
-              placeholder="Tomatoes, nori, feta cheese, mushrooms..."
-            ></textarea>
+            <textarea id="shortDesc" v-model="form.shortDesc" class="field-input field-textarea" rows="3"
+              placeholder="Tomatoes, nori, feta cheese, mushrooms..."></textarea>
           </div>
 
           <!-- INGREDIENTS -->
@@ -207,36 +149,24 @@
               <div class="ingredients-header">
                 <span>Ingredient</span>
                 <span>Amount</span>
+                <span>Price (฿)</span>
                 <span>Note</span>
                 <span></span>
               </div>
 
               <div v-for="(row, index) in ingredients" :key="row.id" class="ingredients-row">
-                <input
-                  v-model="row.name"
-                  type="text"
-                  class="field-input ingredients-input"
-                  placeholder="e.g. Salmon"
-                />
-                <input
-                  v-model="row.amount"
-                  type="text"
-                  class="field-input ingredients-input"
-                  placeholder="e.g. 1 pack"
-                />
-                <input
-                  v-model="row.note"
-                  type="text"
-                  class="field-input ingredients-input"
-                  placeholder="e.g. thin slices"
-                />
-                <button
-                  type="button"
-                  class="btn-icon"
-                  @click="removeIngredientRow(index)"
-                  :disabled="ingredients.length === 1"
-                  title="Remove row"
-                >
+                <input v-model="row.name" type="text" class="field-input ingredients-input"
+                  placeholder="e.g. Caramel" />
+
+                <input v-model="row.amount" type="text" class="field-input ingredients-input" placeholder="e.g. 1 pc" />
+
+                <input v-model.number="row.price" type="number" min="0" step="0.01"
+                  class="field-input field-input--right" placeholder="10" />
+
+                <input v-model="row.note" type="text" class="field-input ingredients-input" placeholder="e.g. melted" />
+
+                <button type="button" class="btn-icon" @click="removeIngredientRow(index)"
+                  :disabled="ingredients.length === 1">
                   ✕
                 </button>
               </div>
@@ -253,28 +183,16 @@
           <div class="field">
             <div class="field-label">Available in</div>
             <div class="chip-group">
-              <button
-                type="button"
-                class="chip"
-                :class="{ 'chip--active': form.availableIn === 'CAFE' }"
-                @click="form.availableIn = 'CAFE'"
-              >
+              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'CAFE' }"
+                @click="form.availableIn = 'CAFE'">
                 Cafe only
               </button>
-              <button
-                type="button"
-                class="chip"
-                :class="{ 'chip--active': form.availableIn === 'ROOM' }"
-                @click="form.availableIn = 'ROOM'"
-              >
+              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'ROOM' }"
+                @click="form.availableIn = 'ROOM'">
                 Room service only
               </button>
-              <button
-                type="button"
-                class="chip"
-                :class="{ 'chip--active': form.availableIn === 'BOTH' }"
-                @click="form.availableIn = 'BOTH'"
-              >
+              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'BOTH' }"
+                @click="form.availableIn = 'BOTH'">
                 Both
               </button>
             </div>
@@ -302,18 +220,10 @@
             <div v-if="tagStore.error" class="form-error">{{ tagStore.error }}</div>
 
             <div class="tag-picker">
-              <label
-                v-for="t in tagStore.items"
-                :key="t.id"
-                class="tag-pill"
-                :class="{ 'tag-pill--active': isTagSelected(t.id) }"
-              >
-                <input
-                  class="tag-pill-input"
-                  type="checkbox"
-                  :checked="isTagSelected(t.id)"
-                  @change="toggleTag(t.id)"
-                />
+              <label v-for="t in tagStore.items" :key="t.id" class="tag-pill"
+                :class="{ 'tag-pill--active': isTagSelected(t.id) }">
+                <input class="tag-pill-input" type="checkbox" :checked="isTagSelected(t.id)"
+                  @change="toggleTag(t.id)" />
                 {{ t.name }}
               </label>
             </div>
@@ -323,13 +233,8 @@
 
           <div class="field">
             <label class="field-label" for="internalNote">Internal note</label>
-            <textarea
-              id="internalNote"
-              v-model="form.internalNote"
-              class="field-input field-textarea"
-              rows="3"
-              placeholder="Kitchen / barista note, allergens, preparation tips…"
-            ></textarea>
+            <textarea id="internalNote" v-model="form.internalNote" class="field-input field-textarea" rows="3"
+              placeholder="Kitchen / barista note, allergens, preparation tips…"></textarea>
           </div>
 
           <div class="product-form-actions">
