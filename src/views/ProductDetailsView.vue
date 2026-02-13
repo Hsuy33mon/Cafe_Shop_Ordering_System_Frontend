@@ -64,7 +64,9 @@
           <header class="pd-header">
             <div class="pd-title-row">
               <h1 class="pd-title">{{ product?.name }}</h1>
-              <div class="pd-price-pill">฿{{ displayPrice }}</div>
+              <!-- <div class="pd-price-pill">฿{{ displayPrice }}</div> -->
+              <div class="pd-price-pill">฿{{ finalTotalPrice.toFixed(2) }}</div>
+
             </div>
 
             <div class="pd-rating-row">
@@ -347,8 +349,10 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
+import { useCartStore } from '../stores/useCartStore'
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
+const cartStore = useCartStore()
 
 
 type Product = {
@@ -363,10 +367,10 @@ type Product = {
   ratingCount: number
 }
 
-type IngredientRow = {
-  left: { label: string; value: string }
-  right: { label: string; value: string }
-}
+// type IngredientRow = {
+//   left: { label: string; value: string }
+//   right: { label: string; value: string }
+// }
 
 const route = useRoute()
 const productId = Number(route.params.id || 1)
@@ -401,7 +405,6 @@ const cheapestSize = computed(() => {
 })
 
 watch(
-
   cheapestSize,
   (size) => {
     if (size) {
@@ -418,9 +421,28 @@ const selectedSize = computed(() => {
   return item.sizes.find((s) => s.size_id === selectedSizeId.value) ?? null
 })
 
-const displayPrice = computed(() => {
-  return selectedSize.value?.sellPrice ?? 0
+const totalIngredientPrice = computed(() => {
+  const item = menuItemsStore.currentItem
+  if (!item?.ingredients?.length) return 0
+
+  return item.ingredients
+    .filter(i => selectedIngredientIds.value.includes(i.id))
+    .reduce((sum, i) => sum + (i.price ?? 0), 0)
 })
+
+
+const displayPrice = computed(() => {
+  const base = selectedSize.value?.sellPrice ?? 0
+  return base + totalIngredientPrice.value
+})
+
+const finalTotalPrice = computed(() => {
+  return displayPrice.value * quantity.value
+})
+
+// const displayPrice = computed(() => {
+//   return selectedSize.value?.sellPrice ?? 0
+// })
 
 const product = computed(() => {
   const item = menuItemsStore.currentItem
@@ -445,29 +467,29 @@ const product = computed(() => {
   }
 })
 
-const ingredientRows = computed<IngredientRow[]>(() => {
-  const item = menuItemsStore.currentItem
-  if (!item?.ingredients?.length) return []
+// const ingredientRows = computed<IngredientRow[]>(() => {
+//   const item = menuItemsStore.currentItem
+//   if (!item?.ingredients?.length) return []
 
-  const rows: IngredientRow[] = []
+//   const rows: IngredientRow[] = []
 
-  for (let i = 0; i < item.ingredients.length; i += 2) {
-    rows.push({
-      left: {
-        label: item.ingredients[i].name,
-        value: item.ingredients[i].amount,
-      },
-      right: item.ingredients[i + 1]
-        ? {
-            label: item.ingredients[i + 1].name,
-            value: item.ingredients[i + 1].amount,
-          }
-        : { label: '', value: '' },
-    })
-  }
+//   for (let i = 0; i < item.ingredients.length; i += 2) {
+//     rows.push({
+//       left: {
+//         label: item.ingredients[i].name,
+//         value: item.ingredients[i].amount,
+//       },
+//       right: item.ingredients[i + 1]
+//         ? {
+//             label: item.ingredients[i + 1].name,
+//             value: item.ingredients[i + 1].amount,
+//           }
+//         : { label: '', value: '' },
+//     })
+//   }
 
-  return rows
-})
+//   return rows
+// })
 
 // const product = computed(() => allProducts.find((p) => p.id === productId) ?? allProducts[0])
 
@@ -501,16 +523,58 @@ function decreaseQty() {
 }
 
 function toggleCart() {
-  isInCart.value = !isInCart.value
-  if (!selectedSize.value) return
+  if (!selectedSize.value || !product.value) return
 
-  console.log({
-    productId: product.value.id,
+  const selectedIngredients =
+    menuItemsStore.currentItem?.ingredients
+      ?.filter(i => selectedIngredientIds.value.includes(i.id))
+      .map(i => ({
+        id: i.id,
+        name: i.name,
+        price: i.price,
+        amount: i.amount
+      })) ?? []
+
+  const totalIngredientPrice =
+    selectedIngredients.reduce((sum, i) => sum + i.price, 0)
+
+  const unitPrice =
+    selectedSize.value.sellPrice + totalIngredientPrice
+
+  cartStore.addItem({
+    productId: product.value.id,   // ✅ REQUIRED
+
+    name: product.value.name,
+    description: product.value.description,
+    imageUrl: product.value.imageUrl,
+
     sizeId: selectedSize.value.size_id,
-    price: selectedSize.value.sellPrice,
-    qty: quantity.value,
+    sizeName: selectedSize.value.shortName,
+
+    ingredients: selectedIngredients,
+
+    quantity: quantity.value,
+    unitPrice,
+
+    totalPrice: 0,                 // not used anymore but required by type
+    totalIngredientPrice
   })
 }
+
+
+// function toggleCart() {
+//   isInCart.value = !isInCart.value
+//   if (!selectedSize.value) return
+
+//   console.log({
+//     productId: product.value.id,
+//     sizeId: selectedSize.value.size_id,
+//     ingredientIds: selectedIngredientIds.value,
+//     unitPrice: displayPrice.value,
+//     totalPrice: finalTotalPrice.value,
+//     qty: quantity.value,
+//   })
+// }
 
 // Tabs
 const activeTab = ref<'ingredients' | 'details' | 'reviews'>('ingredients')

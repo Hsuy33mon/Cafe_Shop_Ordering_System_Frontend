@@ -445,3 +445,143 @@
   font-size: 0.8rem;
   color: var(--cs-text-muted);
 }
+
+/* ===== CARD STYLE ===== */
+.cart-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  transition: 0.2s ease;
+}
+
+.cart-card:hover {
+  transform: translateY(-2px);
+}
+
+/* LEFT */
+.cart-card-left {
+  display: flex;
+  gap: 18px;
+}
+
+.cart-thumb {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.cart-info {
+  max-width: 300px;
+}
+
+.cart-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.cart-desc {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.cart-size {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.cart-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ingredient-tag {
+  /* background: #f3f4f6; */
+  /* padding: 4px 10px; */
+  /* border-radius: 20px; */
+  font-size: 12px;
+  color: #555;
+}
+
+
+/* RIGHT */
+.cart-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.cart-price {
+  font-weight: 500;
+  color: #888;
+}
+
+.cart-total {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f5f5f5;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.qty-control button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #d33;
+  cursor: pointer;
+}
+
+/* ===== SUMMARY ===== */
+.summary-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.totals-row--strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.total-highlight {
+  color: #ff8c00;
+}
+
+.totals-divider {
+  height: 1px;
+  background: #eee;
+  margin: 15px 0;
+}
