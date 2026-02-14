@@ -316,3 +316,12 @@
     margin-top: 1rem;
   }
 }
+
+.crumb--link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.crumb--link:hover {
+  opacity: 0.7;
+}

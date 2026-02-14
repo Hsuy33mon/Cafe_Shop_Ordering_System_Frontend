@@ -1,6 +1,15 @@
 <template>
   <div class="pd-page">
     <main v-if="product" class="pd-main">
+
+      <!-- SUCCESS MESSAGE -->
+<div
+  v-if="cartSuccessMessage"
+  class="pd-success-banner"
+>
+  {{ cartSuccessMessage }}
+</div>
+
       <!-- TOP BREADCRUMB -->
       <section class="cs-container pd-breadcrumb">
         <span class="pd-breadcrumb-text">
@@ -353,7 +362,7 @@ import { useCartStore } from '../stores/useCartStore'
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 const cartStore = useCartStore()
-
+const cartSuccessMessage = ref('')
 
 type Product = {
   id: number
@@ -381,7 +390,28 @@ function goToDetails(id: number) {
 
 onMounted(() => {
   menuItemsStore.fetchById(productId)
+  restoreFromQuery()
 })
+
+function restoreFromQuery() {
+  const sizeId = Number(route.query.sizeId)
+  const qty = Number(route.query.qty)
+  const ingredients = route.query.ingredients as string | undefined
+
+  if (sizeId) {
+    selectedSizeId.value = sizeId
+  }
+
+  if (qty && qty > 0) {
+    quantity.value = qty
+  }
+
+  if (ingredients) {
+    selectedIngredientIds.value = ingredients
+      .split(',')
+      .map(id => Number(id))
+  }
+}
 
 const selectedSizeId = ref<number | null>(null)
 const selectedIngredientIds = ref<number[]>([])
@@ -558,7 +588,14 @@ function toggleCart() {
 
     totalPrice: 0,                 // not used anymore but required by type
     totalIngredientPrice
+
   })
+    // ✅ SHOW SUCCESS MESSAGE
+  cartSuccessMessage.value = 'Added to cart successfully!'
+
+  setTimeout(() => {
+    cartSuccessMessage.value = ''
+  }, 2500)
 }
 
 

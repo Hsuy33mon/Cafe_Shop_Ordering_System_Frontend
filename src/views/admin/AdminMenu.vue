@@ -28,18 +28,20 @@
         </select>
 
         <select v-model="statusFilter" class="filter-select">
-          <option value="">All statuses</option>
-          <option value="Active">Active</option>
-          <option value="Hidden">Hidden</option>
-          <option value="Out of stock">Out of stock</option>
-        </select>
+  <option value="">All statuses</option>
+  <option value="ACTIVE">Active</option>
+  <option value="INACTIVE">Inactive</option>
+  <option value="OUT_OF_STOCK">Out of stock</option>
+</select>
+
 
         <select v-model="availabilityFilter" class="filter-select">
-          <option value="">All times</option>
-          <option value="Cafe">Cafe only</option>
-          <option value="Room">Room service</option>
-          <option value="Both">Cafe & Room</option>
-        </select>
+  <option value="">All times</option>
+  <option value="CAFE_ONLY">Cafe only</option>
+  <option value="ROOM_SERVICE_ONLY">Room service</option>
+  <option value="BOTH">Cafe & Room</option>
+</select>
+
       </div>
     </section>
 
@@ -105,7 +107,7 @@ const productColumns: TableColumn[] = [
   { key: 'sku', label: 'SKU', width: '90px' },
   { key: 'name', label: 'Product' },
   { key: 'category', label: 'Category' },
-  { key: 'availability', label: 'Available' },
+  { key: 'availableIn', label: 'Available' },
   { key: 'price', label: 'Price (฿)', align: 'right', width: '120px' },
   { key: 'status', label: 'Status', width: '120px' },
   { key: 'tags', label: 'Tags' },
@@ -133,8 +135,7 @@ const filteredProducts = computed(() => {
 
     const matchesCategory = !categoryFilter.value || p.category === categoryFilter.value
     const matchesStatus = !statusFilter.value || p.status === statusFilter.value
-    const matchesAvailability =
-      !availabilityFilter.value || p.availability === availabilityFilter.value
+    const matchesAvailability = !availabilityFilter.value || p.availableIn === availabilityFilter.value
 
     return matchesSearch && matchesCategory && matchesStatus && matchesAvailability
   })
@@ -149,7 +150,8 @@ function editProduct(row: MenuItem) {
 }
 
 async function toggleActive(row: MenuItem) {
-  const next: ProductStatus = row.status === 'Active' ? 'Hidden' : 'Active'
+const next: ProductStatus = row.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+
   try {
     await menuItemsStore.updateStatus(row.id, next)
   } catch {
@@ -159,9 +161,9 @@ async function toggleActive(row: MenuItem) {
 
 function statusClass(status: ProductStatus) {
   return {
-    'status-pill--new': status === 'Active',
-    'status-pill--prep': status === 'Hidden',
-    'status-pill--ready': status === 'Out of stock',
+    'status-pill--new': status === 'ACTIVE',
+    'status-pill--prep': status === 'INACTIVE',
+    'status-pill--ready': status === 'OUT_OF_STOCK',
   }
 }
 

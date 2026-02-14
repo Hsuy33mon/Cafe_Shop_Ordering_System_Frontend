@@ -87,7 +87,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
     const res = await http.get(`/api/admin/menu-items/${id}`)
     const item = mapFromApi(res.data)
     this.currentItem = item
-    return item // ✅ THIS WAS MISSING
+    return item
   } catch (e: any) {
     this.error = axiosErrorMessage(e)
     throw e

@@ -7,9 +7,13 @@
         <h1 class="checkout-title">Checkout</h1>
 
         <div class="breadcrumb-pill">
-          <span class="crumb">Home</span>
+          <span class="crumb crumb--link" @click="goToHome">
+            Home
+          </span>
           <span class="crumb-sep">/</span>
-          <span class="crumb">Shop</span>
+          <span class="crumb crumb--link" @click="goToMenu">
+            Menu
+          </span>
           <span class="crumb-sep">/</span>
           <span class="crumb crumb--active">Checkout</span>
         </div>
@@ -20,67 +24,60 @@
     <main class="cart-main">
       <section class="cs-container cart-layout">
         <!-- LEFT: ITEMS LIST -->
- <section class="cart-items">
+        <section class="cart-items">
 
-  <template v-if="items.length > 0">
-    <div
-      v-for="item in items"
-      :key="item.cartId"
-      class="cart-card"
-    >
-      <div class="cart-card-left">
-        <img :src="item.imageUrl" :alt="item.name" class="cart-thumb" />
+          <template v-if="items.length > 0">
+            <div v-for="item in items" :key="item.cartId" class="cart-card">
+              <div class="cart-card-left" @click="goToProductDetails(item)">
 
-        <div class="cart-info">
-          <p class="cart-name">{{ item.name }}</p>
-          <p class="cart-desc">{{ item.description }}</p>
+                <img :src="item.imageUrl" :alt="item.name" class="cart-thumb" />
 
-          <p class="cart-size">
-            Size: {{ item.sizeName }}
-          </p>
+                <!-- <img
+  :src="item.imageUrl"
+  :alt="item.name"
+  class="cart-thumb"
+  @click="goToProductDetails(item)"
+/> -->
 
-          <div
-            v-if="item.ingredients.length"
-            class="cart-ingredients"
-          >
-            <span
-              v-for="ing in item.ingredients"
-              :key="ing.id"
-              class="ingredient-tag"
-            >
-              {{ ing.name }} ({{ ing.amount }})
-            </span>
+                <div class="cart-info">
+                  <p class="cart-name">{{ item.name }}</p>
+                  <p class="cart-desc">{{ item.description }}</p>
+
+                  <p class="cart-size">
+                    Size: {{ item.sizeName }}
+                  </p>
+
+                  <div v-if="item.ingredients.length" class="cart-ingredients">
+                    <span v-for="ing in item.ingredients" :key="ing.id" class="ingredient-tag">
+                      {{ ing.name }} ({{ ing.amount }})
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cart-card-right">
+                <div class="cart-total">
+                  {{ formatMoney(item.unitPrice * item.quantity) }}
+                </div>
+
+                <div class="qty-control">
+                  <button @click="decreaseQty(item)">−</button>
+                  <span>{{ item.quantity }}</span>
+                  <button @click="increaseQty(item)">+</button>
+                </div>
+
+                <button class="remove-btn" @click="removeItem(item)">
+                  ×
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <div v-else class="empty-cart">
+            Your cart is empty.
           </div>
-        </div>
-      </div>
 
-      <div class="cart-card-right">
-        <div class="cart-total">
-          {{ formatMoney(item.unitPrice * item.quantity) }}
-        </div>
-
-        <div class="qty-control">
-          <button @click="decreaseQty(item)">−</button>
-          <span>{{ item.quantity }}</span>
-          <button @click="increaseQty(item)">+</button>
-        </div>
-
-        <button
-          class="remove-btn"
-          @click="removeItem(item)"
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  </template>
-
-  <div v-else class="empty-cart">
-    Your cart is empty.
-  </div>
-
-</section>
-
+        </section>
 
         <!-- RIGHT: SUMMARY CARD -->
         <aside class="cart-summary">
@@ -97,11 +94,6 @@
               <div class="totals-row">
                 <span>Ingredients</span>
                 <span>{{ formatMoney(totalIngredientPrice) }}</span>
-              </div>
-
-              <div class="totals-row">
-                <span>Shipping</span>
-                <span>{{ formatMoney(shippingCost) }}</span>
               </div>
 
               <div class="totals-divider"></div>
@@ -146,11 +138,21 @@ const subtotal = computed(() => cartStore.cartSubtotal)
 const total = computed(() => cartStore.totalPrice)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
 
-const shippingCost = computed(() => 40)
-// const discount = computed(() => 0)
 
 function goToPayment() {
   router.push('/payment')
+}
+
+function goToProductDetails(item: any) {
+  router.push({
+    name: 'product-details',
+    params: { id: item.productId },
+    query: {
+      sizeId: item.sizeId,
+      qty: item.quantity,
+      ingredients: item.ingredients.map((i: any) => i.id).join(','),
+    },
+  })
 }
 
 function removeItem(item: any) {
@@ -168,6 +170,14 @@ function decreaseQty(item: any) {
 function formatMoney(value: number): string {
   return `฿${value.toFixed(0)}`
 }
+
+function goToMenu() {
+  router.push({ name: 'shop' })
+}
+function goToHome() {
+  router.push({ name: 'home' })
+}
+
 </script>
 
 <style scoped src="@/styles/customer/cart-page.css"></style>

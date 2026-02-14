@@ -6,9 +6,19 @@
         <h1 class="checkout-title">Payment</h1>
 
         <div class="breadcrumb-pill">
-          <span class="crumb">Home</span>
+                    <span
+  class="crumb crumb--link"
+  @click="goToHome"
+>
+  Home
+</span>
           <span class="crumb-sep">/</span>
-          <span class="crumb">Checkout</span>
+          <span
+  class="crumb crumb--link"
+  @click="goToCheckout"
+>
+  Checkout
+</span>
           <span class="crumb-sep">/</span>
           <span class="crumb crumb--active">Payment</span>
         </div>
@@ -47,14 +57,14 @@
                     <img :src="item.imageUrl" :alt="item.name" />
                   </div>
                   <div class="item-text">
-                    <p class="item-name">{{ item.name }}</p>
+                    <p class="item-name">{{ item.name }} ({{ item.sizeName }})</p>
                     <p class="item-desc">{{ item.description }}</p>
                   </div>
                 </div>
 
                 <div class="item-qty">x{{ item.quantity }}</div>
                 <div class="item-price">
-                  {{ formatMoney(item.price * item.quantity) }}
+                 {{ formatMoney(item.unitPrice * item.quantity) }}
                 </div>
               </li>
             </ul>
@@ -67,14 +77,12 @@
                 <span>Subtotal</span>
                 <span>{{ formatMoney(subtotal) }}</span>
               </div>
+
               <div class="totals-row">
-                <span>Shipping</span>
-                <span>{{ formatMoney(shippingCost) }}</span>
+                <span>Ingredients</span>
+                <span>{{ formatMoney(totalIngredientPrice) }}</span>
               </div>
-              <div class="totals-row">
-                <span>Discount</span>
-                <span>{{ formatMoney(discount) }}</span>
-              </div>
+
               <div class="totals-row totals-row--strong">
                 <span>Total</span>
                 <span class="total-highlight">
@@ -185,57 +193,28 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
+import { useCartStore } from '../stores/useCartStore'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const cartStore = useCartStore()
+const items = computed(() => cartStore.items)
+
+const subtotal = computed(() => cartStore.cartSubtotal)
+const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
+const total = computed(() =>
+  subtotal.value + totalIngredientPrice.value
+)
+
 
 type OrderType = 'shop' | 'room'
 type PaymentMethod = 'card' | 'promptpay'
 
-type OrderItem = {
-  id: number
-  name: string
-  description: string
-  price: number
-  quantity: number
-  imageUrl: string
-}
 
 // Mock order data – later you can replace with props / store
 const orderType = ref<OrderType>('room')
 const roomNo = ref('1205')
 
-const items = ref<OrderItem[]>([
-  {
-    id: 1,
-    name: 'Chevrefrit Bowl',
-    description: 'Salad bowl with tomatoes, feta cheese and fresh greens.',
-    price: 189,
-    quantity: 1,
-    imageUrl: 'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg',
-  },
-  {
-    id: 2,
-    name: 'Saumon Gravlax',
-    description: 'Salmon, avocado, cucumber, sushi rice & house sauce.',
-    price: 159,
-    quantity: 1,
-    imageUrl: 'https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg',
-  },
-  {
-    id: 3,
-    name: 'Gourmet Burger',
-    description: 'Beef patty, cheddar, lettuce, tomato on brioche bun.',
-    price: 139,
-    quantity: 1,
-    imageUrl: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
-  },
-])
-
-const subtotal = computed(() =>
-  items.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
-)
-
-const shippingCost = computed(() => 40) // example
-const discount = computed(() => 0)
-const total = computed(() => subtotal.value + shippingCost.value - discount.value)
 
 // payment state
 const selectedMethod = ref<PaymentMethod>('card')
@@ -247,6 +226,14 @@ const cardCvv = ref('')
 function formatMoney(value: number): string {
   return `฿${value.toFixed(0)}`
 }
+
+function goToCheckout(){
+  router.push({ name: 'cart' })
+}
+function goToHome(){
+  router.push({ name: 'home' })
+}
+
 
 function submitPayment() {
   if (selectedMethod.value === 'card') {

@@ -585,3 +585,12 @@
   background: #eee;
   margin: 15px 0;
 }
+
+.crumb--link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.crumb--link:hover {
+  opacity: 0.7;
+}

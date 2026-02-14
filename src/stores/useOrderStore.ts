@@ -17,6 +17,7 @@ export type OrderItem = {
   total: number
   note?: string
   orderIngredients?: OrderIngredient[]
+  menuItem?: any
 }
 
 export type OrderIngredient = {
@@ -68,6 +69,7 @@ function mapFromApi(x: any): Order {
         unitPrice: Number(x.unitPrice),
         total: Number(x.totalPrice),
         note: x.note,
+        menuItem: x.menuItem,
         orderIngredients: Array.isArray(x.orderIngredients) ? x.orderIngredients.map((oi: any) => ({
           id: oi.id,
           ingredientId: oi.ingredientId,

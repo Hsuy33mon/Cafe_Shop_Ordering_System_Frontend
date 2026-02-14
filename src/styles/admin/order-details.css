@@ -248,3 +248,20 @@
 .ingredients-table td:nth-child(5) {
   text-align: right;
 }
+
+.order-global-message {
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  background-color: #e6f4ea;
+  color: #1e7e34;
+  border: 1px solid #b7e4c7;
+}
+
+.order-global-message--error {
+  background-color: #fdecea;
+  color: #b02a37;
+  border: 1px solid #f5c2c7;
+}

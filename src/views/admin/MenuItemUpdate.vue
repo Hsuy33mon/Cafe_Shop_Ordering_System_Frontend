@@ -184,18 +184,33 @@
           <div class="field">
             <div class="field-label">Available in</div>
             <div class="chip-group">
-              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'CAFE' }"
-                @click="form.availableIn = 'CAFE'">
-                Cafe only
-              </button>
-              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'ROOM' }"
-                @click="form.availableIn = 'ROOM'">
-                Room service only
-              </button>
-              <button type="button" class="chip" :class="{ 'chip--active': form.availableIn === 'BOTH' }"
-                @click="form.availableIn = 'BOTH'">
-                Both
-              </button>
+              <button
+  type="button"
+  class="chip"
+  :class="{ 'chip--active': form.availableIn === 'CAFE_ONLY' }"
+  @click="form.availableIn = 'CAFE_ONLY'"
+>
+  Cafe only
+</button>
+
+<button
+  type="button"
+  class="chip"
+  :class="{ 'chip--active': form.availableIn === 'ROOM_SERVICE_ONLY' }"
+  @click="form.availableIn = 'ROOM_SERVICE_ONLY'"
+>
+  Room service only
+</button>
+
+<button
+  type="button"
+  class="chip"
+  :class="{ 'chip--active': form.availableIn === 'BOTH' }"
+  @click="form.availableIn = 'BOTH'"
+>
+  Both
+</button>
+
             </div>
           </div>
 
@@ -272,7 +287,8 @@ const sizeStore = useSizeStore()
 const categoryStore = useCategoryStore()
 
 type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK'
-type AvailableIn = 'CAFE' | 'ROOM' | 'BOTH'
+type AvailableIn = 'CAFE_ONLY' | 'ROOM_SERVICE_ONLY' | 'BOTH'
+
 
 type ProductForm = {
   sku: string

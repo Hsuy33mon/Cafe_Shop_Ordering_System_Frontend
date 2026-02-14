@@ -1,6 +1,13 @@
 <!-- src/views/admin/AdminOrderDetails.vue -->
 <template>
   <main class="content order-details-page">
+    <!-- GLOBAL MESSAGE -->
+<section v-if="lastUpdateMessage" class="order-global-message"
+  :class="{ 'order-global-message--error': lastUpdateMessage.includes('Failed') }"
+>
+  {{ lastUpdateMessage }}
+</section>
+
     <!-- HEADER -->
     <section class="panel order-header">
       <div class="order-header-left">
@@ -81,7 +88,6 @@
                         <th>Amount</th>
                         <th>Price (฿)</th>
                         <th>Note</th>
-                        <th>Qty</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -90,7 +96,6 @@
                         <td>{{ getIngredientAmount(item, ing.ingredientId) }}</td>
                         <td>{{ getIngredientPrice(item, ing.ingredientId) }}</td>
                         <td>{{ ing.note || '-' }}</td>
-                        <td>{{ ing.qty }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -178,9 +183,17 @@
           </button>
 
 
-          <p v-if="lastUpdateMessage" class="manage-hint">
+          <!-- <p v-if="lastUpdateMessage" class="manage-hint">
             {{ lastUpdateMessage }}
-          </p>
+          </p> -->
+          <!-- <div
+  v-if="lastUpdateMessage"
+  class="manage-message"
+  :class="{ 'manage-message--error': lastUpdateMessage.includes('Failed') }"
+>
+  {{ lastUpdateMessage }}
+</div> -->
+
         </article>
       </aside>
     </section>
@@ -288,13 +301,17 @@ async function applyOrderUpdate() {
       paymentType: editPaymentType.value,
     })
 
-    lastUpdateMessage.value = 'Order updated successfully.'
+    lastUpdateMessage.value = 'Order updated successfully. Redirecting to orders...'
+
+    setTimeout(() => {
+      router.push({ name: 'admin-orders' })
+    }, 1500)
+
   } catch (e) {
     console.error(e)
     lastUpdateMessage.value = 'Failed to update order. Please try again.'
   }
 }
-
 
 
 /* =======================
@@ -319,25 +336,27 @@ function statusClass(status: OrderStatus) {
 
 
 function getIngredientAmount(item: any, ingredientId: number) {
-  return (
-    item.menuItem?.ingredients?.find((i: any) => i.id === ingredientId)
-      ?.amount || '-'
+  const ingredient = item.menuItem?.ingredients?.find(
+    (i: any) => Number(i.id) === Number(ingredientId),
   )
+  return ingredient?.amount ?? '-'
 }
+
 
 function getIngredientPrice(item: any, ingredientId: number) {
-  return (
-    item.menuItem?.ingredients?.find((i: any) => i.id === ingredientId)
-      ?.price || 0
+  const ingredient = item.menuItem?.ingredients?.find(
+    (i: any) => Number(i.id) === Number(ingredientId),
   )
+  return ingredient?.price ?? 0
 }
 
+
 function ingredientTotalForItem(item: any) {
-  if (!item.orderIngredients) return 0
+  if (!item.orderIngredients?.length) return 0
 
   return item.orderIngredients.reduce((sum: number, ing: any) => {
     const price = getIngredientPrice(item, ing.ingredientId)
-    return sum + price * ing.qty
+    return sum + price
   }, 0)
 }
 
