@@ -45,7 +45,7 @@ const sidebarItems: SidebarItem[] = [
   { key: 'admin-orders', label: 'Orders', icon: '🧾' },
   { key: 'admin-menu', label: 'Menu items', icon: '🍽' },
   { key: 'admin-tables', label: 'Tables', icon: '🪑' },
-  { key: 'admin-customers', label: 'Customers', icon: '👥' },
+  { key: 'admin-invoices', label: 'Invoices', icon: '📝' },
   { key: 'admin-settings', label: 'Settings', icon: '⚙️' },
 ]
 

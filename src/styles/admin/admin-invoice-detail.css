@@ -1,0 +1,256 @@
+/* =========================
+   HEADER
+========================= */
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.invoice-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.invoice-subtitle {
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* =========================
+   CARD
+========================= */
+.invoice-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+}
+
+.card-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* =========================
+   INVOICE INFO TABLE
+========================= */
+.info-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  table-layout: fixed;
+}
+
+.info-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.info-table tr:last-child td {
+  border-bottom: none;
+}
+
+.label {
+  width: 15%;
+  color: #6b7280;
+}
+
+.value {
+  width: 35%;
+  font-weight: 500;
+}
+
+.summary-row td {
+  border-top: 1px solid #e5e7eb;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.grand-row td {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* =========================
+   INNER TABLE (ITEMS & PAYMENTS)
+========================= */
+.inner-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.inner-table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* IMPORTANT */
+  font-size: 0.9rem;
+}
+
+.inner-table th,
+.inner-table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.inner-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* =========================
+   ITEMS TABLE COLUMN ALIGNMENT
+========================= */
+.inner-table th:nth-child(1),
+.inner-table td:nth-child(1) {
+  width: 6%;
+  text-align: center;
+}
+
+.inner-table th:nth-child(2),
+.inner-table td:nth-child(2) {
+  width: 32%;
+}
+
+.inner-table th:nth-child(3),
+.inner-table td:nth-child(3) {
+  width: 10%;
+  text-align: right;
+}
+
+.inner-table th:nth-child(4),
+.inner-table td:nth-child(4) {
+  width: 15%;
+  text-align: right;
+}
+
+.inner-table th:nth-child(5),
+.inner-table td:nth-child(5) {
+  width: 15%;
+  text-align: right;
+}
+
+.inner-table th:nth-child(6),
+.inner-table td:nth-child(6) {
+  width: 22%;
+}
+
+/* Prevent wrapping breaking layout */
+.item-name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.item-option {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* =========================
+   PAYMENTS TABLE COLUMN FIX
+========================= */
+.panel:nth-of-type(3) table {
+  table-layout: fixed;
+}
+
+.panel:nth-of-type(3) th:nth-child(1),
+.panel:nth-of-type(3) td:nth-child(1) {
+  width: 6%;
+  text-align: center;
+}
+
+.panel:nth-of-type(3) th:nth-child(2),
+.panel:nth-of-type(3) td:nth-child(2) {
+  width: 25%;
+}
+
+.panel:nth-of-type(3) th:nth-child(3),
+.panel:nth-of-type(3) td:nth-child(3) {
+  width: 18%;
+}
+
+.panel:nth-of-type(3) th:nth-child(4),
+.panel:nth-of-type(3) td:nth-child(4) {
+  width: 15%;
+  text-align: right;
+}
+
+.panel:nth-of-type(3) th:nth-child(5),
+.panel:nth-of-type(3) td:nth-child(5) {
+  width: 16%;
+  text-align: center;
+}
+
+.panel:nth-of-type(3) th:nth-child(6),
+.panel:nth-of-type(3) td:nth-child(6) {
+  width: 20%;
+}
+
+/* =========================
+   STATUS
+========================= */
+.status-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pill--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+.btn-secondary {
+  border: 1px solid #d1d5db;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  margin-right: 0.5rem;
+}
+
+.btn-danger {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}

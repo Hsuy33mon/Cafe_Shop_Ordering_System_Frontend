@@ -35,6 +35,8 @@ import SizeTable from '@/views/admin/SizeTable.vue'
 
 // ✅ Pinia store for user session
 import { useOrderSessionStore } from '@/stores/orderSession'
+import AdminInvoices from '@/views/admin/AdminInvoices.vue'
+import AdminInvoiceDetails from '@/views/admin/AdminInvoiceDetails.vue'
 
 const routes = [
   {
@@ -84,7 +86,8 @@ const routes = [
       { path: 'orders', name: 'admin-orders', component: AdminOrders },
       { path: 'menu', name: 'admin-menu', component: AdminMenu },
       { path: 'tables', name: 'admin-tables', component: AdminTables },
-      { path: 'customers', name: 'admin-customers', component: AdminCustomers },
+      { path: 'invoices', name: 'admin-invoices', component: AdminInvoices },
+      { path: 'invoices/:id', name: 'admin-invoice-detail', component: AdminInvoiceDetails},
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
       { path: 'orders/:id', name: 'admin-order-details', component: AdminOrderDetails },
       { path: 'menu-items/new', name: 'admin-menu-new', component: MenuItemCreate },
