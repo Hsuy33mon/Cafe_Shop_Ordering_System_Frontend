@@ -19,7 +19,6 @@
     transform 0.1s ease;
 }
 
-
 .setting-btn:hover {
   background: linear-gradient(135deg, #facc15, #f97316);
   color: #111827;
@@ -27,19 +26,16 @@
   transform: translateY(-1px);
 }
 
-
 .setting-btn:active {
   transform: translateY(0);
   box-shadow: 0 3px 8px rgba(249, 115, 22, 0.25);
 }
-
 
 @media (max-width: 768px) {
   .btn-div {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
 
 @media (max-width: 480px) {
   .btn-div {

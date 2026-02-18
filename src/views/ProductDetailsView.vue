@@ -1,14 +1,10 @@
 <template>
   <div class="pd-page">
     <main v-if="product" class="pd-main">
-
       <!-- SUCCESS MESSAGE -->
-<div
-  v-if="cartSuccessMessage"
-  class="pd-success-banner"
->
-  {{ cartSuccessMessage }}
-</div>
+      <div v-if="cartSuccessMessage" class="pd-success-banner">
+        {{ cartSuccessMessage }}
+      </div>
 
       <!-- TOP BREADCRUMB -->
       <section class="cs-container pd-breadcrumb">
@@ -75,7 +71,6 @@
               <h1 class="pd-title">{{ product?.name }}</h1>
               <!-- <div class="pd-price-pill">฿{{ displayPrice }}</div> -->
               <div class="pd-price-pill">฿{{ finalTotalPrice.toFixed(2) }}</div>
-
             </div>
 
             <div class="pd-rating-row">
@@ -167,44 +162,41 @@
         <div class="pd-tab-panel">
           <!-- INGREDIENTS TABLE -->
           <div v-if="activeTab === 'ingredients'" class="pd-ingredients-table">
-  <!-- header -->
-  <div class="pd-ingredients-header">
-    <span></span>
-    <span>Name</span>
-    <span>Amount</span>
-    <span>Price</span>
-  </div>
+            <!-- header -->
+            <div class="pd-ingredients-header">
+              <span></span>
+              <span>Name</span>
+              <span>Amount</span>
+              <span>Price</span>
+            </div>
 
-  <!-- rows -->
-  <div
-    v-for="ingredient in menuItemsStore.currentItem?.ingredients"
-    :key="ingredient.id"
-    class="pd-ingredients-row"
-  >
-    <!-- checkbox -->
-    <input
-      type="checkbox"
-      :disabled="!ingredient.active"
-      :checked="selectedIngredientIds.includes(ingredient.id)"
-      @change="toggleIngredient(ingredient.id)"
-    />
+            <!-- rows -->
+            <div
+              v-for="ingredient in menuItemsStore.currentItem?.ingredients"
+              :key="ingredient.id"
+              class="pd-ingredients-row"
+            >
+              <!-- checkbox -->
+              <input
+                type="checkbox"
+                :disabled="!ingredient.active"
+                :checked="selectedIngredientIds.includes(ingredient.id)"
+                @change="toggleIngredient(ingredient.id)"
+              />
 
-    <!-- name + note -->
-    <div class="pd-ing-name">
-      {{ ingredient.name }}
-      <small v-if="ingredient.note" class="pd-ing-note">
-        ({{ ingredient.note }})
-      </small>
-    </div>
+              <!-- name + note -->
+              <div class="pd-ing-name">
+                {{ ingredient.name }}
+                <small v-if="ingredient.note" class="pd-ing-note"> ({{ ingredient.note }}) </small>
+              </div>
 
-    <!-- amount -->
-    <span>{{ ingredient.amount }}</span>
+              <!-- amount -->
+              <span>{{ ingredient.amount }}</span>
 
-    <!-- price -->
-    <span class="pd-ing-price">฿{{ ingredient.price.toFixed(2) }}</span>
-  </div>
-</div>
-
+              <!-- price -->
+              <span class="pd-ing-price">฿{{ ingredient.price.toFixed(2) }}</span>
+            </div>
+          </div>
 
           <!-- PRODUCT DETAILS -->
           <div v-else-if="activeTab === 'details'" class="pd-text-panel">
@@ -407,9 +399,7 @@ function restoreFromQuery() {
   }
 
   if (ingredients) {
-    selectedIngredientIds.value = ingredients
-      .split(',')
-      .map(id => Number(id))
+    selectedIngredientIds.value = ingredients.split(',').map((id) => Number(id))
   }
 }
 
@@ -418,14 +408,11 @@ const selectedIngredientIds = ref<number[]>([])
 
 function toggleIngredient(id: number) {
   if (selectedIngredientIds.value.includes(id)) {
-    selectedIngredientIds.value = selectedIngredientIds.value.filter(
-      (x) => x !== id,
-    )
+    selectedIngredientIds.value = selectedIngredientIds.value.filter((x) => x !== id)
   } else {
     selectedIngredientIds.value.push(id)
   }
 }
-
 
 const cheapestSize = computed(() => {
   const item = menuItemsStore.currentItem
@@ -456,10 +443,9 @@ const totalIngredientPrice = computed(() => {
   if (!item?.ingredients?.length) return 0
 
   return item.ingredients
-    .filter(i => selectedIngredientIds.value.includes(i.id))
+    .filter((i) => selectedIngredientIds.value.includes(i.id))
     .reduce((sum, i) => sum + (i.price ?? 0), 0)
 })
-
 
 const displayPrice = computed(() => {
   const base = selectedSize.value?.sellPrice ?? 0
@@ -557,22 +543,20 @@ function toggleCart() {
 
   const selectedIngredients =
     menuItemsStore.currentItem?.ingredients
-      ?.filter(i => selectedIngredientIds.value.includes(i.id))
-      .map(i => ({
+      ?.filter((i) => selectedIngredientIds.value.includes(i.id))
+      .map((i) => ({
         id: i.id,
         name: i.name,
         price: i.price,
-        amount: i.amount
+        amount: i.amount,
       })) ?? []
 
-  const totalIngredientPrice =
-    selectedIngredients.reduce((sum, i) => sum + i.price, 0)
+  const totalIngredientPrice = selectedIngredients.reduce((sum, i) => sum + i.price, 0)
 
-  const unitPrice =
-    selectedSize.value.sellPrice + totalIngredientPrice
+  const unitPrice = selectedSize.value.sellPrice + totalIngredientPrice
 
   cartStore.addItem({
-    productId: product.value.id,   // ✅ REQUIRED
+    productId: product.value.id, // ✅ REQUIRED
 
     name: product.value.name,
     description: product.value.description,
@@ -586,18 +570,16 @@ function toggleCart() {
     quantity: quantity.value,
     unitPrice,
 
-    totalPrice: 0,                 // not used anymore but required by type
-    totalIngredientPrice
-
+    totalPrice: 0, // not used anymore but required by type
+    totalIngredientPrice,
   })
-    // ✅ SHOW SUCCESS MESSAGE
+  // ✅ SHOW SUCCESS MESSAGE
   cartSuccessMessage.value = 'Added to cart successfully!'
 
   setTimeout(() => {
     cartSuccessMessage.value = ''
   }, 2500)
 }
-
 
 // function toggleCart() {
 //   isInCart.value = !isInCart.value

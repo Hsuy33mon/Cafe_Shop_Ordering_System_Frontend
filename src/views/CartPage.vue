@@ -7,13 +7,9 @@
         <h1 class="checkout-title">Checkout</h1>
 
         <div class="breadcrumb-pill">
-          <span class="crumb crumb--link" @click="goToHome">
-            Home
-          </span>
+          <span class="crumb crumb--link" @click="goToHome"> Home </span>
           <span class="crumb-sep">/</span>
-          <span class="crumb crumb--link" @click="goToMenu">
-            Menu
-          </span>
+          <span class="crumb crumb--link" @click="goToMenu"> Menu </span>
           <span class="crumb-sep">/</span>
           <span class="crumb crumb--active">Checkout</span>
         </div>
@@ -25,11 +21,9 @@
       <section class="cs-container cart-layout">
         <!-- LEFT: ITEMS LIST -->
         <section class="cart-items">
-
           <template v-if="items.length > 0">
             <div v-for="item in items" :key="item.cartId" class="cart-card">
               <div class="cart-card-left" @click="goToProductDetails(item)">
-
                 <img :src="item.imageUrl" :alt="item.name" class="cart-thumb" />
 
                 <!-- <img
@@ -43,9 +37,7 @@
                   <p class="cart-name">{{ item.name }}</p>
                   <p class="cart-desc">{{ item.description }}</p>
 
-                  <p class="cart-size">
-                    Size: {{ item.sizeName }}
-                  </p>
+                  <p class="cart-size">Size: {{ item.sizeName }}</p>
 
                   <div v-if="item.ingredients.length" class="cart-ingredients">
                     <span v-for="ing in item.ingredients" :key="ing.id" class="ingredient-tag">
@@ -66,17 +58,12 @@
                   <button @click="increaseQty(item)">+</button>
                 </div>
 
-                <button class="remove-btn" @click="removeItem(item)">
-                  ×
-                </button>
+                <button class="remove-btn" @click="removeItem(item)">×</button>
               </div>
             </div>
           </template>
 
-          <div v-else class="empty-cart">
-            Your cart is empty.
-          </div>
-
+          <div v-else class="empty-cart">Your cart is empty.</div>
         </section>
 
         <!-- RIGHT: SUMMARY CARD -->
@@ -85,7 +72,6 @@
             <h2 class="summary-title">Payment Summary</h2>
             <hr class="summary-divider" />
             <div class="totals">
-
               <div class="totals-row">
                 <span>Subtotal</span>
                 <span>{{ formatMoney(subtotal) }}</span>
@@ -104,9 +90,7 @@
                   {{ formatMoney(total) }}
                 </span>
               </div>
-
             </div>
-
 
             <div class="summary-actions">
               <button type="button" class="summary-btn ghost">
@@ -137,7 +121,6 @@ const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const total = computed(() => cartStore.totalPrice)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-
 
 function goToPayment() {
   router.push('/payment')
@@ -177,7 +160,6 @@ function goToMenu() {
 function goToHome() {
   router.push({ name: 'home' })
 }
-
 </script>
 
 <style scoped src="@/styles/customer/cart-page.css"></style>

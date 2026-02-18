@@ -513,7 +513,6 @@
   color: #555;
 }
 
-
 /* RIGHT */
 .cart-card-right {
   display: flex;
@@ -561,7 +560,7 @@
   background: #fff;
   padding: 24px;
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
 }
 
 .totals-row {

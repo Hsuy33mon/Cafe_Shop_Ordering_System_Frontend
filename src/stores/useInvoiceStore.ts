@@ -38,35 +38,33 @@ export interface Invoice {
 
 export const useInvoiceStore = defineStore('invoice', {
   state: () => ({
-    invoices: [] as Invoice[],        // 🔥 ADD THIS
+    invoices: [] as Invoice[], // 🔥 ADD THIS
     currentInvoice: null as Invoice | null,
     loading: false,
     error: null as string | null,
   }),
 
   actions: {
-
     // 🔥 FETCH ALL INVOICES (LIST PAGE)
-   async fetchAll() {
-  try {
-    this.loading = true
-    this.error = null
+    async fetchAll() {
+      try {
+        this.loading = true
+        this.error = null
 
-    const res = await axios.get('/api/admin/invoices')
+        const res = await axios.get('/api/admin/invoices')
 
-    // Normalize null values
-    this.invoices = res.data.map((inv: any) => ({
-      ...inv,
-      invoiceNo: inv.invoiceNo ?? `INV-${inv.id}`,
-      orderPlaceName: inv.orderPlaceName ?? '-',
-    }))
-
-  } catch (err: any) {
-    this.error = err.message
-  } finally {
-    this.loading = false
-  }
-},
+        // Normalize null values
+        this.invoices = res.data.map((inv: any) => ({
+          ...inv,
+          invoiceNo: inv.invoiceNo ?? `INV-${inv.id}`,
+          orderPlaceName: inv.orderPlaceName ?? '-',
+        }))
+      } catch (err: any) {
+        this.error = err.message
+      } finally {
+        this.loading = false
+      }
+    },
 
     // 🔥 FETCH SINGLE INVOICE (DETAIL PAGE)
     async fetchById(id: number) {
@@ -80,7 +78,6 @@ export const useInvoiceStore = defineStore('invoice', {
         const data = res.data?.[0] || null
 
         this.currentInvoice = data
-
       } catch (err: any) {
         this.error = err.message
       } finally {

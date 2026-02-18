@@ -87,7 +87,7 @@ const routes = [
       { path: 'menu', name: 'admin-menu', component: AdminMenu },
       { path: 'tables', name: 'admin-tables', component: AdminTables },
       { path: 'invoices', name: 'admin-invoices', component: AdminInvoices },
-      { path: 'invoices/:id', name: 'admin-invoice-detail', component: AdminInvoiceDetails},
+      { path: 'invoices/:id', name: 'admin-invoice-detail', component: AdminInvoiceDetails },
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
       { path: 'orders/:id', name: 'admin-order-details', component: AdminOrderDetails },
       { path: 'menu-items/new', name: 'admin-menu-new', component: MenuItemCreate },

@@ -28,20 +28,18 @@
         </select>
 
         <select v-model="statusFilter" class="filter-select">
-  <option value="">All statuses</option>
-  <option value="ACTIVE">Active</option>
-  <option value="INACTIVE">Inactive</option>
-  <option value="OUT_OF_STOCK">Out of stock</option>
-</select>
-
+          <option value="">All statuses</option>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+          <option value="OUT_OF_STOCK">Out of stock</option>
+        </select>
 
         <select v-model="availabilityFilter" class="filter-select">
-  <option value="">All times</option>
-  <option value="CAFE_ONLY">Cafe only</option>
-  <option value="ROOM_SERVICE_ONLY">Room service</option>
-  <option value="BOTH">Cafe & Room</option>
-</select>
-
+          <option value="">All times</option>
+          <option value="CAFE_ONLY">Cafe only</option>
+          <option value="ROOM_SERVICE_ONLY">Room service</option>
+          <option value="BOTH">Cafe & Room</option>
+        </select>
       </div>
     </section>
 
@@ -135,7 +133,8 @@ const filteredProducts = computed(() => {
 
     const matchesCategory = !categoryFilter.value || p.category === categoryFilter.value
     const matchesStatus = !statusFilter.value || p.status === statusFilter.value
-    const matchesAvailability = !availabilityFilter.value || p.availableIn === availabilityFilter.value
+    const matchesAvailability =
+      !availabilityFilter.value || p.availableIn === availabilityFilter.value
 
     return matchesSearch && matchesCategory && matchesStatus && matchesAvailability
   })
@@ -150,7 +149,7 @@ function editProduct(row: MenuItem) {
 }
 
 async function toggleActive(row: MenuItem) {
-const next: ProductStatus = row.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+  const next: ProductStatus = row.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
 
   try {
     await menuItemsStore.updateStatus(row.id, next)

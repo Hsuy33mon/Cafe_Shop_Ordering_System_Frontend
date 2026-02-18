@@ -35,34 +35,29 @@ export const useCartStore = defineStore('cart', () => {
   const tableNumber = ref('')
 
   function addItem(item: Omit<CartItem, 'cartId'>) {
-  items.value.push({
-    ...item,
-    cartId: Date.now() + Math.random()
-  })
-}
-
+    items.value.push({
+      ...item,
+      cartId: Date.now() + Math.random(),
+    })
+  }
 
   function removeItem(cartId: number) {
-    items.value = items.value.filter(i => i.cartId !== cartId)
+    items.value = items.value.filter((i) => i.cartId !== cartId)
   }
 
   function increaseQty(cartId: number) {
-    const item = items.value.find(i => i.cartId === cartId)
+    const item = items.value.find((i) => i.cartId === cartId)
     if (item) item.quantity++
   }
 
   function decreaseQty(cartId: number) {
-    const item = items.value.find(i => i.cartId === cartId)
+    const item = items.value.find((i) => i.cartId === cartId)
     if (item && item.quantity > 1) item.quantity--
   }
 
   const cartSubtotal = computed(() =>
-  items.value.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
+    items.value.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
   )
-)
-
 
   const totalIngredientPrice = computed(() => 0)
 
@@ -78,6 +73,6 @@ export const useCartStore = defineStore('cart', () => {
     decreaseQty,
     cartSubtotal,
     totalIngredientPrice,
-    totalPrice
+    totalPrice,
   }
 })

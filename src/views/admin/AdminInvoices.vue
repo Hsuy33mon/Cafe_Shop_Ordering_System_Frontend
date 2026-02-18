@@ -4,14 +4,10 @@
     <section class="panel panel--filters menu-header">
       <div class="menu-header-left">
         <h1 class="menu-title">Invoices</h1>
-        <p class="menu-subtitle">
-          Manage all invoices generated in CafeShop.
-        </p>
+        <p class="menu-subtitle">Manage all invoices generated in CafeShop.</p>
       </div>
 
-      <button class="menu-btn-primary" @click="goToCreateInvoice">
-        + Create invoice
-      </button>
+      <button class="menu-btn-primary" @click="goToCreateInvoice">+ Create invoice</button>
     </section>
 
     <!-- FILTER BAR -->
@@ -49,29 +45,23 @@
       @page-change="onPageChange"
     >
       <!-- Total -->
-      <template #cell-grandTotal="{ value }">
-  ฿{{ value.toFixed(2) }}
-</template>
+      <template #cell-grandTotal="{ value }"> ฿{{ value.toFixed(2) }} </template>
 
-<template #cell-createdAt="{ value }">
-  {{ new Date(value).toLocaleString() }}
-</template>
-
+      <template #cell-createdAt="{ value }">
+        {{ new Date(value).toLocaleString() }}
+      </template>
 
       <!-- Status pill -->
       <template #cell-status="{ value }">
-  <span class="status-pill" :class="statusClass(value)">
-    {{ value }}
-  </span>
-</template>
-
+        <span class="status-pill" :class="statusClass(value)">
+          {{ value }}
+        </span>
+      </template>
 
       <!-- Actions -->
       <template #cell-actions="{ row }">
         <button class="btn-link" @click="viewInvoice(row)">View</button>
-        <button class="btn-link btn-link--danger" @click="cancelInvoice(row)">
-          Cancel
-        </button>
+        <button class="btn-link btn-link--danger" @click="cancelInvoice(row)">Cancel</button>
       </template>
     </AdminTable>
   </main>
@@ -112,18 +102,12 @@ const filteredInvoices = computed(() => {
 
   return invoices.value.filter((inv) => {
     const matchesSearch =
-      !s ||
-      (inv.invoiceNo?.toLowerCase().includes(s)) ||
-      inv.customerName?.toLowerCase().includes(s)
+      !s || inv.invoiceNo?.toLowerCase().includes(s) || inv.customerName?.toLowerCase().includes(s)
 
-    const matchesStatus =
-      !statusFilter.value || inv.status === statusFilter.value
+    const matchesStatus = !statusFilter.value || inv.status === statusFilter.value
 
     const matchesPlace =
-      !placeFilter.value ||
-      (inv.orderPlaceName || '')
-        .toUpperCase()
-        .includes(placeFilter.value)
+      !placeFilter.value || (inv.orderPlaceName || '').toUpperCase().includes(placeFilter.value)
 
     return matchesSearch && matchesStatus && matchesPlace
   })
@@ -153,6 +137,5 @@ function goToCreateInvoice() {
   router.push({ name: 'admin-invoice-new' })
 }
 </script>
-
 
 <style scoped src="@/styles/admin/admin-invoices.css"></style>

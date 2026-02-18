@@ -2,11 +2,13 @@
 <template>
   <main class="content order-details-page">
     <!-- GLOBAL MESSAGE -->
-<section v-if="lastUpdateMessage" class="order-global-message"
-  :class="{ 'order-global-message--error': lastUpdateMessage.includes('Failed') }"
->
-  {{ lastUpdateMessage }}
-</section>
+    <section
+      v-if="lastUpdateMessage"
+      class="order-global-message"
+      :class="{ 'order-global-message--error': lastUpdateMessage.includes('Failed') }"
+    >
+      {{ lastUpdateMessage }}
+    </section>
 
     <!-- HEADER -->
     <section class="panel order-header">
@@ -102,7 +104,6 @@
                 </td>
               </tr>
             </template>
-
           </tbody>
         </table>
       </article>
@@ -133,7 +134,6 @@
               <dt>Total</dt>
               <dd>฿{{ grandTotal }}</dd>
             </div>
-
           </dl>
         </article>
 
@@ -145,8 +145,6 @@
           </p>
         </article>
 
-
-
         <!-- STATUS / PAYMENT UPDATE -->
         <article class="panel order-manage-panel">
           <h2 class="panel-title">Status & payment</h2>
@@ -157,7 +155,6 @@
               <option v-for="opt in statusOptions" :key="opt" :value="opt">
                 {{ STATUS_LABELS[opt] }}
               </option>
-
             </select>
           </label>
 
@@ -171,17 +168,18 @@
 
           <label class="manage-field">
             <span class="manage-label">Payment type</span>
-            <select v-model="editPaymentType" class="manage-select" :disabled="editPaymentStatus === 'UNPAID'">
+            <select
+              v-model="editPaymentType"
+              class="manage-select"
+              :disabled="editPaymentStatus === 'UNPAID'"
+            >
               <option value="CASH">Cash</option>
               <option value="CARD">Card</option>
               <option value="QR">QR</option>
             </select>
           </label>
 
-          <button class="manage-btn-primary" @click="applyOrderUpdate">
-            Update order
-          </button>
-
+          <button class="manage-btn-primary" @click="applyOrderUpdate">Update order</button>
 
           <!-- <p v-if="lastUpdateMessage" class="manage-hint">
             {{ lastUpdateMessage }}
@@ -193,7 +191,6 @@
 >
   {{ lastUpdateMessage }}
 </div> -->
-
         </article>
       </aside>
     </section>
@@ -212,19 +209,14 @@ const route = useRoute()
 const router = useRouter()
 const ordersStore = useOrdersStore()
 
-const itemsTotal = computed(() =>
-  order.value?.items.reduce(
-    (sum: number, item: any) => sum + item.total,
-    0,
-  ) || 0,
+const itemsTotal = computed(
+  () => order.value?.items.reduce((sum: number, item: any) => sum + item.total, 0) || 0,
 )
 
-
-const ingredientsTotal = computed(() =>
-  order.value?.items.reduce(
-    (sum: number, item: any) => sum + ingredientTotalForItem(item),
+const ingredientsTotal = computed(
+  () =>
+    order.value?.items.reduce((sum: number, item: any) => sum + ingredientTotalForItem(item), 0) ||
     0,
-  ) || 0,
 )
 
 const grandTotal = computed(() => itemsTotal.value + ingredientsTotal.value)
@@ -249,7 +241,6 @@ type PaymentType = 'CASH' | 'CARD' | 'QR'
 // const paymentStatusOptions: PaymentStatus[] = ['UNPAID', 'PAID']
 // const paymentTypeOptions: PaymentType[] = ['CASH', 'CARD', 'QR']
 
-
 /* =======================
    Status Update Form
 ======================= */
@@ -270,12 +261,10 @@ const statusOptions: OrderStatus[] = [
   'CANCELLED',
 ]
 
-
 const editStatus = ref<OrderStatus>('PENDING')
 const lastUpdateMessage = ref('')
 const editPaymentStatus = ref<PaymentStatus>('UNPAID')
 const editPaymentType = ref<PaymentType>('CASH')
-
 
 watch(order, (o) => {
   if (!o) return
@@ -306,13 +295,11 @@ async function applyOrderUpdate() {
     setTimeout(() => {
       router.push({ name: 'admin-orders' })
     }, 1500)
-
   } catch (e) {
     console.error(e)
     lastUpdateMessage.value = 'Failed to update order. Please try again.'
   }
 }
-
 
 /* =======================
    Navigation
@@ -334,7 +321,6 @@ function statusClass(status: OrderStatus) {
   }
 }
 
-
 function getIngredientAmount(item: any, ingredientId: number) {
   const ingredient = item.menuItem?.ingredients?.find(
     (i: any) => Number(i.id) === Number(ingredientId),
@@ -342,14 +328,12 @@ function getIngredientAmount(item: any, ingredientId: number) {
   return ingredient?.amount ?? '-'
 }
 
-
 function getIngredientPrice(item: any, ingredientId: number) {
   const ingredient = item.menuItem?.ingredients?.find(
     (i: any) => Number(i.id) === Number(ingredientId),
   )
   return ingredient?.price ?? 0
 }
-
 
 function ingredientTotalForItem(item: any) {
   if (!item.orderIngredients?.length) return 0
@@ -359,9 +343,6 @@ function ingredientTotalForItem(item: any) {
     return sum + price
   }, 0)
 }
-
-
-
 </script>
 
 <style scoped src="@/styles/admin/order-details.css"></style>

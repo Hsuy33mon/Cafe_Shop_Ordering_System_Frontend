@@ -70,14 +70,15 @@ function mapFromApi(x: any): Order {
         total: Number(x.totalPrice),
         note: x.note,
         menuItem: x.menuItem,
-        orderIngredients: Array.isArray(x.orderIngredients) ? x.orderIngredients.map((oi: any) => ({
-          id: oi.id,
-          ingredientId: oi.ingredientId,
-          ingredientName: oi.ingredientName,
-          qty: Number(oi.qty),
-          note: oi.note,
-        }))
-      : [],
+        orderIngredients: Array.isArray(x.orderIngredients)
+          ? x.orderIngredients.map((oi: any) => ({
+              id: oi.id,
+              ingredientId: oi.ingredientId,
+              ingredientName: oi.ingredientName,
+              qty: Number(oi.qty),
+              note: oi.note,
+            }))
+          : [],
       },
     ],
     subtotal: Number(x.totalPrice),
@@ -137,36 +138,35 @@ export const useOrdersStore = defineStore('orders', {
       }
     },
     async updateOrderItem(orderId: number, itemId: number, payload: any) {
-  await http.put(`/api/admin/orders/${orderId}/items/${itemId}`, payload)
-},
-async update(
-  id: number,
-  payload: {
-    status?: OrderStatus
-    paymentStatus?: string
-    paymentType?: string
-  },
-) {
-  this.loading = true
-  this.error = null
-  try {
-    const res = await http.put(`/api/admin/orders/${id}`, payload)
+      await http.put(`/api/admin/orders/${orderId}/items/${itemId}`, payload)
+    },
+    async update(
+      id: number,
+      payload: {
+        status?: OrderStatus
+        paymentStatus?: string
+        paymentType?: string
+      },
+    ) {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await http.put(`/api/admin/orders/${id}`, payload)
 
-    const updated = mapFromApi(res.data)
+        const updated = mapFromApi(res.data)
 
-    const idx = this.items.findIndex((x) => x.id === id)
-    if (idx !== -1) this.items[idx] = updated
-    if (this.currentOrder?.id === id) this.currentOrder = updated
+        const idx = this.items.findIndex((x) => x.id === id)
+        if (idx !== -1) this.items[idx] = updated
+        if (this.currentOrder?.id === id) this.currentOrder = updated
 
-    return res.data
-  } catch (e: any) {
-    this.error = axiosErrorMessage(e)
-    throw e
-  } finally {
-    this.loading = false
-  }
-},
-
+        return res.data
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
 
     // async update(id: number, payload: { status?: OrderStatus }) {
     //   this.loading = true

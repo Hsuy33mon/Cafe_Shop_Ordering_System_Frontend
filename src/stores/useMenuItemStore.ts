@@ -4,8 +4,6 @@ import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
 type MenuItemApi = any
 
-
-
 function mapFromApi(x: any) {
   return {
     id: Number(x.id),
@@ -28,7 +26,6 @@ function mapFromApi(x: any) {
     ingredients: x.ingredients ?? [],
   }
 }
-
 
 function axiosErrorMessage(e: any): string {
   const data = e?.response?.data
@@ -83,16 +80,16 @@ export const useMenuItemsStore = defineStore('menuItems', {
     },
 
     async fetchById(id: number) {
-  try {
-    const res = await http.get(`/api/admin/menu-items/${id}`)
-    const item = mapFromApi(res.data)
-    this.currentItem = item
-    return item
-  } catch (e: any) {
-    this.error = axiosErrorMessage(e)
-    throw e
-  }
-},
+      try {
+        const res = await http.get(`/api/admin/menu-items/${id}`)
+        const item = mapFromApi(res.data)
+        this.currentItem = item
+        return item
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
+      }
+    },
 
     async create(payload: any) {
       this.loading = true

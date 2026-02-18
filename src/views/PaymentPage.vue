@@ -6,19 +6,9 @@
         <h1 class="checkout-title">Payment</h1>
 
         <div class="breadcrumb-pill">
-                    <span
-  class="crumb crumb--link"
-  @click="goToHome"
->
-  Home
-</span>
+          <span class="crumb crumb--link" @click="goToHome"> Home </span>
           <span class="crumb-sep">/</span>
-          <span
-  class="crumb crumb--link"
-  @click="goToCheckout"
->
-  Checkout
-</span>
+          <span class="crumb crumb--link" @click="goToCheckout"> Checkout </span>
           <span class="crumb-sep">/</span>
           <span class="crumb crumb--active">Payment</span>
         </div>
@@ -64,7 +54,7 @@
 
                 <div class="item-qty">x{{ item.quantity }}</div>
                 <div class="item-price">
-                 {{ formatMoney(item.unitPrice * item.quantity) }}
+                  {{ formatMoney(item.unitPrice * item.quantity) }}
                 </div>
               </li>
             </ul>
@@ -202,19 +192,14 @@ const items = computed(() => cartStore.items)
 
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-const total = computed(() =>
-  subtotal.value + totalIngredientPrice.value
-)
-
+const total = computed(() => subtotal.value + totalIngredientPrice.value)
 
 type OrderType = 'shop' | 'room'
 type PaymentMethod = 'card' | 'promptpay'
 
-
 // Mock order data – later you can replace with props / store
 const orderType = ref<OrderType>('room')
 const roomNo = ref('1205')
-
 
 // payment state
 const selectedMethod = ref<PaymentMethod>('card')
@@ -227,13 +212,12 @@ function formatMoney(value: number): string {
   return `฿${value.toFixed(0)}`
 }
 
-function goToCheckout(){
+function goToCheckout() {
   router.push({ name: 'cart' })
 }
-function goToHome(){
+function goToHome() {
   router.push({ name: 'home' })
 }
-
 
 function submitPayment() {
   if (selectedMethod.value === 'card') {

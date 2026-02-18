@@ -73,60 +73,50 @@
     </AdminTable>
 
     <!-- EDIT TABLE DIALOG -->
-<div v-if="editDialogVisible" class="modal-backdrop">
-  <div class="modal modal--wide">
-    <h3 class="modal-title">Update table</h3>
+    <div v-if="editDialogVisible" class="modal-backdrop">
+      <div class="modal modal--wide">
+        <h3 class="modal-title">Update table</h3>
 
-    <label class="modal-label">
-      Table number
-      <input v-model="editForm.name" class="modal-input" />
-    </label>
+        <label class="modal-label">
+          Table number
+          <input v-model="editForm.name" class="modal-input" />
+        </label>
 
-    <label class="modal-label">
-      Area / zone
-      <input v-model="editForm.area" class="modal-input" />
-    </label>
+        <label class="modal-label">
+          Area / zone
+          <input v-model="editForm.area" class="modal-input" />
+        </label>
 
-    <label class="modal-label">
-      Seats
-      <input
-        v-model.number="editForm.capacity"
-        type="number"
-        min="1"
-        class="modal-input"
-      />
-    </label>
+        <label class="modal-label">
+          Seats
+          <input v-model.number="editForm.capacity" type="number" min="1" class="modal-input" />
+        </label>
 
-    <label class="modal-label">
-      Status
-      <select v-model="editForm.status" class="modal-select">
-        <option v-for="opt in statusOptions" :key="opt" :value="opt">
-          {{ opt }}
-        </option>
-      </select>
-    </label>
+        <label class="modal-label">
+          Status
+          <select v-model="editForm.status" class="modal-select">
+            <option v-for="opt in statusOptions" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </label>
 
-    <label class="modal-label">
-      Note
-      <textarea
-        v-model="editForm.note"
-        rows="3"
-        class="modal-textarea"
-        placeholder="Optional note for staff"
-      />
-    </label>
+        <label class="modal-label">
+          Note
+          <textarea
+            v-model="editForm.note"
+            rows="3"
+            class="modal-textarea"
+            placeholder="Optional note for staff"
+          />
+        </label>
 
-    <div class="modal-actions">
-      <button class="modal-btn modal-btn--primary" @click="confirmEdit">
-        Save changes
-      </button>
-      <button class="modal-btn" @click="closeEditDialog">
-        Cancel
-      </button>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn--primary" @click="confirmEdit">Save changes</button>
+          <button class="modal-btn" @click="closeEditDialog">Cancel</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
   </main>
 </template>
 
@@ -150,7 +140,6 @@ type TableEditForm = {
 
 const editDialogVisible = ref(false)
 const editForm = ref<TableEditForm | null>(null)
-
 
 type TableRow = {
   id: number
@@ -184,7 +173,6 @@ function toApiStatus(status: TableStatus): OrderPlaceStatus {
   return status === 'Active' ? 'ACTIVE' : 'INACTIVE'
 }
 
-
 async function confirmEdit() {
   if (!editForm.value) return
 
@@ -202,7 +190,6 @@ async function confirmEdit() {
     alert(orderPlacesStore.error || 'Update failed')
   }
 }
-
 
 /* =======================
    Router & Store
@@ -233,7 +220,7 @@ const tableColumns: TableColumn[] = [
 ======================= */
 const tables = computed<TableRow[]>(() =>
   orderPlacesStore.items
-    .filter(p => p.status !== 'DELETED')
+    .filter((p) => p.status !== 'DELETED')
     .map((p) => ({
       id: p.id,
       name: p.no,
@@ -245,9 +232,8 @@ const tables = computed<TableRow[]>(() =>
         ? new Date(p.activeOrders[0].createdAt).toTimeString().slice(0, 5)
         : '-',
       note: p.description,
-    }))
+    })),
 )
-
 
 /* =======================
    Filters
@@ -328,7 +314,6 @@ function statusClass(status: TableStatus) {
     'status-pill--inactive': status === 'Inactive',
   }
 }
-
 
 /* =======================
    Go to Order
