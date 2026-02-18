@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import { http } from '@/lib/http'
 
 export interface InvoiceOrder {
   id: number
@@ -52,7 +52,7 @@ export const useInvoiceStore = defineStore('invoice', {
     this.loading = true
     this.error = null
 
-    const res = await axios.get('/api/admin/invoices')
+    const res = await http.get('/api/admin/invoices')
 
     // Normalize null values
     this.invoices = res.data.map((inv: any) => ({
@@ -60,6 +60,8 @@ export const useInvoiceStore = defineStore('invoice', {
       invoiceNo: inv.invoiceNo ?? `INV-${inv.id}`,
       orderPlaceName: inv.orderPlaceName ?? '-',
     }))
+    console.log('API RESPONSE:', res.data)
+
 
   } catch (err: any) {
     this.error = err.message
@@ -69,23 +71,28 @@ export const useInvoiceStore = defineStore('invoice', {
 },
 
     // 🔥 FETCH SINGLE INVOICE (DETAIL PAGE)
-    async fetchById(id: number) {
-      try {
-        this.loading = true
-        this.error = null
+   async fetchById(id: number) {
+  try {
+    this.loading = true
+    this.error = null
 
-        const res = await axios.get(`/api/admin/invoices/${id}`)
+    const res = await http.get(`/api/admin/invoices/${id}`)
 
-        // Backend returns array
-        const data = res.data?.[0] || null
+    const inv = res.data
 
-        this.currentInvoice = data
+    this.currentInvoice = {
+      ...inv,
+      invoiceNo: inv.invoiceNo ?? `INV-${inv.id}`,
+      orderPlaceName: inv.orderPlaceName ?? '-',
+    }
 
-      } catch (err: any) {
-        this.error = err.message
-      } finally {
-        this.loading = false
-      }
-    },
+  } catch (err: any) {
+    this.error = err.message
+    this.currentInvoice = null
+  } finally {
+    this.loading = false
+  }
+},
+
   },
 })

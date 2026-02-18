@@ -64,7 +64,17 @@ export const useCartStore = defineStore('cart', () => {
 )
 
 
-  const totalIngredientPrice = computed(() => 0)
+  const totalIngredientPrice = computed(() =>
+  items.value.reduce((sum, item) => {
+    const ingredientTotalPerItem = item.ingredients.reduce(
+      (ingSum, ing) => ingSum + ing.price,
+      0
+    )
+
+    return sum + ingredientTotalPerItem * item.quantity
+  }, 0)
+)
+
 
   const totalPrice = computed(() => cartSubtotal.value)
 

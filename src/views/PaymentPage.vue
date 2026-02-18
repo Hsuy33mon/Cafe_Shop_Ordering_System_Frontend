@@ -203,7 +203,7 @@ const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
 const total = computed(() =>
-  subtotal.value + totalIngredientPrice.value
+  subtotal.value
 )
 
 

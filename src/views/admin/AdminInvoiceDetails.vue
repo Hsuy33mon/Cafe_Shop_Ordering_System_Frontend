@@ -57,8 +57,7 @@
 
         <tr>
           <td class="label">Applied at</td>
-          <td class="value">{{ formatDate(invoice.appliedAt) }}</td>d>
-
+          <td class="value">{{ formatDate(invoice.appliedAt) }}</td>
           <td class="label">Delivery Fee</td>
           <td class="value">฿{{ invoice.deliveryFee.toFixed(2) }}</td>
         </tr>
@@ -136,13 +135,13 @@
           </thead>
 
           <tbody>
-            <tr v-for="(p) in invoice.payments" :key="p.id">
-              <td>1</td>
+            <tr v-for="(p, index) in invoice.payments" :key="p.id">
+                <td>{{ index + 1 }}</td>
               <td>{{  p.method }}</td>
               <td>{{ p.gateway }}</td>
               <td>฿{{ p.amount.toFixed(2) }}</td>
               <td>
-                <span class="status-pill status-pill--pending">
+                <span class="status-pill" :class="statusClass(invoice.status)">
                   {{ p.status  }}
                 </span>
               </td>
@@ -189,6 +188,16 @@ function formatDate(date: string | null) {
   if (!date) return '-'
   return new Date(date).toLocaleString()
 }
+
+function statusClass(status: string) {
+  return {
+    'status-pill--new': status === 'PAID',
+    'status-pill--prep': status === 'PENDING',
+    'status-pill--ready': status === 'CANCELED',
+    'status-pill--cancel': status === 'REFUNDED',
+  }
+}
+
 </script>
 
 
