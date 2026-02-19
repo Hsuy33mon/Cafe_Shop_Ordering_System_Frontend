@@ -192,7 +192,7 @@ const items = computed(() => cartStore.items)
 
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-const total = computed(() => subtotal.value + totalIngredientPrice.value)
+const total = computed(() => subtotal.value)
 
 type OrderType = 'shop' | 'room'
 type PaymentMethod = 'card' | 'promptpay'

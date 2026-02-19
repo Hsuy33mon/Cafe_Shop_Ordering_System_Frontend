@@ -31,7 +31,7 @@
               <tr>
                 <th>#</th>
                 <th>Time</th>
-                <th>Customer / Room</th>
+                <th>Customer</th>
                 <th>Type</th>
                 <th>Total (฿)</th>
                 <th>Status</th>

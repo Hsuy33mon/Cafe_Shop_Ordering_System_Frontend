@@ -32,6 +32,7 @@
           <option value="ACTIVE">Active</option>
           <option value="INACTIVE">Inactive</option>
           <option value="OUT_OF_STOCK">Out of stock</option>
+          <option value="TEST">Test</option>
         </select>
 
         <select v-model="availabilityFilter" class="filter-select">
@@ -163,6 +164,7 @@ function statusClass(status: ProductStatus) {
     'status-pill--new': status === 'ACTIVE',
     'status-pill--prep': status === 'INACTIVE',
     'status-pill--ready': status === 'OUT_OF_STOCK',
+    'status-pill--test': status === 'TEST',
   }
 }
 
