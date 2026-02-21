@@ -96,145 +96,71 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useDashboardStore } from '@/stores/useDashboardStore'
 
-type KpiCard = {
-  label: string
-  value: string
-  subtext: string
-  trend: number
-}
+const props = defineProps<{ search?: string }>()
 
-type OrderStatus = 'New' | 'Preparing' | 'Ready' | 'Paid'
+const dashboardStore = useDashboardStore()
 
-type Order = {
-  id: number
-  time: string
-  customer: string
-  meta?: string
-  channel: 'Cafe' | 'Room' | 'Take-away'
-  total: number
-  status: OrderStatus
-}
+onMounted(() => {
+  dashboardStore.fetchDashboard()
+})
 
-// Receive search text from AdminLayout (optional but recommended)
-const props = defineProps<{
-  search?: string
-}>()
+const dashboard = computed(() => dashboardStore.dashboard)
 
-// kpi cards
-const kpiCards: KpiCard[] = [
-  {
-    label: "Today's orders",
-    value: '128',
-    subtext: 'vs. 115 yesterday',
-    trend: 11,
-  },
-  {
-    label: 'Revenue',
-    value: '฿18,420',
-    subtext: 'Today (incl. room service)',
-    trend: 8,
-  },
-  {
-    label: 'Active tables',
-    value: '9',
-    subtext: 'Out of 24 seats',
-    trend: 3,
-  },
-  {
-    label: 'Popular item',
-    value: 'Iced Caramel Latte',
-    subtext: '37 orders today',
-    trend: 15,
-  },
-]
+// KPI CARDS (dynamic)
+const kpiCards = computed(() => {
+  if (!dashboard.value) return []
 
-// orders
-const orders = ref<Order[]>([
-  {
-    id: 1042,
-    time: '10:12',
-    customer: 'Room 1205',
-    meta: '2 x Iced Latte, 1 x Cake',
-    channel: 'Room',
-    total: 320,
-    status: 'Preparing',
-  },
-  {
-    id: 1041,
-    time: '10:05',
-    customer: 'Walk-in',
-    meta: 'Gourmet Burger set',
-    channel: 'Cafe',
-    total: 240,
-    status: 'Ready',
-  },
-  {
-    id: 1040,
-    time: '09:58',
-    customer: 'Take-away #09',
-    meta: 'Matcha Latte, Croissant',
-    channel: 'Take-away',
-    total: 170,
-    status: 'Paid',
-  },
-  {
-    id: 1039,
-    time: '09:45',
-    customer: 'Room 810',
-    meta: 'Breakfast set',
-    channel: 'Room',
-    total: 420,
-    status: 'Preparing',
-  },
-  {
-    id: 1038,
-    time: '09:32',
-    customer: 'Walk-in',
-    meta: 'Saumon Gravlax',
-    channel: 'Cafe',
-    total: 260,
-    status: 'Paid',
-  },
-  {
-    id: 1037,
-    time: '09:20',
-    customer: 'Take-away #07',
-    meta: '2 x Americano',
-    channel: 'Take-away',
-    total: 120,
-    status: 'Paid',
-  },
-])
+  return [
+    {
+      label: "Today's orders",
+      value: dashboard.value.todayOrders,
+      subtext: `vs. ${dashboard.value.yesterdayOrders} yesterday`,
+      trend: Number(dashboard.value.orderGrowthPercent.toFixed(1)),
+    },
+    {
+      label: 'Profit (฿)',
+      value: `฿${dashboard.value.todayProfitBaht.toLocaleString()}`,
+      subtext: 'Today gross profit',
+      trend: Number(dashboard.value.profitGrowthPercent.toFixed(1)),
+    },
+    {
+      label: 'Active tables',
+      value: dashboard.value.activeTables,
+      subtext: `Out of ${dashboard.value.totalTables} tables`,
+      trend: 0, // no growth yet
+    },
+    {
+      label: 'Popular item',
+      value: dashboard.value.popularItemName,
+      subtext: `${dashboard.value.popularItemCount} orders today`,
+      trend: 0, // can add later
+    },
+  ]
+})
+
+// Recent Orders (if backend provides)
+const orders = computed(() => dashboard.value?.recentOrders ?? [])
 
 const filteredOrders = computed(() => {
   const text = (props.search ?? '').trim().toLowerCase()
   if (!text) return orders.value
 
-  return orders.value.filter((o) => {
-    return (
-      o.customer.toLowerCase().includes(text) ||
-      (o.meta && o.meta.toLowerCase().includes(text)) ||
-      String(o.id).includes(text)
-    )
-  })
+  return orders.value.filter((o: any) =>
+    o.customer?.toLowerCase().includes(text) ||
+    String(o.id).includes(text)
+  )
 })
 
-// stats
-const channelStats = [
-  { label: 'Cafe', count: 64, percent: 55 },
-  { label: 'Room service', count: 38, percent: 32 },
-  { label: 'Take-away', count: 16, percent: 13 },
-]
+// Channel stats (if backend provides)
+const channelStats = computed(() => dashboard.value?.channelStats ?? [])
 
-const topCategories = [
-  { name: 'Coffee & drinks', orders: 72 },
-  { name: 'Burgers & mains', orders: 28 },
-  { name: 'Desserts', orders: 18 },
-]
+// Top categories (if backend provides)
+const topCategories = computed(() => dashboard.value?.topCategories ?? [])
 
-function statusClass(status: OrderStatus) {
+function statusClass(status: string) {
   return {
     'status-pill--new': status === 'New',
     'status-pill--prep': status === 'Preparing',
