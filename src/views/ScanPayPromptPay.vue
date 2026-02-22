@@ -18,7 +18,6 @@
     <!-- MAIN -->
     <main class="payment-main">
       <section class="cs-container payment-layout">
-        <!-- LEFT: ORDER SUMMARY -->
         <section class="summary-left">
           <div class="order-card">
             <h2 class="section-title">Order summary</h2>
@@ -209,7 +208,6 @@ function formatMoney(value: number): string {
   return `฿${Number(value).toFixed(0)}`
 }
 
-// ✅ Build request body from cart (match your DTO)
 function buildPaymentRequestBody() {
   return {
     orderPlaceId: orderPlaceId.value,
@@ -217,15 +215,12 @@ function buildPaymentRequestBody() {
     method: 'PROMPTPAY_QR',
     gateway: 'OMISE',
     promptPayId: promptPayId.value,
-    // optional (backend should compute)
     amount: total.value,
     items: cartStore.items.map((i: any) => ({
       qty: i.quantity,
-      // ✅ cart has sizeId, not menuItemSizeId
       menuItemSizeId: i.sizeId,
       note: i.note ?? '',
       status: 'PENDING',
-      // ✅ cart ingredients uses id, not ingredientId
       ingredients: (i.ingredients ?? []).map((ing: any) => ({
         ingredientId: ing.id,
         qty: ing.qty ?? 1,
@@ -240,7 +235,7 @@ async function createPromptPayQr() {
   try {
     const body = buildPaymentRequestBody()
     const res = await axios.post<PaymentResponse>('/api/payments', body)
-
+    console.log("res-->",res.data)
     payment.value = res.data
     paidConfirmed.value = false
     expiresInSec.value = 300
@@ -268,7 +263,6 @@ function goToHome() {
 }
 
 async function confirmPaid() {
-  // Later: poll payment status from backend by payment.value?.id
   router.push({ name: 'paymentSuccess' })
 }
 

@@ -116,6 +116,7 @@ export const usePaymentStore = defineStore('payment', () => {
     try {
       const body = buildRequestBody(payload)
       const res = await http.post<PaymentResponse>('/payments', body)
+      console.log("payment response--> ",res)
 
       payment.value = res.data
       expiresInSec.value = 300

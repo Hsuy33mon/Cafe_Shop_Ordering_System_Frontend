@@ -6,7 +6,7 @@ export type CartIngredient = {
   name: string
   price: number
   amount: string
-  qty?: number // ✅ optional if later you need ingredient qty
+  qty?: number 
 }
 
 export type CartItem = {
@@ -42,9 +42,6 @@ export const useCartStore = defineStore('cart', () => {
   const customerName = ref('')
   const tableNumber = ref('')
 
-  // ----------------------------
-  // ✅ Load from localStorage
-  // ----------------------------
   function loadFromStorage() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return
@@ -60,9 +57,6 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  // ----------------------------
-  // ✅ Save to localStorage
-  // ----------------------------
   function saveToStorage() {
     const payload: PersistedCart = {
       items: items.value,
@@ -122,8 +116,6 @@ export const useCartStore = defineStore('cart', () => {
       return sum + ingredientTotalPerItem * item.quantity
     }, 0),
   )
-
-  // ✅ Fix total to include ingredients
   const totalPrice = computed(() => cartSubtotal.value + totalIngredientPrice.value)
 
   return {
