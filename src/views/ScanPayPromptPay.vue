@@ -99,8 +99,7 @@
                   <h3>Scan to pay</h3>
 
                   <p class="scan-text">
-                    Use your banking app to scan this QR code.
-                    Amount:
+                    Use your banking app to scan this QR code. Amount:
                     <strong>{{ formatMoney(payment?.amount ?? total) }}</strong>
                   </p>
 
@@ -159,6 +158,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/useCartStore'
 import axios from 'axios'
+import { useOrderSessionStore } from '@/stores/orderSession'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -168,9 +168,9 @@ const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
 
 const total = computed(() => subtotal.value + totalIngredientPrice.value)
-
-const customerName = computed(() => cartStore.customerName || 'MIN PYAE HEIN')
-const tableNumber = computed(() => cartStore.tableNumber || '12')
+const session = useOrderSessionStore()
+const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
+const tableNumber = computed(() => session.placeNumber || '12')
 
 const orderType = ref<'shop' | 'room'>('shop')
 const roomNo = ref('1205')

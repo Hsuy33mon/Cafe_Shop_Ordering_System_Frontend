@@ -19,15 +19,18 @@
     <!-- MIDDLE ROW: ORDERS + STATS -->
     <section class="middle-grid">
       <div class="revenue-filter">
-        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
-          @click="changeType(t)">
+        <button
+          v-for="t in ['DAILY', 'MONTHLY']"
+          :key="t"
+          :class="{ active: currentType === t }"
+          @click="changeType(t)"
+        >
           {{ t }}
         </button>
         <div class="chart-wrapper">
           <Line :data="chartData" :options="chartOptions" />
         </div>
       </div>
-
 
       <!-- RECENT ORDERS -->
       <!-- <article class="panel panel--orders">
@@ -185,11 +188,11 @@ function changeType(type: 'DAILY' | 'MONTHLY') {
 }
 
 const chartData = computed(() => ({
-  labels: dashboardStore.revenueChart.map(p => p.label),
+  labels: dashboardStore.revenueChart.map((p) => p.label),
   datasets: [
     {
       label: 'Revenue (฿)',
-      data: dashboardStore.revenueChart.map(p => p.revenue),
+      data: dashboardStore.revenueChart.map((p) => p.revenue),
       borderColor: '#10b981',
       backgroundColor: 'rgba(16,185,129,0.2)',
       tension: 0.4,
@@ -218,9 +221,8 @@ const filteredOrders = computed(() => {
   const text = (props.search ?? '').trim().toLowerCase()
   if (!text) return orders.value
 
-  return orders.value.filter((o: any) =>
-    o.customer?.toLowerCase().includes(text) ||
-    String(o.id).includes(text)
+  return orders.value.filter(
+    (o: any) => o.customer?.toLowerCase().includes(text) || String(o.id).includes(text),
   )
 })
 

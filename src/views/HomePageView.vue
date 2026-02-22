@@ -37,7 +37,7 @@
             <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
           </div>
           <!-- <div class="floating-card floating-card--top"> -->
-            <div class="floating-card floating-card--bottom">
+          <div class="floating-card floating-card--bottom">
             <!-- <span class="dot dot--green" /> -->
             <div>
               <p class="floating-label">Served with warmth &amp;</p>

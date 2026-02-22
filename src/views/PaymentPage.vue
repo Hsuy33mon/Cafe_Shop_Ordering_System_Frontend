@@ -91,12 +91,7 @@
             <!-- Method choices (no payment creation here) -->
             <div class="method-list">
               <label class="method-option" :class="{ active: selectedMethod === 'promptpay' }">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="promptpay"
-                  v-model="selectedMethod"
-                />
+                <input type="radio" name="payment" value="promptpay" v-model="selectedMethod" />
                 <span class="method-icon">📱</span>
                 <div class="method-text">
                   <div class="method-title">PromptPay (QR)</div>
@@ -175,19 +170,10 @@ function goToCheckout() {
 function goToHome() {
   router.push({ name: 'home' })
 }
-
-/**
- * Step 2 page: create QR / show card form / confirm cash
- * You can decide the route name. Example:
- * - payPromptPay
- * - payCard
- * - payCash
- * Or use one route with query param ?method=
- */
 function goToPayStep() {
   router.push({
     name: 'checkoutPay',
-    query: { method: selectedMethod.value },
+    params: { method: selectedMethod.value },
   })
 }
 </script>

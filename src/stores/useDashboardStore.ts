@@ -29,7 +29,7 @@ export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
     dashboard: null,
     revenueChart: [] as RevenuePoint[],
-    loading: false
+    loading: false,
   }),
 
   actions: {
@@ -53,4 +53,3 @@ export const useDashboardStore = defineStore('dashboard', {
     },
   },
 })
-

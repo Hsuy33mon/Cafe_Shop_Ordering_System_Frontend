@@ -37,9 +37,9 @@
         <h3 class="footer-title">Visit &amp; hours</h3>
 
         <p class="footer-text">
-          Address: 25, D Varee Residence Montara <br/>
-          (ทองหล่อ, 52/1 Phrom Phak Alley, Khlong Tan Nuea, Watthana, Bangkok 10110)
-          Ground floor, hotel lobby<br />
+          Address: 25, D Varee Residence Montara <br />
+          (ทองหล่อ, 52/1 Phrom Phak Alley, Khlong Tan Nuea, Watthana, Bangkok 10110) Ground floor,
+          hotel lobby<br />
           (Cafe corner)
         </p>
         <p class="footer-text">Monday: <strong>8:00 – 17:00</strong></p>

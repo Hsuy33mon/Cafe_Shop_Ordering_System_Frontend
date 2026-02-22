@@ -44,7 +44,7 @@ function isActive(basePath: string, exact = true) {
       <!-- LEFT: LOGO -->
       <div class="navbar-logo">
         <!-- <div class="logo-icon">☕</div> -->
-         <!-- <div class="logo-icon">
+        <!-- <div class="logo-icon">
   <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
 </div> -->
         <div class="logo-text">Five Two One Cafe & Bakery</div>

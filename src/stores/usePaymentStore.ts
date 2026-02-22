@@ -104,32 +104,36 @@ export const usePaymentStore = defineStore('payment', () => {
   }
 
   /** Create payment (PromptPay QR / Card / Cash) */
-async function createPayment(payload: {
-  orderPlaceId: number
-  customerName: string
-  promptPayId?: string
-  gateway?: string
-  method?: PaymentMethod
-}) {
-  loading.value = true
-  error.value = ''
-  try {
-    const body = buildRequestBody(payload)
-    const res = await http.post<PaymentResponse>('/payments', body)
+  async function createPayment(payload: {
+    orderPlaceId: number
+    customerName: string
+    promptPayId?: string
+    gateway?: string
+    method?: PaymentMethod
+  }) {
+    loading.value = true
+    error.value = ''
+    try {
+      const body = buildRequestBody(payload)
+      const res = await http.post<PaymentResponse>('/payments', body)
 
-    payment.value = res.data
-    expiresInSec.value = 300
-    return res.data
-  } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || 'Create payment failed'
-    throw e
-  } finally {
-    loading.value = false
+      payment.value = res.data
+      expiresInSec.value = 300
+      return res.data
+    } catch (e: any) {
+      error.value = e?.response?.data?.message || e?.message || 'Create payment failed'
+      throw e
+    } finally {
+      loading.value = false
+    }
   }
-}
 
   /** Refresh QR (create new payment or regenerate) */
-  async function refreshQr(payload: { orderPlaceId: number; customerName: string; promptPayId: string }) {
+  async function refreshQr(payload: {
+    orderPlaceId: number
+    customerName: string
+    promptPayId: string
+  }) {
     return createPayment({
       ...payload,
       method: 'PROMPTPAY_QR',
