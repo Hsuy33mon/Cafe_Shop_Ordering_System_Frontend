@@ -265,3 +265,25 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.revenue-filter {
+  margin-bottom: 12px;
+}
+
+.revenue-filter button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+
+.revenue-filter button.active {
+  background: #10b981;
+  color: white;
+}
+
+.chart-wrapper {
+  height: 320px;
+}

@@ -18,8 +18,19 @@
 
     <!-- MIDDLE ROW: ORDERS + STATS -->
     <section class="middle-grid">
+      <div class="revenue-filter">
+        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
+          @click="changeType(t)">
+          {{ t }}
+        </button>
+        <div class="chart-wrapper">
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
+      </div>
+
+
       <!-- RECENT ORDERS -->
-      <article class="panel panel--orders">
+      <!-- <article class="panel panel--orders">
         <div class="panel-header">
           <h2 class="panel-title">Recent orders</h2>
           <span class="panel-caption">Last 10 tickets</span>
@@ -56,10 +67,10 @@
             </tbody>
           </table>
         </div>
-      </article>
+      </article> -->
 
       <!-- QUICK STATS -->
-      <article class="panel panel--stats">
+      <!-- <article class="panel panel--stats">
         <div class="panel-header">
           <h2 class="panel-title">Today at a glance</h2>
           <span class="panel-caption">Updated every minute</span>
@@ -90,26 +101,47 @@
             </ul>
           </div>
         </div>
-      </article>
+      </article> -->
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useDashboardStore } from '@/stores/useDashboardStore'
+
+import { Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend)
 
 const props = defineProps<{ search?: string }>()
 
 const dashboardStore = useDashboardStore()
 
-onMounted(() => {
-  dashboardStore.fetchDashboard()
+// ======================
+// DASHBOARD DATA
+// ======================
+
+onMounted(async () => {
+  await dashboardStore.fetchDashboard()
+  await dashboardStore.fetchRevenue(currentType.value)
 })
 
 const dashboard = computed(() => dashboardStore.dashboard)
 
-// KPI CARDS (dynamic)
+// ======================
+// KPI CARDS
+// ======================
+
 const kpiCards = computed(() => {
   if (!dashboard.value) return []
 
@@ -130,18 +162,56 @@ const kpiCards = computed(() => {
       label: 'Active tables',
       value: dashboard.value.activeTables,
       subtext: `Out of ${dashboard.value.totalTables} tables`,
-      trend: 0, // no growth yet
+      trend: 0,
     },
     {
       label: 'Popular item',
       value: dashboard.value.popularItemName,
       subtext: `${dashboard.value.popularItemCount} orders today`,
-      trend: 0, // can add later
+      trend: 0,
     },
   ]
 })
 
-// Recent Orders (if backend provides)
+// ======================
+// REVENUE CHART
+// ======================
+
+const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
+
+function changeType(type: 'DAILY' | 'MONTHLY') {
+  currentType.value = type
+  dashboardStore.fetchRevenue(type)
+}
+
+const chartData = computed(() => ({
+  labels: dashboardStore.revenueChart.map(p => p.label),
+  datasets: [
+    {
+      label: 'Revenue (฿)',
+      data: dashboardStore.revenueChart.map(p => p.revenue),
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16,185,129,0.2)',
+      tension: 0.4,
+      fill: true,
+    },
+  ],
+}))
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+    },
+  },
+}
+
+// ======================
+// SEARCH FILTER (Optional)
+// ======================
+
 const orders = computed(() => dashboard.value?.recentOrders ?? [])
 
 const filteredOrders = computed(() => {
@@ -154,12 +224,6 @@ const filteredOrders = computed(() => {
   )
 })
 
-// Channel stats (if backend provides)
-const channelStats = computed(() => dashboard.value?.channelStats ?? [])
-
-// Top categories (if backend provides)
-const topCategories = computed(() => dashboard.value?.topCategories ?? [])
-
 function statusClass(status: string) {
   return {
     'status-pill--new': status === 'New',
@@ -169,5 +233,4 @@ function statusClass(status: string) {
   }
 }
 </script>
-
 <style scoped src="@/styles/admin/dashboard.css"></style>

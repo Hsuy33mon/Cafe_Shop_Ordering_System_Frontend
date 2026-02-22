@@ -20,10 +20,16 @@ export interface DashboardResponse {
   topCategories?: any[]
 }
 
+export type RevenuePoint = {
+  label: string
+  revenue: number
+}
+
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    dashboard: null as DashboardResponse | null,
-    loading: false,
+    dashboard: null,
+    revenueChart: [] as RevenuePoint[],
+    loading: false
   }),
 
   actions: {
@@ -38,5 +44,13 @@ export const useDashboardStore = defineStore('dashboard', {
         this.loading = false
       }
     },
+
+    async fetchRevenue(type: 'WEEKLY' | 'MONTHLY') {
+      const res = await http.get('/api/admin/dashboard/revenue', {
+        params: { type },
+      })
+      this.revenueChart = res.data
+    },
   },
 })
+
