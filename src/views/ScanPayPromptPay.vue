@@ -151,106 +151,56 @@
     </main>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/useCartStore'
-import axios from 'axios'
-import { useOrderSessionStore } from '@/stores/orderSession'
+import { useOrderSessionStore } from '../stores/orderSession'
+import { usePaymentStore } from '../stores/usePaymentStore'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const session = useOrderSessionStore()
+const paymentStore = usePaymentStore()
 
 const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-
 const total = computed(() => subtotal.value + totalIngredientPrice.value)
-const session = useOrderSessionStore()
+
 const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
 const tableNumber = computed(() => session.placeNumber || '12')
-
-const orderType = ref<'shop' | 'room'>('shop')
-const roomNo = ref('1205')
-
 const orderPlaceId = computed(() => Number(tableNumber.value) || 1)
-const promptPayId = ref('0891234567')
 
-type PaymentResponse = {
-  id: number
-  amount: number
-  method: string
-  status: string
-  referenceNo: string
-  gatewayPaymentId: string
-  qrImageUrl: string | null
-  createdAt: string
-  paidAt: string | null
-}
+const promptPayId = computed(() => '0891234567') // or from config/store
 
-const payment = ref<PaymentResponse | null>(null)
-const loading = ref(false)
-const errorMsg = ref('')
+// bind UI from store
+const payment = computed(() => paymentStore.payment)
+const loading = computed(() => paymentStore.loading)
+const errorMsg = computed(() => paymentStore.error)
+const expiresInText = computed(() => paymentStore.expiresInText)
+const expiresInSec = computed(() => paymentStore.expiresInSec)
 
-const paidConfirmed = ref(false)
-
-const expiresInSec = ref(300)
-let timer: number | undefined
-
-const expiresInText = computed(() => {
-  const m = Math.floor(expiresInSec.value / 60)
-  const s = expiresInSec.value % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+const paidConfirmed = computed({
+  get: () => false, // keep your local checkbox if you want
+  set: () => {},
 })
 
 function formatMoney(value: number): string {
   return `฿${Number(value).toFixed(0)}`
 }
 
-function buildPaymentRequestBody() {
-  return {
+async function refreshQr() {
+  await paymentStore.refreshQr({
     orderPlaceId: orderPlaceId.value,
     customerName: customerName.value,
-    method: 'PROMPTPAY_QR',
-    gateway: 'OMISE',
     promptPayId: promptPayId.value,
-    amount: total.value,
-    items: cartStore.items.map((i: any) => ({
-      qty: i.quantity,
-      menuItemSizeId: i.sizeId,
-      note: i.note ?? '',
-      status: 'PENDING',
-      ingredients: (i.ingredients ?? []).map((ing: any) => ({
-        ingredientId: ing.id,
-        qty: ing.qty ?? 1,
-      })),
-    })),
-  }
-}
-
-async function createPromptPayQr() {
-  loading.value = true
-  errorMsg.value = ''
-  try {
-    const body = buildPaymentRequestBody()
-    const res = await axios.post<PaymentResponse>('/api/payments', body)
-    console.log("res-->",res.data)
-    payment.value = res.data
-    paidConfirmed.value = false
-    expiresInSec.value = 300
-  } catch (e: any) {
-    errorMsg.value = e?.response?.data?.message || e?.message || 'Failed to create QR'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function refreshQr() {
-  await createPromptPayQr()
+  })
 }
 
 function changeMethod() {
+  // if user changes method, cancel current payment locally (and optionally API cancel)
+  paymentStore.cancelPayment()
   router.push({ name: 'checkoutPaymentMethod' })
 }
 
@@ -266,11 +216,26 @@ async function confirmPaid() {
   router.push({ name: 'paymentSuccess' })
 }
 
-onMounted(async () => {
-  await createPromptPayQr()
+let timer: number | undefined
 
+onMounted(async () => {
+  // ✅ IMPORTANT: reuse existing payment on refresh
+  await paymentStore.ensurePromptPayPayment({
+    orderPlaceId: orderPlaceId.value,
+    customerName: customerName.value,
+    promptPayId: promptPayId.value,
+  })
+
+  // countdown tick (store manages expiration)
   timer = window.setInterval(() => {
-    if (expiresInSec.value > 0) expiresInSec.value -= 1
+    paymentStore.tick()
+
+    // optional: if expired, auto back to method page
+    if (expiresInSec.value <= 0) {
+      // stop and move user
+      // paymentStore.cancelPayment() // optional
+      // router.push({ name: 'checkoutPaymentMethod' })
+    }
   }, 1000)
 })
 
