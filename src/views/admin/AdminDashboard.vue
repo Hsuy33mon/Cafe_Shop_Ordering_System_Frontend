@@ -18,8 +18,19 @@
 
     <!-- MIDDLE ROW: ORDERS + STATS -->
     <section class="middle-grid">
+      <div class="revenue-filter">
+        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
+          @click="changeType(t)">
+          {{ t }}
+        </button>
+        <div class="chart-wrapper">
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
+      </div>
+
+
       <!-- RECENT ORDERS -->
-      <article class="panel panel--orders">
+      <!-- <article class="panel panel--orders">
         <div class="panel-header">
           <h2 class="panel-title">Recent orders</h2>
           <span class="panel-caption">Last 10 tickets</span>
@@ -56,10 +67,10 @@
             </tbody>
           </table>
         </div>
-      </article>
+      </article> -->
 
       <!-- QUICK STATS -->
-      <article class="panel panel--stats">
+      <!-- <article class="panel panel--stats">
         <div class="panel-header">
           <h2 class="panel-title">Today at a glance</h2>
           <span class="panel-caption">Updated every minute</span>
@@ -90,151 +101,130 @@
             </ul>
           </div>
         </div>
-      </article>
+      </article> -->
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useDashboardStore } from '@/stores/useDashboardStore'
 
-type KpiCard = {
-  label: string
-  value: string
-  subtext: string
-  trend: number
+import { Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend)
+
+const props = defineProps<{ search?: string }>()
+
+const dashboardStore = useDashboardStore()
+
+// ======================
+// DASHBOARD DATA
+// ======================
+
+onMounted(async () => {
+  await dashboardStore.fetchDashboard()
+  await dashboardStore.fetchRevenue(currentType.value)
+})
+
+const dashboard = computed(() => dashboardStore.dashboard)
+
+// ======================
+// KPI CARDS
+// ======================
+
+const kpiCards = computed(() => {
+  if (!dashboard.value) return []
+
+  return [
+    {
+      label: "Today's orders",
+      value: dashboard.value.todayOrders,
+      subtext: `vs. ${dashboard.value.yesterdayOrders} yesterday`,
+      trend: Number(dashboard.value.orderGrowthPercent.toFixed(1)),
+    },
+    {
+      label: 'Profit (฿)',
+      value: `฿${dashboard.value.todayProfitBaht.toLocaleString()}`,
+      subtext: 'Today gross profit',
+      trend: Number(dashboard.value.profitGrowthPercent.toFixed(1)),
+    },
+    {
+      label: 'Active tables',
+      value: dashboard.value.activeTables,
+      subtext: `Out of ${dashboard.value.totalTables} tables`,
+      trend: 0,
+    },
+    {
+      label: 'Popular item',
+      value: dashboard.value.popularItemName,
+      subtext: `${dashboard.value.popularItemCount} orders today`,
+      trend: 0,
+    },
+  ]
+})
+
+// ======================
+// REVENUE CHART
+// ======================
+
+const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
+
+function changeType(type: 'DAILY' | 'MONTHLY') {
+  currentType.value = type
+  dashboardStore.fetchRevenue(type)
 }
 
-type OrderStatus = 'New' | 'Preparing' | 'Ready' | 'Paid'
+const chartData = computed(() => ({
+  labels: dashboardStore.revenueChart.map(p => p.label),
+  datasets: [
+    {
+      label: 'Revenue (฿)',
+      data: dashboardStore.revenueChart.map(p => p.revenue),
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16,185,129,0.2)',
+      tension: 0.4,
+      fill: true,
+    },
+  ],
+}))
 
-type Order = {
-  id: number
-  time: string
-  customer: string
-  meta?: string
-  channel: 'Cafe' | 'Room' | 'Take-away'
-  total: number
-  status: OrderStatus
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+    },
+  },
 }
 
-// Receive search text from AdminLayout (optional but recommended)
-const props = defineProps<{
-  search?: string
-}>()
+// ======================
+// SEARCH FILTER (Optional)
+// ======================
 
-// kpi cards
-const kpiCards: KpiCard[] = [
-  {
-    label: "Today's orders",
-    value: '128',
-    subtext: 'vs. 115 yesterday',
-    trend: 11,
-  },
-  {
-    label: 'Revenue',
-    value: '฿18,420',
-    subtext: 'Today (incl. room service)',
-    trend: 8,
-  },
-  {
-    label: 'Active tables',
-    value: '9',
-    subtext: 'Out of 24 seats',
-    trend: 3,
-  },
-  {
-    label: 'Popular item',
-    value: 'Iced Caramel Latte',
-    subtext: '37 orders today',
-    trend: 15,
-  },
-]
-
-// orders
-const orders = ref<Order[]>([
-  {
-    id: 1042,
-    time: '10:12',
-    customer: 'Room 1205',
-    meta: '2 x Iced Latte, 1 x Cake',
-    channel: 'Room',
-    total: 320,
-    status: 'Preparing',
-  },
-  {
-    id: 1041,
-    time: '10:05',
-    customer: 'Walk-in',
-    meta: 'Gourmet Burger set',
-    channel: 'Cafe',
-    total: 240,
-    status: 'Ready',
-  },
-  {
-    id: 1040,
-    time: '09:58',
-    customer: 'Take-away #09',
-    meta: 'Matcha Latte, Croissant',
-    channel: 'Take-away',
-    total: 170,
-    status: 'Paid',
-  },
-  {
-    id: 1039,
-    time: '09:45',
-    customer: 'Room 810',
-    meta: 'Breakfast set',
-    channel: 'Room',
-    total: 420,
-    status: 'Preparing',
-  },
-  {
-    id: 1038,
-    time: '09:32',
-    customer: 'Walk-in',
-    meta: 'Saumon Gravlax',
-    channel: 'Cafe',
-    total: 260,
-    status: 'Paid',
-  },
-  {
-    id: 1037,
-    time: '09:20',
-    customer: 'Take-away #07',
-    meta: '2 x Americano',
-    channel: 'Take-away',
-    total: 120,
-    status: 'Paid',
-  },
-])
+const orders = computed(() => dashboard.value?.recentOrders ?? [])
 
 const filteredOrders = computed(() => {
   const text = (props.search ?? '').trim().toLowerCase()
   if (!text) return orders.value
 
-  return orders.value.filter((o) => {
-    return (
-      o.customer.toLowerCase().includes(text) ||
-      (o.meta && o.meta.toLowerCase().includes(text)) ||
-      String(o.id).includes(text)
-    )
-  })
+  return orders.value.filter((o: any) =>
+    o.customer?.toLowerCase().includes(text) ||
+    String(o.id).includes(text)
+  )
 })
 
-// stats
-const channelStats = [
-  { label: 'Cafe', count: 64, percent: 55 },
-  { label: 'Room service', count: 38, percent: 32 },
-  { label: 'Take-away', count: 16, percent: 13 },
-]
-
-const topCategories = [
-  { name: 'Coffee & drinks', orders: 72 },
-  { name: 'Burgers & mains', orders: 28 },
-  { name: 'Desserts', orders: 18 },
-]
-
-function statusClass(status: OrderStatus) {
+function statusClass(status: string) {
   return {
     'status-pill--new': status === 'New',
     'status-pill--prep': status === 'Preparing',
@@ -243,5 +233,4 @@ function statusClass(status: OrderStatus) {
   }
 }
 </script>
-
 <style scoped src="@/styles/admin/dashboard.css"></style>

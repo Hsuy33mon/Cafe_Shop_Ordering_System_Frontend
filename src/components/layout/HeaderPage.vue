@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { useCartStore } from '../../stores/useCartStore'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,7 +22,10 @@ const sessionLabel = computed(() => {
 })
 
 const isMobileMenuOpen = ref(false)
-const cartCount = ref(5)
+const cartStore = useCartStore()
+const cartCount = computed(() => {
+  return cartStore.items.length
+})
 
 function closeMobile() {
   isMobileMenuOpen.value = false
@@ -39,8 +43,11 @@ function isActive(basePath: string, exact = true) {
     <div class="cs-container navbar-inner">
       <!-- LEFT: LOGO -->
       <div class="navbar-logo">
-        <div class="logo-icon">☕</div>
-        <div class="logo-text">CafeShop</div>
+        <!-- <div class="logo-icon">☕</div> -->
+         <!-- <div class="logo-icon">
+  <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
+</div> -->
+        <div class="logo-text">Five Two One Cafe & Bakery</div>
       </div>
 
       <nav class="nav-links">

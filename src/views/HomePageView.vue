@@ -34,21 +34,19 @@
 
         <div class="hero-right">
           <div class="hero-plate">
-            <img
-              src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg"
-              alt="Colorful salad bowl"
-            />
+            <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
           </div>
-          <div class="floating-card floating-card--top">
-            <span class="dot dot--green" />
+          <!-- <div class="floating-card floating-card--top"> -->
+            <div class="floating-card floating-card--bottom">
+            <!-- <span class="dot dot--green" /> -->
             <div>
-              <p class="floating-label">Best seller</p>
-              <p class="floating-text">Chevrefrit Bowl</p>
+              <p class="floating-label">Served with warmth &amp;</p>
+              <p class="floating-text">Brewed with love 🤎</p>
             </div>
           </div>
-          <div class="floating-card floating-card--bottom">
-            <p class="floating-text">Fresh, fast &amp; made with love 💛</p>
-          </div>
+          <!-- <div class="floating-card floating-card--bottom">
+            <p class="floating-text">Served with warmth &amp; Brewed with love 💛</p>
+          </div> -->
         </div>
       </div>
     </section>
@@ -231,7 +229,7 @@ const specials = ref([
 ])
 
 function goToProducts() {
-  router.push('/products')
+  router.push('/shop')
 }
 
 function goToCart() {
