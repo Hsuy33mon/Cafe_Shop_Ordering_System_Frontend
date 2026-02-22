@@ -69,6 +69,12 @@ const routes = [
         component: PaymentPage,
         meta: { requiresOrderSession: true },
       },
+      {
+        path: '/checkout/pay/:method',
+        name: 'checkoutPay',
+        component: () => import('@/views/CheckoutPay.vue'),
+      },
+
       { path: 'shop', name: 'shop', component: ShopPage },
       { path: 'contact', name: 'contact', component: ContactPage },
       { path: 'about', name: 'about', component: aboutPage },

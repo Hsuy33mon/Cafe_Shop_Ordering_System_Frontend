@@ -325,3 +325,364 @@
 .crumb--link:hover {
   opacity: 0.7;
 }
+
+/* =========================
+   Payment Method (choose only)
+   ========================= */
+
+/* list of options */
+.method-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+/* clickable option card */
+.method-option {
+  display: grid;
+  grid-template-columns: 18px 28px 1fr;
+  align-items: start;
+  gap: 0.65rem;
+
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.08s ease;
+}
+
+.method-option:hover {
+  border-color: rgba(15, 23, 42, 0.18);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+.method-option:active {
+  transform: translateY(1px);
+}
+
+/* radio alignment */
+.method-option input[type='radio'] {
+  width: 16px;
+  height: 16px;
+  margin-top: 0.15rem;
+  accent-color: var(--cs-primary);
+}
+
+/* icon */
+.method-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+/* text block */
+.method-text {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.method-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.method-desc {
+  font-size: 0.78rem;
+  color: var(--cs-text-muted);
+  line-height: 1.2;
+}
+
+/* active selection highlight */
+.method-option.active {
+  border-color: var(--cs-primary);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+/* actions row: Back + Continue */
+.actions {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+/* back button (fixed to look consistent) */
+.btn-secondary {
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+/* keep your pay-btn, just ensure height matches */
+.pay-btn {
+  height: 44px;
+  padding: 0 1.2rem; /* better align with back button */
+}
+
+.pay-btn:hover {
+  filter: brightness(0.98);
+}
+
+.pay-btn:active {
+  transform: translateY(1px);
+}
+
+/* responsive: stack buttons on small screens */
+@media (max-width: 520px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+  .btn-secondary,
+  .pay-btn {
+    width: 100%;
+  }
+}
+
+/* =========================
+   Scan Pay (PromptPay QR) - FIX DESIGN
+   ========================= */
+
+.scan-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* QR + instructions layout */
+.scan-top {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* QR container */
+.qr-frame {
+  width: 190px;
+  height: 190px;
+  padding: 10px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top, #fef3c7, #fefce8);
+  display: grid;
+  place-items: center;
+}
+
+.qr-img,
+.qr-placeholder {
+  width: 170px;
+  height: 170px;
+  border-radius: 14px;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  object-fit: contain;
+}
+
+/* text block */
+.scan-info h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.scan-text {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--cs-text-muted);
+  line-height: 1.45;
+}
+
+/* expires pill */
+.scan-meta {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  font-size: 0.82rem;
+  color: #111827;
+}
+
+.scan-meta strong {
+  font-weight: 800;
+}
+
+/* checkbox row */
+.confirm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.86rem;
+  color: #111827;
+  margin-top: 0.6rem;
+}
+
+.confirm-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cs-primary);
+}
+
+/* buttons row */
+.scan-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+/* outline button (Refresh) */
+.btn-outline {
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+}
+
+.btn-outline:hover {
+  background: #ffffff;
+}
+
+.btn-outline:active {
+  transform: translateY(1px);
+}
+
+/* confirm button full width */
+.confirm-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 999px;
+  border: none;
+  background-color: var(--cs-primary);
+  color: #111827;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.2rem;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* helper note */
+.helper-note {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--cs-text-muted);
+  line-height: 1.4;
+}
+
+/* mobile */
+@media (max-width: 768px) {
+  .scan-top {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+/* =========================
+   PayByCard - FIX DESIGN
+   ========================= */
+
+.actions {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+/* secondary button (if you didn't add before) */
+.btn-secondary {
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+}
+
+/* make pay-btn match height */
+.pay-btn {
+  height: 44px;
+  padding: 0 1.2rem;
+  font-weight: 800;
+}
+
+.pay-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* nice helper text under buttons */
+.helper-note {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--cs-text-muted);
+  line-height: 1.4;
+}
+
+/* improve input spacing (optional) */
+.method-panel {
+  margin-top: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+/* mobile */
+@media (max-width: 520px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+  .btn-secondary,
+  .pay-btn {
+    width: 100%;
+  }
+}

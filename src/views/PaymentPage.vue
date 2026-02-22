@@ -3,14 +3,14 @@
     <!-- PAGE HEADER / COVER -->
     <section class="checkout-hero">
       <div class="cs-container checkout-hero-inner">
-        <h1 class="checkout-title">Payment</h1>
+        <h1 class="checkout-title">Payment Method</h1>
 
         <div class="breadcrumb-pill">
           <span class="crumb crumb--link" @click="goToHome"> Home </span>
           <span class="crumb-sep">/</span>
           <span class="crumb crumb--link" @click="goToCheckout"> Checkout </span>
           <span class="crumb-sep">/</span>
-          <span class="crumb crumb--active">Payment</span>
+          <span class="crumb crumb--active">Method</span>
         </div>
       </div>
     </section>
@@ -83,97 +83,58 @@
           </div>
         </section>
 
-        <!-- RIGHT: PAYMENT OPTIONS -->
+        <!-- RIGHT: CHOOSE METHOD ONLY -->
         <section class="payment-right">
           <div class="pay-card">
-            <h2 class="section-title">Payment method</h2>
+            <h2 class="section-title">Choose payment method</h2>
 
-            <!-- method toggle -->
-            <div class="method-toggle">
-              <button
-                type="button"
-                class="method-tab"
-                :class="{ 'method-tab--active': selectedMethod === 'card' }"
-                @click="selectedMethod = 'card'"
-              >
-                <span class="method-icon">💳</span>
-                <span>Visa / MasterCard</span>
-              </button>
-
-              <button
-                type="button"
-                class="method-tab"
-                :class="{ 'method-tab--active': selectedMethod === 'promptpay' }"
-                @click="selectedMethod = 'promptpay'"
-              >
+            <!-- Method choices (no payment creation here) -->
+            <div class="method-list">
+              <label class="method-option" :class="{ active: selectedMethod === 'promptpay' }">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="promptpay"
+                  v-model="selectedMethod"
+                />
                 <span class="method-icon">📱</span>
-                <span>PromptPay</span>
-              </button>
-            </div>
-
-            <!-- card payment -->
-            <div v-if="selectedMethod === 'card'" class="method-panel">
-              <div class="field">
-                <label class="field-label">Card holder name</label>
-                <input
-                  v-model="cardName"
-                  type="text"
-                  class="field-input"
-                  placeholder="Name on card"
-                />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Card number</label>
-                <input
-                  v-model="cardNumber"
-                  type="text"
-                  class="field-input"
-                  placeholder="XXXX XXXX XXXX XXXX"
-                />
-              </div>
-
-              <div class="field-row">
-                <div class="field">
-                  <label class="field-label">Expiry date</label>
-                  <input
-                    v-model="cardExpiry"
-                    type="text"
-                    class="field-input"
-                    placeholder="MM / YY"
-                  />
+                <div class="method-text">
+                  <div class="method-title">PromptPay (QR)</div>
+                  <div class="method-desc">Scan QR in the next step</div>
                 </div>
-                <div class="field">
-                  <label class="field-label">CVV</label>
-                  <input v-model="cardCvv" type="password" class="field-input" placeholder="***" />
-                </div>
-              </div>
-            </div>
+              </label>
 
-            <!-- PromptPay -->
-            <div v-else class="method-panel promptpay-panel">
-              <div class="qr-box">
-                <div class="qr-inner">
-                  <span>QR</span>
+              <label class="method-option" :class="{ active: selectedMethod === 'card' }">
+                <input type="radio" name="payment" value="card" v-model="selectedMethod" />
+                <span class="method-icon">💳</span>
+                <div class="method-text">
+                  <div class="method-title">Visa / MasterCard</div>
+                  <div class="method-desc">Enter card details in the next step</div>
                 </div>
-              </div>
-              <p class="promptpay-text">
-                Use your banking app to scan this PromptPay QR code. Your order total is
-                <strong>{{ formatMoney(total) }}</strong
-                >.
-              </p>
+              </label>
+
+              <label class="method-option" :class="{ active: selectedMethod === 'cash' }">
+                <input type="radio" name="payment" value="cash" v-model="selectedMethod" />
+                <span class="method-icon">💵</span>
+                <div class="method-text">
+                  <div class="method-title">Cash</div>
+                  <div class="method-desc">Confirm cash payment in the next step</div>
+                </div>
+              </label>
             </div>
 
             <hr class="divider" />
 
             <p class="pay-note">
-              By clicking “Pay now”, your cafe order will be confirmed and processed according to
-              the selected delivery type.
+              No payment is created yet. You will complete the payment on the next page.
             </p>
 
-            <button type="button" class="pay-btn" @click="submitPayment">
-              Pay now – {{ formatMoney(total) }}
-            </button>
+            <div class="actions">
+              <button type="button" class="btn-secondary" @click="goToCheckout">Back</button>
+              <button type="button" class="pay-btn" @click="goToPayStep">
+                Continue – {{ formatMoney(total) }}
+              </button>
+            </div>
           </div>
         </section>
       </section>
@@ -188,25 +149,21 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const cartStore = useCartStore()
-const items = computed(() => cartStore.items)
 
+const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
 const total = computed(() => subtotal.value)
 
 type OrderType = 'shop' | 'room'
-type PaymentMethod = 'card' | 'promptpay'
+type PaymentMethod = 'card' | 'promptpay' | 'cash'
 
-// Mock order data – later you can replace with props / store
+// mock (replace later with real order data)
 const orderType = ref<OrderType>('room')
 const roomNo = ref('1205')
 
-// payment state
-const selectedMethod = ref<PaymentMethod>('card')
-const cardName = ref('')
-const cardNumber = ref('')
-const cardExpiry = ref('')
-const cardCvv = ref('')
+// choose only
+const selectedMethod = ref<PaymentMethod>('promptpay')
 
 function formatMoney(value: number): string {
   return `฿${value.toFixed(0)}`
@@ -219,26 +176,19 @@ function goToHome() {
   router.push({ name: 'home' })
 }
 
-function submitPayment() {
-  if (selectedMethod.value === 'card') {
-    // later: real validation + API call
-    console.log('Paying by card', {
-      cardName: cardName.value,
-      cardNumber: cardNumber.value,
-      cardExpiry: cardExpiry.value,
-      last4: cardNumber.value.slice(-4),
-      amount: total.value,
-      orderType: orderType.value,
-      roomNo: roomNo.value,
-    })
-  } else {
-    console.log('Paying by PromptPay QR', {
-      amount: total.value,
-      orderType: orderType.value,
-      roomNo: roomNo.value,
-    })
-  }
-  alert('Mock payment submitted – connect this to your backend later.')
+/**
+ * Step 2 page: create QR / show card form / confirm cash
+ * You can decide the route name. Example:
+ * - payPromptPay
+ * - payCard
+ * - payCash
+ * Or use one route with query param ?method=
+ */
+function goToPayStep() {
+  router.push({
+    name: 'checkoutPay',
+    query: { method: selectedMethod.value },
+  })
 }
 </script>
 
