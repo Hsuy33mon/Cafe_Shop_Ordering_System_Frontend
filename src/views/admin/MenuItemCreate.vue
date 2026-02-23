@@ -362,6 +362,7 @@
 </template>
 
 <script setup lang="ts">
+import { useMenuItemImageStore } from '../../stores/useMenuItemImageStore'
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCategoryStore } from '../../stores/useCategoryStore'
@@ -376,7 +377,7 @@ const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 const sizeStore = useSizeStore()
 const categoryStore = useCategoryStore()
-
+const menuItemImageStore = useMenuItemImageStore()
 type ProductStatus = 'ACTIVE' | 'HIDDEN' | 'OUT_OF_STOCK'
 type AvailableIn = 'CAFE_ONLY' | 'ROOM_SERVICE_ONLY' | 'BOTH'
 
@@ -547,9 +548,17 @@ async function onSubmit() {
       ingredients: normalizeIngredientRows(),
     }
 
-    await menuItemsStore.create(payload)
-    await menuItemsStore.fetchAll()
+    // ✅ 1) create menu item first (need id)
+    const created = await menuItemsStore.create(payload)
+    const menuItemId = created.id // <-- your create() must return { id: ... }
 
+    // ✅ 2) upload images (optional)
+    if (images.value.length) {
+      const files = images.value.map((x) => x.file)
+      await menuItemImageStore.upload(menuItemId, files, 0) // first image as primary
+    }
+
+    await menuItemsStore.fetchAll()
     router.push({ name: 'admin-menu' })
   } catch (e: any) {
     error.value = e?.message || 'Failed to save product'

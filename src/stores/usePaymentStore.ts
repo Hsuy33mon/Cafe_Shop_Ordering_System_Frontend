@@ -164,7 +164,6 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
-  /** ✅ Create NEW payment (only when needed) */
   async function createPayment(payload: {
     orderPlaceId: number
     customerName: string
@@ -189,7 +188,6 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
-  /** ✅ Ensure we reuse existing payment on refresh */
   async function ensurePromptPayPayment(payload: {
     orderPlaceId: number
     customerName: string

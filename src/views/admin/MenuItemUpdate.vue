@@ -1,4 +1,4 @@
-<!-- src/views/admin/MenuItemCreate.vue -->
+<!-- src/views/admin/MenuItemEdit.vue -->
 <template>
   <main class="content product-form-page">
     <!-- HEADER -->
@@ -7,9 +7,7 @@
         <button class="back-link" type="button" @click="goBack">← Back to menu items</button>
 
         <h1 class="product-form-title">Edit product</h1>
-        <p class="product-form-subtitle">
-          Update menu item details, prices, sizes and ingredients.
-        </p>
+        <p class="product-form-subtitle">Update menu item details, prices, sizes and ingredients.</p>
       </div>
 
       <div class="product-form-header-right">
@@ -23,7 +21,7 @@
     <!-- FORM -->
     <section class="panel product-form-body">
       <form @submit.prevent="onSubmit" class="product-form-grid">
-        <!-- LEFT COLUMN: MEDIA + MAIN INFO -->
+        <!-- LEFT COLUMN -->
         <div class="product-form-col">
           <!-- MEDIA (IMAGES) -->
           <div class="media-card">
@@ -55,17 +53,55 @@
 
             <!-- thumbnails -->
             <div v-if="images.length" class="media-thumbs">
-              <button
-                v-for="(img, index) in images"
-                :key="img.id"
-                type="button"
-                class="media-thumb"
-                :class="{ 'media-thumb--active': index === activeImageIndex }"
-                @click="setActiveImage(index)"
-              >
-                <img :src="img.url" alt="Thumbnail" />
-              </button>
+              <div v-for="(img, index) in images" :key="img.id" class="media-thumb-wrap">
+                <button
+                  type="button"
+                  class="media-thumb"
+                  :class="{ 'media-thumb--active': index === activeImageIndex }"
+                  @click="setActiveImage(index)"
+                >
+                  <img :src="img.url" alt="Thumbnail" />
+                </button>
+
+                <div class="media-thumb-actions">
+                  <template v-if="img.kind === 'existing'">
+                    <button
+                      type="button"
+                      class="btn-chip"
+                      :disabled="img.primary"
+                      @click="setPrimaryImage(img.id)"
+                      title="Set as primary"
+                    >
+                      {{ img.primary ? 'Primary' : 'Make primary' }}
+                    </button>
+
+                    <label class="btn-chip" title="Replace this image">
+                      Replace
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style="display: none"
+                        @change="(e) => onReplaceFile(e, img.id)"
+                      />
+                    </label>
+
+                    <button type="button" class="btn-chip" @click="removeExisting(img.id)">
+                      Delete
+                    </button>
+                  </template>
+
+                  <template v-else>
+                    <button type="button" class="btn-chip" @click="removeNew(img.id)">
+                      Remove
+                    </button>
+                  </template>
+                </div>
+              </div>
             </div>
+
+            <p v-if="menuItemImageStore.error" class="form-error">
+              {{ menuItemImageStore.error }}
+            </p>
           </div>
 
           <!-- BASIC INFO -->
@@ -104,7 +140,6 @@
                 required
               >
                 <option disabled :value="null">Select category</option>
-
                 <option v-for="c in categoryStore.items" :key="c.id" :value="c.id">
                   {{ c.name }}
                 </option>
@@ -134,7 +169,6 @@
               <div v-for="(row, index) in sizes" :key="row.id" class="sizes-row">
                 <select v-model="row.sizeId" class="field-input" required>
                   <option disabled :value="null">Select</option>
-
                   <option v-for="s in sizeStore.items" :key="s.id" :value="s.id">
                     {{ s.name }}
                   </option>
@@ -159,12 +193,7 @@
                   placeholder="150"
                 />
 
-                <input
-                  v-model="row.desc"
-                  type="text"
-                  class="field-input"
-                  placeholder="e.g. Regular"
-                />
+                <input v-model="row.desc" type="text" class="field-input" placeholder="e.g. Regular" />
 
                 <button
                   type="button"
@@ -196,9 +225,7 @@
           <div class="field">
             <div class="field-label-row">
               <span class="field-label">Ingredients</span>
-              <button type="button" class="btn-chip" @click="addIngredientRow">
-                + Add ingredient
-              </button>
+              <button type="button" class="btn-chip" @click="addIngredientRow">+ Add ingredient</button>
             </div>
 
             <div class="ingredients-table">
@@ -252,9 +279,7 @@
               </div>
             </div>
 
-            <p class="field-hint">
-              These will appear in the “Ingredients” tab on the product page.
-            </p>
+            <p class="field-hint">These will appear in the “Ingredients” tab on the product page.</p>
           </div>
         </div>
 
@@ -300,8 +325,7 @@
               <option value="OUT_OF_STOCK">Out of stock</option>
             </select>
             <p class="field-hint">
-              <strong>Active</strong> items appear on the menu. Use <strong>Hidden</strong> while
-              preparing photos or descriptions.
+              <strong>Active</strong> items appear on the menu.
             </p>
           </div>
 
@@ -356,22 +380,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCategoryStore } from '../../stores/useCategoryStore'
 import { useMenuItemsStore } from '../../stores/useMenuItemStore'
 import { useSizeStore } from '../../stores/useSizeStore'
 import { useTagStore } from '../../stores/useTagStore'
-
-import { onMounted } from 'vue'
-const tagStore = useTagStore()
+import { useMenuItemImageStore } from '../../stores/useMenuItemImageStore'
 
 const router = useRouter()
 const route = useRoute()
 const menuItemId = Number(route.params.id)
+
 const menuItemsStore = useMenuItemsStore()
 const sizeStore = useSizeStore()
 const categoryStore = useCategoryStore()
+const tagStore = useTagStore()
+const menuItemImageStore = useMenuItemImageStore()
 
 type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK'
 type AvailableIn = 'CAFE_ONLY' | 'ROOM_SERVICE_ONLY' | 'BOTH'
@@ -398,56 +423,7 @@ const form = reactive<ProductForm>({
   tagIds: [],
 })
 
-onMounted(async () => {
-  await Promise.all([
-    tagStore.items.length ? Promise.resolve() : tagStore.fetchAll(),
-    categoryStore.items.length ? Promise.resolve() : categoryStore.fetchAll(),
-    sizeStore.items.length ? Promise.resolve() : sizeStore.fetchAll(),
-  ])
-
-  const item = await menuItemsStore.fetchById(menuItemId)
-  form.sku = item.sku ?? ''
-  form.name = item.name
-  form.shortDesc = item.shortDesc ?? ''
-  form.status = item.status
-  form.availableIn = item.availableIn
-  form.internalNote = item.internalNote ?? ''
-  form.categoryId = item.categoryId
-  form.tagIds = item.tags?.map((t: any) => t.id) ?? []
-
-  // SIZES
-  sizes.value = item.sizes.map((s: any) => ({
-    id: Date.now() + Math.random(),
-    sizeId: s.size_id,
-    sellPrice: s.sellPrice,
-    originalPrice: s.originalPrice,
-    desc: s.description ?? '',
-  }))
-
-  // INGREDIENTS
-  ingredients.value = item.ingredients.length
-    ? item.ingredients.map((i: any) => ({
-        id: i.id,
-        name: i.name,
-        amount: i.amount ?? '',
-        price: i.price ?? null, // ✅ ADD
-        note: i.note ?? '',
-      }))
-    : [{ id: 1, name: '', amount: '', price: null, note: '' }]
-})
-
-function toggleTag(id: number) {
-  const idx = form.tagIds.indexOf(id)
-  if (idx === -1) form.tagIds.push(id)
-  else form.tagIds.splice(idx, 1)
-}
-
-function isTagSelected(id: number) {
-  return form.tagIds.includes(id)
-}
-
 /* ---------- SIZES ---------- */
-
 type SizeRow = {
   id: number
   sizeId: number | null
@@ -456,13 +432,10 @@ type SizeRow = {
   desc: string
 }
 
-const sizes = ref<SizeRow[]>([
-  { id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' },
-])
+const sizes = ref<SizeRow[]>([{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }])
 
 function addSizeRow() {
-  const id = Date.now() + Math.random()
-  sizes.value.push({ id, sizeId: null, sellPrice: null, originalPrice: null, desc: '' })
+  sizes.value.push({ id: Date.now() + Math.random(), sizeId: null, sellPrice: null, originalPrice: null, desc: '' })
 }
 
 function removeSizeRow(index: number) {
@@ -470,32 +443,7 @@ function removeSizeRow(index: number) {
   sizes.value.splice(index, 1)
 }
 
-/* ---------- IMAGES / GALLERY (preview only) ---------- */
-
-type ProductImage = { id: number; url: string; file: File }
-const images = ref<ProductImage[]>([])
-const activeImageIndex = ref(0)
-const activeImage = computed(() => images.value[activeImageIndex.value])
-
-function onImageSelect(event: Event) {
-  const input = event.target as HTMLInputElement
-  const files = input.files
-  if (!files?.length) return
-
-  Array.from(files).forEach((file) => {
-    images.value.push({ id: Date.now() + Math.random(), url: URL.createObjectURL(file), file })
-  })
-
-  if (images.value.length === files.length) activeImageIndex.value = 0
-  input.value = ''
-}
-
-function setActiveImage(index: number) {
-  activeImageIndex.value = index
-}
-
 /* ---------- INGREDIENTS ---------- */
-
 type IngredientRow = {
   id: number
   name: string
@@ -507,8 +455,7 @@ type IngredientRow = {
 const ingredients = ref<IngredientRow[]>([{ id: 1, name: '', amount: '', price: null, note: '' }])
 
 function addIngredientRow() {
-  const id = Date.now() + Math.random()
-  ingredients.value.push({ id, name: '', amount: '', price: null, note: '' })
+  ingredients.value.push({ id: Date.now() + Math.random(), name: '', amount: '', price: null, note: '' })
 }
 
 function removeIngredientRow(index: number) {
@@ -516,13 +463,75 @@ function removeIngredientRow(index: number) {
   ingredients.value.splice(index, 1)
 }
 
-/* ---------- BUILD REQUEST BODY ---------- */
+/* ---------- IMAGES (existing + new) ---------- */
+type NewImage = { id: number; url: string; file: File }
+const newImages = ref<NewImage[]>([])
 
+const images = computed(() => [
+  ...menuItemImageStore.items.map((x) => ({
+    id: x.id,
+    url: x.url,
+    primary: x.primary,
+    kind: 'existing' as const,
+  })),
+  ...newImages.value.map((x) => ({
+    id: x.id,
+    url: x.url,
+    kind: 'new' as const,
+    primary: false,
+  })),
+])
+
+const activeImageIndex = ref(0)
+const activeImage = computed(() => images.value[activeImageIndex.value])
+
+function setActiveImage(index: number) {
+  activeImageIndex.value = index
+}
+
+function onImageSelect(event: Event) {
+  const input = event.target as HTMLInputElement
+  const files = input.files
+  if (!files?.length) return
+
+  Array.from(files).forEach((file) => {
+    newImages.value.push({ id: Date.now() + Math.random(), url: URL.createObjectURL(file), file })
+  })
+
+  input.value = ''
+}
+
+function removeNew(tempId: number) {
+  newImages.value = newImages.value.filter((x) => x.id !== tempId)
+}
+
+async function removeExisting(imageId: number) {
+  await menuItemImageStore.delete(menuItemId, imageId)
+  activeImageIndex.value = 0
+}
+
+async function setPrimaryImage(imageId: number) {
+  await menuItemImageStore.setPrimary(menuItemId, imageId)
+}
+
+async function onReplaceFile(e: Event, imageId: number) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  await menuItemImageStore.replaceFile(menuItemId, imageId, file)
+  input.value = ''
+}
+
+/* ---------- TAGS ---------- */
+function isTagSelected(id: number) {
+  return form.tagIds.includes(id)
+}
+
+/* ---------- BUILD REQUEST BODY ---------- */
 function normalizeSizeRows() {
   return sizes.value.map((r) => {
     if (!r.sizeId) throw new Error('Please select size for all size rows.')
     if (r.sellPrice == null) throw new Error('Sell price is required for all size rows.')
-
     return {
       sizeId: r.sizeId,
       sellPrice: r.sellPrice,
@@ -543,13 +552,55 @@ function normalizeIngredientRows() {
     }))
 }
 
-// TEMP: backend expects tagIds. We'll send [] until you implement tag select.
-function resolveTagIds(): number[] {
-  return []
-}
+/* ---------- LOAD DATA ---------- */
+onMounted(async () => {
+  await Promise.all([
+    tagStore.items.length ? Promise.resolve() : tagStore.fetchAll(),
+    categoryStore.items.length ? Promise.resolve() : categoryStore.fetchAll(),
+    sizeStore.items.length ? Promise.resolve() : sizeStore.fetchAll(),
+  ])
+
+  const item = await menuItemsStore.fetchById(menuItemId)
+
+  form.sku = item.sku ?? ''
+  form.name = item.name
+  form.shortDesc = item.shortDesc ?? ''
+  form.status = item.status
+  form.availableIn = item.availableIn
+  form.internalNote = item.internalNote ?? ''
+  form.categoryId = item.categoryId
+  form.tagIds = item.tags?.map((t: any) => t.id) ?? []
+
+  // sizes mapping
+  sizes.value = (item.sizes ?? []).map((s: any) => ({
+    id: Date.now() + Math.random(),
+    sizeId: s.size_id ?? s.sizeId ?? null,
+    sellPrice: s.sellPrice ?? null,
+    originalPrice: s.originalPrice ?? null,
+    desc: s.description ?? s.desc ?? '',
+  }))
+  if (!sizes.value.length) sizes.value = [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
+
+  // ingredients mapping
+  ingredients.value = (item.ingredients ?? []).length
+    ? item.ingredients.map((i: any) => ({
+        id: i.id ?? (Date.now() + Math.random()),
+        name: i.name ?? '',
+        amount: i.amount ?? '',
+        price: i.price ?? null,
+        note: i.note ?? '',
+      }))
+    : [{ id: 1, name: '', amount: '', price: null, note: '' }]
+
+  // images from API response
+  menuItemImageStore.setItems(item.images ?? [])
+
+  // set active image to primary if exists
+  const pIdx = menuItemImageStore.items.findIndex((x) => x.primary)
+  activeImageIndex.value = pIdx >= 0 ? pIdx : 0
+})
 
 /* ---------- SAVE / NAV ---------- */
-
 const saving = ref(false)
 const error = ref<string | null>(null)
 
@@ -574,11 +625,18 @@ async function onSubmit() {
     }
 
     await menuItemsStore.update(menuItemId, payload)
-    await menuItemsStore.fetchAll()
 
+    // upload new images if any selected
+    if (newImages.value.length) {
+      const files = newImages.value.map((x) => x.file)
+      await menuItemImageStore.upload(menuItemId, files, 0)
+      newImages.value = []
+    }
+
+    await menuItemsStore.fetchAll()
     router.push({ name: 'admin-menu' })
   } catch (e: any) {
-    error.value = e?.message || 'Failed to save product'
+    error.value = e?.message || 'Failed to update product'
     console.error(e)
   } finally {
     saving.value = false

@@ -1,29 +1,37 @@
+// src/stores/useMenuItemStore.ts
 import { defineStore } from 'pinia'
 import { http } from '@/lib/http'
 import type { MenuItem, ProductStatus } from '@/dtos/MenuItem'
 
-type MenuItemApi = any
-
-function mapFromApi(x: any) {
+function mapFromApi(x: any): MenuItem {
   return {
     id: Number(x.id),
     sku: x.sku ?? '',
     name: x.name ?? '',
-
-    // ✅ REQUIRED FOR EDIT FORM
-    categoryId: x.categoryId,
-    availableIn: x.availableIn,
-    status: x.status,
+    categoryId: x.categoryId ?? null,
+    availableIn: x.availableIn ?? 'BOTH',
+    status: x.status ?? 'ACTIVE',
     internalNote: x.internalNote ?? '',
     shortDesc: x.shortDesc ?? '',
-
-    // for table
     category: x.categoryName ?? '',
     price: x.sizes?.[0]?.sellPrice ?? 0,
 
     tags: Array.isArray(x.tags) ? x.tags : [],
-    sizes: x.sizes ?? [],
-    ingredients: x.ingredients ?? [],
+    sizes: Array.isArray(x.sizes) ? x.sizes : [],
+    ingredients: Array.isArray(x.ingredients) ? x.ingredients : [],
+images: Array.isArray(x.images)
+  ? x.images
+      .filter((img: any) => img.active === true) // ✅ only active = true
+      .map((img: any) => ({
+        id: Number(img.id),
+        url: img.url,
+        primary: !!img.primary,
+        active: true,
+        contentType: img.contentType,
+        sizeBytes: img.sizeBytes,
+        createdAt: img.createdAt,
+      }))
+  : [],
   }
 }
 
