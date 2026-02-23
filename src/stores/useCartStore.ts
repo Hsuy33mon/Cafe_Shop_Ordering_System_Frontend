@@ -6,7 +6,7 @@ export type CartIngredient = {
   name: string
   price: number
   amount: string
-  qty?: number 
+  qty?: number
 }
 
 export type CartItem = {
