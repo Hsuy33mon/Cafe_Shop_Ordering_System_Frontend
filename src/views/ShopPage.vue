@@ -106,20 +106,37 @@
                   :class="{ 'item-btn--added': isInCart(item.id) }"
                   @click="toggleCart(item)"
                 > -->
-                <button
-                  type="button"
-                  class="item-btn"
-                  :class="{
-                    'item-btn--added': isInCart(item.id),
-                    'item-btn--disabled': item.status === 'OUT_OF_STOCK',
-                  }"
-                  :disabled="item.status === 'OUT_OF_STOCK'"
-                  @click="item.status !== 'OUT_OF_STOCK' && toggleCart(item)"
-                >
-                  <span>
-                    {{ isInCart(item.id) ? 'Added' : 'Add to bag' }}
-                  </span>
-                </button>
+                <div v-if="getCartItem(item.id)" class="qty-control">
+  <button
+    type="button"
+    class="qty-btn"
+    @click="decrease(item.id)"
+  >
+    −
+  </button>
+
+  <span class="qty-value">
+    {{ getCartItem(item.id)?.quantity }}
+  </span>
+
+  <button
+    type="button"
+    class="qty-btn"
+    @click="increase(item.id)"
+  >
+    +
+  </button>
+</div>
+
+<button
+  v-else
+  type="button"
+  class="item-btn"
+  :disabled="item.status === 'OUT_OF_STOCK'"
+  @click="addDefaultItem(item)"
+>
+  Add to bag
+</button>
               </div>
             </div>
           </article>
@@ -173,6 +190,9 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 import { useCategoryStore } from '../stores/useCategoryStore'
+import { useCartStore } from '../stores/useCartStore'
+
+const cartStore = useCartStore()
 
 type ShopItem = {
   id: number
@@ -186,6 +206,7 @@ type ShopItem = {
   rating?: number
   status: 'ACTIVE' | 'OUT_OF_STOCK' | 'INACTIVE'
 }
+
 
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
@@ -244,7 +265,7 @@ const currentPage = ref(1)
 const pageSize = ref(12)
 const searchText = ref('')
 const selectedCategory = ref<string>('all')
-const cartIds = ref<number[]>([])
+
 
 const showingCount = computed(() => paginatedItems.value.length)
 
@@ -288,19 +309,92 @@ watch([searchText, selectedCategory], () => {
   currentPage.value = 1
 })
 
-const cartCount = computed(() => cartIds.value.length)
+const cartCount = computed(() => cartStore.items.length)
 
 function isInCart(id: number): boolean {
-  return cartIds.value.includes(id)
+  return cartStore.items.some(
+    i =>
+      i.productId === id &&
+      i.sizeId === 0 &&
+      i.ingredients.length === 0
+  )
 }
 
-function toggleCart(item: ShopItem) {
-  const index = cartIds.value.indexOf(item.id)
-  if (index === -1) {
-    cartIds.value.push(item.id)
-  } else {
-    cartIds.value.splice(index, 1)
+// function toggleCart(item: ShopItem) {
+//   const existing = cartStore.items.find(
+//     i =>
+//       i.productId === item.id &&
+//       i.sizeId === 0 &&
+//       i.ingredients.length === 0
+//   )
+
+//   if (existing) {
+//     cartStore.increaseQty(existing.cartId)
+//     return
+//   }
+
+//   cartStore.addItem({
+//     productId: item.id,
+//     name: item.name,
+//     description: item.description,
+//     imageUrl: item.imageUrl,
+
+//     sizeId: 0,
+//     sizeName: item.size ?? 'Regular',
+
+//     ingredients: [],
+//     quantity: 1,
+
+//     unitPrice: item.price,
+//     totalPrice: 0,
+//     totalIngredientPrice: 0
+//   })
+// }
+
+function addDefaultItem(item: ShopItem) {
+  cartStore.addItem({
+    productId: item.id,
+    name: item.name,
+    description: item.description,
+    imageUrl: item.imageUrl,
+
+    sizeId: 0,
+    sizeName: item.size ?? 'Regular',
+
+    ingredients: [],
+    quantity: 1,
+
+    unitPrice: item.price,
+    totalPrice: 0,
+    totalIngredientPrice: 0
+  })
+}
+
+function increase(id: number) {
+  const cartItem = getCartItem(id)
+  if (cartItem) {
+    cartStore.increaseQty(cartItem.cartId)
   }
+}
+
+function decrease(id: number) {
+  const cartItem = getCartItem(id)
+  if (!cartItem) return
+
+  if (cartItem.quantity > 1) {
+    cartStore.decreaseQty(cartItem.cartId)
+  } else {
+    cartStore.removeItem(cartItem.cartId)
+  }
+}
+
+function getCartItem(id: number) {
+  return cartStore.items.find(
+    i =>
+      i.productId === id &&
+      i.sizeId === 0 &&
+      i.ingredients.length === 0
+  )
 }
 
 function goToCart() {

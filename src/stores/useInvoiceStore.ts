@@ -18,6 +18,7 @@ export interface InvoicePayment {
   status: string
   gateway: string
   referenceNo: string
+  qrImageUrl?: string | null 
 }
 
 export interface Invoice {

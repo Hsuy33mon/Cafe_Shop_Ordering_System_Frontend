@@ -55,10 +55,16 @@
 }
 
 /* MIDDLE GRID */
-.middle-grid {
+/* .middle-grid {
   display: grid;
   grid-template-columns: minmax(0, 2.3fr) minmax(0, 1.7fr);
   gap: 1rem;
+} */
+
+.middle-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr;
+  gap: 24px;
 }
 
 /* PANELS */
@@ -286,4 +292,16 @@
 
 .chart-wrapper {
   height: 320px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.date-input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
 }

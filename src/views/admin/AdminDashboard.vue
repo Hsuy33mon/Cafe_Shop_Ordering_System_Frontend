@@ -1,15 +1,11 @@
-<!-- src/views/admin/AdminDashboard.vue -->
+
 <template>
-  <!-- Only the dashboard content, no layout shell -->
   <main class="content">
     <!-- KPI CARDS -->
     <section class="kpi-grid">
       <article v-for="card in kpiCards" :key="card.label" class="kpi-card">
         <div class="kpi-header">
           <span class="kpi-label">{{ card.label }}</span>
-          <span class="kpi-tag" :class="card.trend > 0 ? 'kpi-tag--up' : 'kpi-tag--down'">
-            {{ card.trend > 0 ? '+' : '' }}{{ card.trend }}%
-          </span>
         </div>
         <p class="kpi-value">{{ card.value }}</p>
         <p class="kpi-sub">{{ card.subtext }}</p>
@@ -19,12 +15,37 @@
     <!-- MIDDLE ROW: ORDERS + STATS -->
     <section class="middle-grid">
       <div class="revenue-filter">
-        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
-          @click="changeType(t)">
-          {{ t }}
-        </button>
+        <div class="filter-row">
+          <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
+            @click="changeType(t)">
+            {{ t }}
+          </button>
+
+          <!-- DAILY date picker -->
+          <input v-if="currentType === 'DAILY'" type="date" v-model="selectedDate" @change="fetchWithSelectedPeriod"
+            class="date-input" />
+
+          <!-- MONTHLY month picker -->
+          <input v-if="currentType === 'MONTHLY'" type="month" v-model="selectedMonth" @change="fetchWithSelectedPeriod"
+            class="date-input" />
+        </div>
+
         <div class="chart-wrapper">
           <Line :data="chartData" :options="chartOptions" />
+        </div>
+      </div>
+
+      <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
+        No orders count for this period
+      </div>
+      <div v-else class="revenue-filter">
+        <div class="chart-header">
+          <div>
+            <h3>Order Count by Category</h3>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <Bar :data="categoryChartData" :options="categoryChartOptions" />
         </div>
       </div>
 
@@ -110,10 +131,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useDashboardStore } from '@/stores/useDashboardStore'
 
+import { Bar } from 'vue-chartjs'
 import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   LineElement,
+  BarElement,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -121,26 +144,35 @@ import {
   Legend,
 } from 'chart.js'
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend)
-
-const props = defineProps<{ search?: string }>()
+ChartJS.register(LineElement, BarElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend)
 
 const dashboardStore = useDashboardStore()
 
-// ======================
-// DASHBOARD DATA
-// ======================
-
 onMounted(async () => {
   await dashboardStore.fetchDashboard()
-  await dashboardStore.fetchRevenue(currentType.value)
+  await fetchWithSelectedPeriod()
 })
 
 const dashboard = computed(() => dashboardStore.dashboard)
+const selectedDate = ref(new Date().toISOString().split('T')[0])
+const selectedMonth = ref(new Date().toISOString().slice(0, 7))
 
-// ======================
-// KPI CARDS
-// ======================
+const categoryChartData = computed(() => {
+  const sorted = [...dashboardStore.categoryChart]
+    .sort((a, b) => b.orderCount - a.orderCount)
+
+  return {
+    labels: sorted.map(p => p.categoryName),
+    datasets: [
+      {
+        label: 'Orders',
+        data: sorted.map(p => p.orderCount),
+        backgroundColor: '#3b82f6',
+        borderRadius: 6
+      }
+    ]
+  }
+})
 
 const kpiCards = computed(() => {
   if (!dashboard.value) return []
@@ -150,42 +182,40 @@ const kpiCards = computed(() => {
       label: "Today's orders",
       value: dashboard.value.todayOrders,
       subtext: `vs. ${dashboard.value.yesterdayOrders} yesterday`,
-      trend: Number(dashboard.value.orderGrowthPercent.toFixed(1)),
     },
     {
       label: 'Profit (฿)',
       value: `฿${dashboard.value.todayProfitBaht.toLocaleString()}`,
       subtext: 'Today gross profit',
-      trend: Number(dashboard.value.profitGrowthPercent.toFixed(1)),
     },
     {
       label: 'Active tables',
       value: dashboard.value.activeTables,
       subtext: `Out of ${dashboard.value.totalTables} tables`,
-      trend: 0,
     },
     {
       label: 'Popular item',
       value: dashboard.value.popularItemName,
-      subtext: `${dashboard.value.popularItemCount} orders today`,
-      trend: 0,
+      subtext: `${dashboard.value.todayOrders} orders today`,
     },
   ]
 })
 
-// ======================
-// REVENUE CHART
-// ======================
 
 const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
 
 function changeType(type: 'DAILY' | 'MONTHLY') {
   currentType.value = type
-  dashboardStore.fetchRevenue(type)
+  fetchWithSelectedPeriod()
 }
 
 const chartData = computed(() => ({
-  labels: dashboardStore.revenueChart.map(p => p.label),
+  labels: dashboardStore.revenueChart.map(p =>
+    new Date(p.date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    })
+  ),
   datasets: [
     {
       label: 'Revenue (฿)',
@@ -198,39 +228,72 @@ const chartData = computed(() => ({
   ],
 }))
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: {
-      display: true,
-    },
+    legend: { display: true },
   },
-}
+  scales: {
+    y: {
+      title: {
+        display: true,
+        text: 'Revenue (฿)',
+      },
+      beginAtZero: true
+    },
+    x: {
+      title: {
+        display: true,
+        text: currentType.value === 'DAILY' ? 'Date' : 'Month'
+      }
+    }
+  }
+}))
 
-// ======================
-// SEARCH FILTER (Optional)
-// ======================
-
-const orders = computed(() => dashboard.value?.recentOrders ?? [])
-
-const filteredOrders = computed(() => {
-  const text = (props.search ?? '').trim().toLowerCase()
-  if (!text) return orders.value
-
-  return orders.value.filter((o: any) =>
-    o.customer?.toLowerCase().includes(text) ||
-    String(o.id).includes(text)
-  )
-})
-
-function statusClass(status: string) {
-  return {
-    'status-pill--new': status === 'New',
-    'status-pill--prep': status === 'Preparing',
-    'status-pill--ready': status === 'Ready',
-    'status-pill--paid': status === 'Paid',
+const categoryChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      callbacks: {
+        label: (context: any) => {
+          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
+          const value = context.raw
+          const percent = ((value / total) * 100).toFixed(1)
+          return ` ${value} orders (${percent}%)`
+        }
+      }
+    }
+  },
+  scales: {
+    x: {
+      beginAtZero: true,
+      ticks: {
+        precision: 0
+      },
+      title: {
+        display: true,
+        text: 'Order Count'
+      }
+    }
   }
 }
+
+
+async function fetchWithSelectedPeriod() {
+  if (currentType.value === 'DAILY') {
+    await dashboardStore.fetchRevenue('DAILY', selectedDate.value)
+    await dashboardStore.fetchCategoryOrders('DAILY', selectedDate.value)
+  } else {
+    await dashboardStore.fetchRevenue('MONTHLY', selectedMonth.value)
+    await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
+  }
+}
+
 </script>
 <style scoped src="@/styles/admin/dashboard.css"></style>

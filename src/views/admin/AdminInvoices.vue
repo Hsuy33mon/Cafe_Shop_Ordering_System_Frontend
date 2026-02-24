@@ -86,7 +86,7 @@ import { useInvoiceStore } from '@/stores/useInvoiceStore'
 
 const router = useRouter()
 const store = useInvoiceStore()
-const { invoices, loading, error } = storeToRefs(store)
+const { invoices} = storeToRefs(store)
 
 onMounted(() => {
   store.fetchAll()
@@ -95,7 +95,7 @@ onMounted(() => {
 const invoiceColumns: TableColumn[] = [
   { key: 'invoiceNo', label: 'Invoice No', width: '160px' },
   { key: 'customerName', label: 'Customer' },
-  { key: 'orderPlaceName', label: 'Order Place', width: '140px' },
+  { key: 'orderPlaceName', label: 'Order Place From', width: '140px' },
   { key: 'grandTotal', label: 'Total (฿)', align: 'right', width: '120px' },
   { key: 'status', label: 'Status', width: '130px' },
   { key: 'createdAt', label: 'Created At', width: '180px' },

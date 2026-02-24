@@ -542,7 +542,21 @@ const steps = [
 ]
 
 const quantity = ref(1)
-const isInCart = ref(false)
+const isInCart = computed(() => {
+  if (!product.value || !selectedSize.value) return false
+
+  const sortedSelected = [...selectedIngredientIds.value].sort()
+
+  return cartStore.items.some(i => {
+    const sortedCart = i.ingredients.map(x => x.id).sort()
+
+    return (
+      i.productId === product.value.id &&
+      i.sizeId === selectedSize.value.size_id &&
+      JSON.stringify(sortedCart) === JSON.stringify(sortedSelected)
+    )
+  })
+})
 
 function increaseQty() {
   quantity.value++
@@ -565,39 +579,47 @@ function toggleCart() {
         amount: i.amount
       })) ?? []
 
-  const totalIngredientPrice =
+  const ingredientTotal =
     selectedIngredients.reduce((sum, i) => sum + i.price, 0)
 
   const unitPrice =
-    selectedSize.value.sellPrice + totalIngredientPrice
+    selectedSize.value.sellPrice + ingredientTotal
 
-  cartStore.addItem({
-    productId: product.value.id,   // ✅ REQUIRED
+  const existing = cartStore.items.find(i => {
+    const sortedCart = i.ingredients.map(x => x.id).sort()
+    const sortedSelected = [...selectedIngredientIds.value].sort()
 
-    name: product.value.name,
-    description: product.value.description,
-    imageUrl: product.value.imageUrl,
-
-    sizeId: selectedSize.value.size_id,
-    sizeName: selectedSize.value.shortName,
-
-    ingredients: selectedIngredients,
-
-    quantity: quantity.value,
-    unitPrice,
-
-    totalPrice: 0,                 // not used anymore but required by type
-    totalIngredientPrice
-
+    return (
+      i.productId === product.value.id &&
+      i.sizeId === selectedSize.value.size_id &&
+      JSON.stringify(sortedCart) === JSON.stringify(sortedSelected)
+    )
   })
-    // ✅ SHOW SUCCESS MESSAGE
+
+  if (existing) {
+    cartStore.increaseQty(existing.cartId)
+  } else {
+    cartStore.addItem({
+      productId: product.value.id,
+      name: product.value.name,
+      description: product.value.description,
+      imageUrl: product.value.imageUrl,
+
+      sizeId: selectedSize.value.size_id,
+      sizeName: selectedSize.value.shortName,
+
+      ingredients: selectedIngredients,
+      quantity: quantity.value,
+
+      unitPrice,
+      totalPrice: 0,
+      totalIngredientPrice: ingredientTotal
+    })
+  }
+
   cartSuccessMessage.value = 'Added to cart successfully!'
-
-  setTimeout(() => {
-    cartSuccessMessage.value = ''
-  }, 2500)
+  setTimeout(() => (cartSuccessMessage.value = ''), 2500)
 }
-
 
 // function toggleCart() {
 //   isInCart.value = !isInCart.value
