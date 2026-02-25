@@ -68,14 +68,6 @@ function isActive(basePath: string, exact = true) {
         </RouterLink>
 
         <RouterLink
-          to="/orders"
-          class="nav-link"
-          :class="{ 'nav-link--active': isActive('/orders', false) }"
-        >
-          Orders
-        </RouterLink>
-
-        <RouterLink
           to="/contact"
           class="nav-link"
           :class="{ 'nav-link--active': isActive('/contact') }"
