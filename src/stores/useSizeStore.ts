@@ -1,6 +1,5 @@
 import type { Size } from '@/dtos/SizeDto'
 import { http } from '@/lib/http'
-import axios from 'axios'
 import { defineStore } from 'pinia'
 
 type SizeApi = any

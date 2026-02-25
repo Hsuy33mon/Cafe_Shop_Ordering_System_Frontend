@@ -584,3 +584,13 @@
   letter-spacing: 0.08em;
   pointer-events: none;
 }
+.qty-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-control button {
+  width: 28px;
+  height: 28px;
+}

@@ -2,7 +2,9 @@
   <main class="content" v-if="invoice">
     <!-- TOP NAV -->
     <div class="top-nav">
-      <button class="back-btn" @click="goBack">← Back to Invoices</button>
+      <button class="back-btn" @click="goBack">
+        ← Back to Invoices
+      </button>
     </div>
 
     <!-- HEADER -->
@@ -10,6 +12,7 @@
       <div>
         <h1 class="invoice-title">Invoice #{{ invoice.id }}</h1>
         <div class="invoice-subtitle">{{ invoice.customerName }}</div>
+
       </div>
 
       <span class="status-pill status-pill--pending">
@@ -79,12 +82,13 @@
       </div>
     </section>
 
+
     <!-- ITEMS -->
     <section class="panel invoice-card">
       <div class="card-title">Items</div>
 
-      <div class="inner-table">
-        <table>
+      <div class="inner-table" >
+        <table class="items-table">
           <thead>
             <tr>
               <th>#</th>
@@ -98,6 +102,7 @@
 
           <tbody>
             <tr v-for="(item, index) in invoice.orders" :key="item.id">
+
               <td>{{ index + 1 }}</td>
               <td>
                 <div class="item-name">{{ item.menuItemName }} ({{ item.sizeName }})</div>
@@ -117,7 +122,7 @@
       <div class="card-title">Payments</div>
 
       <div class="inner-table">
-        <table>
+        <table class="payments-table">
           <thead>
             <tr>
               <th>#</th>
@@ -126,6 +131,7 @@
               <th>Amount</th>
               <th>Status</th>
               <th>Ref #</th>
+              <th>QR</th>
             </tr>
           </thead>
 
@@ -136,11 +142,16 @@
               <td>{{ p.gateway }}</td>
               <td>฿{{ p.amount.toFixed(2) }}</td>
               <td>
-                <span class="status-pill" :class="statusClass(invoice.status)">
+                <span class="status-pill" :class="statusClass(p.status)">
                   {{ p.status }}
                 </span>
               </td>
               <td>{{ p.referenceNo }}</td>
+              <td>
+                <a :href="p.qrImageUrl" target="_blank">
+                  <img :src="p.qrImageUrl" class="qr-image" />
+                </a>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -154,8 +165,10 @@
         <button class="btn-danger">Cancel Invoice</button>
       </div>
     </section>
+
   </main>
 </template>
+
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
@@ -167,7 +180,7 @@ const router = useRouter()
 const route = useRoute()
 
 const store = useInvoiceStore()
-const { currentInvoice: invoice, loading, error } = storeToRefs(store)
+const { currentInvoice: invoice} = storeToRefs(store)
 
 onMounted(() => {
   store.fetchById(Number(route.params.id))
@@ -190,6 +203,8 @@ function statusClass(status: string) {
     'status-pill--cancel': status === 'REFUNDED',
   }
 }
+
 </script>
+
 
 <style scoped src="@/styles/admin/admin-invoice-detail.css"></style>

@@ -15,6 +15,8 @@ function mapFromApi(x: any): MenuItem {
     shortDesc: x.shortDesc ?? '',
     category: x.categoryName ?? '',
     price: x.sizes?.[0]?.sellPrice ?? 0,
+    averageRating: x.averageRating ?? 0,
+    ratingCount: x.reviewCount ?? 0,
 
     tags: Array.isArray(x.tags) ? x.tags : [],
     sizes: Array.isArray(x.sizes) ? x.sizes : [],
