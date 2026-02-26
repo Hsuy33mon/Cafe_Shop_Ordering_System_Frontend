@@ -1,3 +1,4 @@
+// src/stores/useWsStore.ts
 import { defineStore } from 'pinia'
 import SockJS from 'sockjs-client'
 import { Client } from '@stomp/stompjs'
@@ -11,7 +12,6 @@ type PaymentUpdateEvent = {
 }
 
 function toWsUrl(baseUrl: string, wsPath: string) {
-  // SockJS endpoint must be http(s), not ws(s)
   return `${baseUrl.replace(/\/$/, '')}${wsPath.startsWith('/') ? '' : '/'}${wsPath}`
 }
 
@@ -19,7 +19,12 @@ export const useWsStore = defineStore('ws', {
   state: () => ({
     client: null as Client | null,
     connected: false,
+
+    // admin list banner
     newOrderIds: [] as number[],
+
+    // ✅ customer payment page
+    lastPaymentEvent: null as PaymentUpdateEvent | null,
   }),
 
   getters: {
@@ -45,11 +50,9 @@ export const useWsStore = defineStore('ws', {
         this.connected = true
         client.subscribe('/topic/orders/payment', (msg) => {
           const evt = JSON.parse(msg.body) as PaymentUpdateEvent
-          const ids = (evt.orderIds ?? []).map((x) => Number(x)).filter(Boolean)
-
+          const ids = (evt.orderIds ?? []).map(Number).filter(Boolean)
           if (!ids.length) return
 
-          // dedupe
           const set = new Set(this.newOrderIds)
           ids.forEach((id) => set.add(id))
           this.newOrderIds = Array.from(set)
@@ -63,11 +66,23 @@ export const useWsStore = defineStore('ws', {
       client.activate()
       this.client = client
     },
+    subscribePayment(paymentId: number, onEvent?: (evt: PaymentUpdateEvent) => void) {
+      if (!this.client || !this.connected) return
+      if (!paymentId) return
+
+      this.client.subscribe(`/topic/payments/${paymentId}`, (msg) => {
+        const evt = JSON.parse(msg.body) as PaymentUpdateEvent
+        this.lastPaymentEvent = evt
+        onEvent?.(evt)
+      })
+    },
 
     disconnect() {
       this.client?.deactivate()
       this.client = null
       this.connected = false
+      this.lastPaymentEvent = null
+      this.newOrderIds = []
     },
 
     clearNewOrders() {
