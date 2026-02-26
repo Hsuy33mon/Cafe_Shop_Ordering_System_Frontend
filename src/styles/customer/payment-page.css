@@ -686,3 +686,21 @@
     width: 100%;
   }
 }
+.order-session-info {
+  margin-bottom: 16px;
+}
+
+.session-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.session-label {
+  color: #888;
+}
+
+.session-value {
+  font-weight: 600;
+}

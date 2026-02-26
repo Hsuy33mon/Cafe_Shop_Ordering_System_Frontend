@@ -52,6 +52,7 @@ export const useCartStore = defineStore('cart', () => {
       customerName.value = data.customerName ?? ''
       tableNumber.value = data.tableNumber ?? ''
     } catch {
+      // if corrupted, clear it
       localStorage.removeItem(STORAGE_KEY)
     }
   }
@@ -65,8 +66,10 @@ export const useCartStore = defineStore('cart', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
   }
 
+  // run once when store is created
   loadFromStorage()
 
+  // auto-save whenever cart changes
   watch(
     [items, customerName, tableNumber],
     () => {
