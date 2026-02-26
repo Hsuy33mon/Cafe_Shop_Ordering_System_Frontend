@@ -16,6 +16,37 @@
 
       <!-- TOP LAYOUT: IMAGE + MAIN INFO -->
       <section class="cs-container pd-top">
+        <!-- FULLSCREEN ZOOM MODAL -->
+<transition name="fade">
+  <div v-if="isZoomOpen" class="zoom-overlay" @click.self="closeZoom">
+
+    <button class="zoom-close" @click="closeZoom">×</button>
+
+    <!-- left arrow -->
+    <button
+      v-if="productImages.length > 1"
+      class="zoom-nav zoom-nav--left"
+      @click.stop="prevImage"
+    >
+      ‹
+    </button>
+
+    <img
+      :src="currentImage"
+      :alt="product.name"
+      class="zoom-image"
+    />
+
+    <!-- right arrow -->
+    <button
+      v-if="productImages.length > 1"
+      class="zoom-nav zoom-nav--right"
+      @click.stop="nextImage"
+    >
+      ›
+    </button>
+  </div>
+</transition>
         <!-- LEFT: SINGLE IMAGE -->
         <div class="pd-image-card">
           <!-- MAIN SLIDE -->
@@ -61,7 +92,15 @@
             </button>
           </div>
 
-          <button type="button" class="pd-zoom-btn" aria-label="View larger">⤢</button>
+          <button
+  type="button"
+  class="pd-zoom-btn"
+  aria-label="View larger"
+  @click="openZoom"
+>
+  ⤢
+</button>
+          <!-- <button type="button" class="pd-zoom-btn" aria-label="View larger">⤢</button> -->
         </div>
 
         <!-- RIGHT: INFO -->
@@ -73,19 +112,29 @@
               <div class="pd-price-pill">฿{{ finalTotalPrice.toFixed(2) }}</div>
             </div>
 
+            <!-- summary -->
             <div class="pd-rating-row">
               <span class="pd-stars">
                 <span
-                  v-for="n in 5"
-                  :key="n"
-                  :class="['pd-star', { 'pd-star--muted': n > product.rating }]"
-                >
-                  ★
-                </span>
+                    v-for="n in 5"
+                    :key="'avg-' + n"
+                    :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]"
+                  >
+                    ★
+                  </span>
               </span>
               <span class="pd-rating-text">
-                {{ product?.rating?.toFixed(1) }} ({{ product.ratingCount }} ratings)
+                ({{ reviewStore.items.length }})
+                  rating{{ reviewStore.items.length === 1 ? '' : 's' }}
               </span>
+            </div>
+
+            <div class="pd-reviews-summary">
+              <div>
+                <p class="pd-reviews-summary-text">
+                  {{ averageRating.toFixed(1) }} out of 5
+                </p>
+              </div>
             </div>
 
             <p class="pd-short-desc">
@@ -94,7 +143,7 @@
           </header>
 
           <!-- STEPS ROW -->
-          <section class="pd-steps">
+          <!-- <section class="pd-steps">
             <article v-for="step in steps" :key="step.number" class="pd-step">
               <div class="pd-step-number">{{ step.number }}</div>
               <div class="pd-step-body">
@@ -102,7 +151,7 @@
                 <p class="pd-step-text">{{ step.text }}</p>
               </div>
             </article>
-          </section>
+          </section> -->
 
           <!-- SIZE SELECTOR -->
           <div v-if="menuItemsStore.currentItem?.sizes?.length" class="pd-size-section">
@@ -172,14 +221,14 @@
 
             <!-- rows -->
             <div
-              v-for="ingredient in menuItemsStore.currentItem?.ingredients"
+              v-for="ingredient in menuItemsStore.currentItem?.ingredients?.filter(i => i.active)"
               :key="ingredient.id"
               class="pd-ingredients-row"
             >
               <!-- checkbox -->
               <input
                 type="checkbox"
-                :disabled="!ingredient.active"
+
                 :checked="selectedIngredientIds.includes(ingredient.id)"
                 @change="toggleIngredient(ingredient.id)"
               />
@@ -199,7 +248,7 @@
           </div>
 
           <!-- PRODUCT DETAILS -->
-          <div v-else-if="activeTab === 'details'" class="pd-text-panel">
+          <!-- <div v-else-if="activeTab === 'details'" class="pd-text-panel">
             <p>
               Freshly prepared at CafeShop with carefully selected ingredients. Perfect as a light
               lunch or cozy dinner in your room.
@@ -208,36 +257,11 @@
               If you have specific dietary requirements (gluten-free, dairy-free, etc.), please add
               it in the order notes and our team will try to accommodate.
             </p>
-          </div>
+          </div> -->
 
-          <!-- REVIEWS -->
           <!-- REVIEWS -->
           <div v-else class="pd-reviews">
-            <!-- summary -->
-            <div class="pd-reviews-summary">
-              <div>
-                <div class="pd-reviews-stars">
-                  <span
-                    v-for="n in 5"
-                    :key="'avg-' + n"
-                    :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]"
-                  >
-                    ★
-                  </span>
-                </div>
-                <p class="pd-reviews-summary-text">
-                  {{ averageRating.toFixed(1) }} out of 5 ·
-                  {{ reviewStore.items.length }}
-                  review{{ reviewStore.items.length === 1 ? '' : 's' }}
-                  <!-- {{ averageRating.toFixed(1) }} out of 5 · {{ reviewStore.items.length }}review{{
-                    reviewStore.items.length=== 1 ? '' : 's'
-                  }} -->
-                </p>
-              </div>
-            </div>
-
             <!-- list -->
-
             <div v-if="reviewStore.items.length" class="pd-reviews-list">
               <article v-for="review in reviewStore.items" :key="review.id" class="pd-review-card">
                 <div class="pd-review-header">
@@ -318,7 +342,7 @@
       </section>
 
       <!-- BOUGHT TOGETHER -->
-      <section class="cs-container pd-bought-section">
+      <!-- <section class="cs-container pd-bought-section">
         <header class="pd-bought-header">
           <h2 class="pd-bought-title">It is usually bought together with this product</h2>
           <p class="pd-bought-text">
@@ -345,47 +369,67 @@
             </div>
           </article>
         </div>
-      </section>
+      </section> -->
     </main>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 import { useCartStore } from '../stores/useCartStore'
 import { useReviewStore } from '@/stores/useReviewStore'
 
 const reviewStore = useReviewStore()
-const router = useRouter()
+// const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 const cartStore = useCartStore()
 const cartSuccessMessage = ref('')
 
-type Product = {
-  id: number
-  name: string
-  price: number
-  description: string
-  imageUrl: string
-  images?: string[]
-  label?: string
-  rating: number
-  ratingCount: number
+// type Product = {
+//   id: number
+//   name: string
+//   price: number
+//   description: string
+//   imageUrl: string
+//   images?: string[]
+//   label?: string
+//   rating: number
+//   ratingCount: number
+// }
+
+const isZoomOpen = ref(false)
+
+function openZoom() {
+  isZoomOpen.value = true
 }
+
+function closeZoom() {
+  isZoomOpen.value = false
+}
+
+function handleEsc(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    closeZoom()
+  }
+}
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleEsc)
+})
 
 const route = useRoute()
 const productId = Number(route.params.id || 1)
 
-function goToDetails(id: number) {
-  router.push({ name: 'product-details', params: { id } })
-}
+// function goToDetails(id: number) {
+//   router.push({ name: 'product-details', params: { id } })
+// }
 
 onMounted(() => {
   menuItemsStore.fetchById(productId)
   reviewStore.fetchByMenuItem(productId)
-
+ window.addEventListener('keydown', handleEsc)
   restoreFromQuery()
 })
 
@@ -460,9 +504,20 @@ const finalTotalPrice = computed(() => {
   return displayPrice.value * quantity.value
 })
 
+
 const product = computed(() => {
   const item = menuItemsStore.currentItem
   if (!item) return null
+
+  // extract active images
+  const activeImages =
+    item.images?.filter((img: any) => img.active).map((img: any) => img.url) ?? []
+
+  // find primary image
+  const primaryImage =
+    item.images?.find((img: any) => img.primary && img.active)?.url ||
+    activeImages[0] ||
+    ''
 
   return {
     id: item.id,
@@ -470,36 +525,32 @@ const product = computed(() => {
     description: item.shortDesc,
     label: item.tags?.[0]?.name ?? item.status,
 
-    price: item.price, // already mapped from first size
+    price: item.price,
     rating: item.averageRating ?? 0,
     ratingCount: item.reviewCount ?? 0,
 
-    imageUrl:
-      'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
-
-    images: [
-      'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
-    ],
+    imageUrl: primaryImage,
+    images: activeImages.length ? activeImages : [primaryImage],
   }
 })
 
-const steps = [
-  {
-    number: '01',
-    title: 'Add to the cart and place an order',
-    text: 'Choose your quantity and confirm your room or table number at checkout.',
-  },
-  {
-    number: '02',
-    title: 'Enter your phone number and address',
-    text: 'We’ll contact you only if we need clarification about your order.',
-  },
-  {
-    number: '03',
-    title: 'Enjoy your favorite food at home!',
-    text: 'Sit back while we prepare and deliver everything fresh to you.',
-  },
-]
+// const steps = [
+//   {
+//     number: '01',
+//     title: 'Add to the cart and place an order',
+//     text: 'Choose your quantity and confirm your room or table number at checkout.',
+//   },
+//   {
+//     number: '02',
+//     title: 'Enter your phone number and address',
+//     text: 'We’ll contact you only if we need clarification about your order.',
+//   },
+//   {
+//     number: '03',
+//     title: 'Enjoy your favorite food at home!',
+//     text: 'Sit back while we prepare and deliver everything fresh to you.',
+//   },
+// ]
 
 const quantity = ref(1)
 const isInCart = ref(false)
@@ -556,15 +607,12 @@ function toggleCart() {
 }
 
 // Tabs
-const activeTab = ref<'ingredients' | 'details' | 'reviews'>('ingredients')
+const activeTab = ref<'ingredients' | 'reviews'>('ingredients')
 const tabList = [
   { value: 'ingredients', label: 'Ingredients' },
-  { value: 'details', label: 'Product details' },
+  // { value: 'details', label: 'Product details' },
   { value: 'reviews', label: 'Reviews' },
 ]
-
-// Bought-together mock
-const boughtTogether = computed<Product[]>(() => [])
 
 const newReviewName = ref('')
 const newReviewRating = ref(5)
