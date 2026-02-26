@@ -171,7 +171,7 @@ const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
 const tableNumber = computed(() => session.placeNumber || '12')
 const orderPlaceId = computed(() => Number(tableNumber.value) || 1)
 
-const promptPayId = computed(() => '0891234567') 
+const promptPayId = computed(() => '0891234567')
 
 const payment = computed(() => paymentStore.payment)
 const loading = computed(() => paymentStore.loading)
@@ -180,7 +180,7 @@ const expiresInText = computed(() => paymentStore.expiresInText)
 const expiresInSec = computed(() => paymentStore.expiresInSec)
 
 const paidConfirmed = computed({
-  get: () => false, 
+  get: () => false,
   set: () => {},
 })
 
@@ -195,7 +195,6 @@ async function refreshQr() {
     promptPayId: promptPayId.value,
   })
 }
-
 
 function changeMethod() {
   paymentStore.cancelPayment()

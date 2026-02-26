@@ -227,8 +227,8 @@
                 </div>
                 <p class="pd-reviews-summary-text">
                   {{ averageRating.toFixed(1) }} out of 5 ·
-{{ reviewStore.items.length }}
-review{{ reviewStore.items.length === 1 ? '' : 's' }}
+                  {{ reviewStore.items.length }}
+                  review{{ reviewStore.items.length === 1 ? '' : 's' }}
                   <!-- {{ averageRating.toFixed(1) }} out of 5 · {{ reviewStore.items.length }}review{{
                     reviewStore.items.length=== 1 ? '' : 's'
                   }} -->
@@ -239,7 +239,6 @@ review{{ reviewStore.items.length === 1 ? '' : 's' }}
             <!-- list -->
 
             <div v-if="reviewStore.items.length" class="pd-reviews-list">
-
               <article v-for="review in reviewStore.items" :key="review.id" class="pd-review-card">
                 <div class="pd-review-header">
                   <p class="pd-review-name">{{ review.reviewerName }}</p>
@@ -461,7 +460,6 @@ const finalTotalPrice = computed(() => {
   return displayPrice.value * quantity.value
 })
 
-
 const product = computed(() => {
   const item = menuItemsStore.currentItem
   if (!item) return null
@@ -532,7 +530,7 @@ function toggleCart() {
   const unitPrice = selectedSize.value.sellPrice + totalIngredientPrice
 
   cartStore.addItem({
-    productId: product.value.id, 
+    productId: product.value.id,
 
     name: product.value.name,
     description: product.value.description,
@@ -557,7 +555,6 @@ function toggleCart() {
   }, 2500)
 }
 
-
 // Tabs
 const activeTab = ref<'ingredients' | 'details' | 'reviews'>('ingredients')
 const tabList = [
@@ -568,7 +565,6 @@ const tabList = [
 
 // Bought-together mock
 const boughtTogether = computed<Product[]>(() => [])
-
 
 const newReviewName = ref('')
 const newReviewRating = ref(5)
@@ -601,7 +597,6 @@ async function submitReview() {
 
     // refresh product rating summary
     await menuItemsStore.fetchById(productId)
-
   } catch (err) {
     console.error(err)
   }

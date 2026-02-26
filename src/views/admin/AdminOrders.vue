@@ -67,6 +67,9 @@
           Details
         </RouterLink>
       </template>
+      <template #cell-invoicePaymentStatus="{ value }">
+        <span class="status-pill">{{ value }}</span>
+      </template>
 
       <template #cell-status="{ value }">
         <span class="status-pill" :class="statusClass(value)">
@@ -123,11 +126,6 @@ const tableNoFilter = computed<string | null>(() => {
   return typeof v === 'string' ? v : null
 })
 
-// const orderPlaceIdFilter = computed<number | null>(() => {
-//   const v = route.query.orderPlaceId
-//   return v ? Number(v) : null
-// })
-
 onMounted(() => {
   ordersStore.fetchAll()
 })
@@ -139,7 +137,7 @@ const newOrderCount = computed(() => ordersStore.items.filter((o) => o.status ==
 const currentPage = ref(1)
 
 type Channel = 'Cafe' | 'Room' | 'Take-away'
-type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
+type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED'
 
 type OrderRow = {
   id: number
@@ -152,7 +150,7 @@ type OrderRow = {
   channel: Channel
   itemsSummary: string
   total: number
-  paymentStatus: PaymentStatus
+  invoicePaymentStatus: InvoicePaymentStatus
   status: OrderStatus
 }
 
@@ -165,7 +163,7 @@ const orderColumns: TableColumn[] = [
   { key: 'channel', label: 'Channel' },
   { key: 'itemsSummary', label: 'Items' },
   { key: 'total', label: 'Total (฿)', align: 'right' },
-  { key: 'paymentStatus', label: 'Payment' },
+  { key: 'invoicePaymentStatus', label: 'Payment' },
   { key: 'status', label: 'Status' },
   { key: 'details', label: '', align: 'right' },
   { key: 'actions', label: '', align: 'right' },
@@ -180,7 +178,6 @@ const endDateFilter = ref('')
 
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o: any) => {
-    // ✅ CUSTOMER NAME (handle all possible shapes)
     const customerName =
       o.customerName ??
       o.customer?.name ??
@@ -188,12 +185,7 @@ const orders = computed<OrderRow[]>(() =>
       o.items?.[0]?.customerName ?? // <-- from your API response screenshot
       '-'
 
-    // ✅ ORDER PLACE NO
-    const orderPlaceNo =
-      o.orderPlace?.no ??
-      o.orderPlaceNo ??
-      o.tableNo ??
-      '-'
+    const orderPlaceNo = o.orderPlace?.no ?? o.orderPlaceNo ?? o.tableNo ?? '-'
 
     return {
       id: o.id,
@@ -206,7 +198,7 @@ const orders = computed<OrderRow[]>(() =>
       channel: o.channel,
       itemsSummary: (o.items ?? []).map((i: any) => `${i.quantity}× ${i.name}`).join(', '),
       total: o.total ?? 0,
-      paymentStatus: o.paymentStatus ?? 'Unpaid',
+      invoicePaymentStatus: o.invoicePaymentStatus,
       status: o.status,
     }
   }),
@@ -226,7 +218,7 @@ const filteredOrders = computed(() => {
 
     const matchesStatus = !statusFilter.value || o.status === statusFilter.value
     const matchesChannel = !channelFilter.value || o.channel === channelFilter.value
-    const matchesPayment = !paymentFilter.value || o.paymentStatus === paymentFilter.value
+    const matchesPayment = !paymentFilter.value || o.invoicePaymentStatus === paymentFilter.value
 
     const matchesTable = !tableNoFilter.value || o.tableNo === tableNoFilter.value
 

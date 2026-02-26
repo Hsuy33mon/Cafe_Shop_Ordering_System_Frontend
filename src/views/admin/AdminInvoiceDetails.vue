@@ -2,9 +2,7 @@
   <main class="content" v-if="invoice">
     <!-- TOP NAV -->
     <div class="top-nav">
-      <button class="back-btn" @click="goBack">
-        ← Back to Invoices
-      </button>
+      <button class="back-btn" @click="goBack">← Back to Invoices</button>
     </div>
 
     <!-- HEADER -->
@@ -12,7 +10,6 @@
       <div>
         <h1 class="invoice-title">Invoice #{{ invoice.id }}</h1>
         <div class="invoice-subtitle">{{ invoice.customerName }}</div>
-
       </div>
 
       <span class="status-pill status-pill--pending">
@@ -82,12 +79,11 @@
       </div>
     </section>
 
-
     <!-- ITEMS -->
     <section class="panel invoice-card">
       <div class="card-title">Items</div>
 
-      <div class="inner-table" >
+      <div class="inner-table">
         <table class="items-table">
           <thead>
             <tr>
@@ -102,7 +98,6 @@
 
           <tbody>
             <tr v-for="(item, index) in invoice.orders" :key="item.id">
-
               <td>{{ index + 1 }}</td>
               <td>
                 <div class="item-name">{{ item.menuItemName }} ({{ item.sizeName }})</div>
@@ -142,9 +137,26 @@
               <td>{{ p.gateway }}</td>
               <td>฿{{ p.amount.toFixed(2) }}</td>
               <td>
-                <span class="status-pill" :class="statusClass(p.status)">
-                  {{ p.status }}
-                </span>
+                <div class="pay-status-cell">
+                  <select class="status-select" v-model="editStatus[p.id]" :disabled="saving[p.id]">
+                    <option value="PENDING">PENDING</option>
+                    <option value="PAID">PAID</option>
+                    <option value="FAILED">FAILED</option>
+                    <option value="REFUNDED">REFUNDED</option>
+                  </select>
+
+                  <button
+                    class="btn-small"
+                    :disabled="saving[p.id] || editStatus[p.id] === p.status"
+                    @click="updatePaymentStatus(p.id)"
+                  >
+                    {{ saving[p.id] ? 'Saving...' : 'Update' }}
+                  </button>
+                </div>
+
+                <div v-if="errorMsg[p.id]" class="error-text">
+                  {{ errorMsg[p.id] }}
+                </div>
               </td>
               <td>{{ p.referenceNo }}</td>
               <td>
@@ -165,22 +177,22 @@
         <button class="btn-danger">Cancel Invoice</button>
       </div>
     </section>
-
   </main>
 </template>
-
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useInvoiceStore } from '@/stores/useInvoiceStore'
-
+import { usePaymentStore } from '@/stores/usePaymentStore'
+import { reactive, watchEffect } from 'vue'
 const router = useRouter()
 const route = useRoute()
 
 const store = useInvoiceStore()
-const { currentInvoice: invoice} = storeToRefs(store)
+const paymentStore = usePaymentStore()
+const { currentInvoice: invoice } = storeToRefs(store)
 
 onMounted(() => {
   store.fetchById(Number(route.params.id))
@@ -204,7 +216,34 @@ function statusClass(status: string) {
   }
 }
 
-</script>
+// per-payment edit status map
+const editStatus = reactive<Record<number, string>>({})
+const saving = reactive<Record<number, boolean>>({})
+const errorMsg = reactive<Record<number, string>>({})
 
+// when invoice loaded, init dropdown values
+watchEffect(() => {
+  if (!invoice.value?.payments) return
+  for (const p of invoice.value.payments) {
+    if (editStatus[p.id] == null) editStatus[p.id] = p.status
+  }
+})
+
+async function updatePaymentStatus(paymentId: number) {
+  try {
+    saving[paymentId] = true
+    errorMsg[paymentId] = ''
+    const newStatus = editStatus[paymentId]
+
+    await paymentStore.updatePaymentStatus({ paymentId, status: newStatus })
+    await store.fetchById(Number(route.params.id))
+  } catch (e: any) {
+    errorMsg[paymentId] =
+      e?.response?.data?.message || e?.message || 'Failed to update payment status'
+  } finally {
+    saving[paymentId] = false
+  }
+}
+</script>
 
 <style scoped src="@/styles/admin/admin-invoice-detail.css"></style>

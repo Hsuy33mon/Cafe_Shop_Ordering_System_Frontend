@@ -188,6 +188,25 @@ export const usePaymentStore = defineStore('payment', () => {
       loading.value = false
     }
   }
+  async function updatePaymentStatus(payload: { paymentId: number; status: PaymentStatus }) {
+    loading.value = true
+    error.value = ''
+    try {
+      const res = await http.patch<PaymentResponse>(`/api/payments/${payload.paymentId}/status`, {
+        status: payload.status,
+      })
+      if (payment.value?.id === payload.paymentId) {
+        payment.value = res.data
+      }
+
+      return res.data
+    } catch (e: any) {
+      error.value = e?.response?.data?.message || e?.message || 'Update payment status failed'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
 
   async function ensurePromptPayPayment(payload: {
     orderPlaceId: number
@@ -213,7 +232,6 @@ export const usePaymentStore = defineStore('payment', () => {
     })
   }
 
-  /** ✅ Refresh QR = force new payment */
   async function refreshQr(payload: {
     orderPlaceId: number
     customerName: string
@@ -224,8 +242,6 @@ export const usePaymentStore = defineStore('payment', () => {
     expiresAtMs.value = null
     return createPayment({ ...payload, method: 'PROMPTPAY_QR', gateway: 'OMISE' })
   }
-
-  /** ✅ Use http.get (not axios) */
   async function fetchPaymentById(id: number) {
     loading.value = true
     error.value = ''
@@ -287,5 +303,6 @@ export const usePaymentStore = defineStore('payment', () => {
     cancelPayment,
     clearPayment,
     tick,
+    updatePaymentStatus,
   }
 })

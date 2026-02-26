@@ -34,10 +34,10 @@ export type Order = {
   tableNo: string | null
   date: string
   time: string
-  customer: string
+  customerName: string
   channel: 'Cafe' | 'Room' | 'Take-away'
   status: OrderStatus
-  paymentStatus: string
+  invoicePaymentStatus: string
   customerNote?: string
   items: OrderItem[]
   subtotal: number
@@ -56,10 +56,10 @@ function mapFromApi(x: any): Order {
     tableNo: x.orderPlace?.no ?? null,
     date: created.toISOString().slice(0, 10),
     time: created.toTimeString().slice(0, 5),
-    customer: x.customerName,
+    customerName: x.customerName,
     channel: 'Cafe',
     status: x.status,
-    paymentStatus: x.paymentStatus ?? 'UNPAID',
+    invoicePaymentStatus: x.invoicePaymentStatus ?? '--',
     customerNote: x.note,
     items: [
       {

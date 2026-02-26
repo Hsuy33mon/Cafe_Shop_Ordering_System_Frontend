@@ -23,9 +23,7 @@ const sessionLabel = computed(() => {
 
 const isMobileMenuOpen = ref(false)
 const cartStore = useCartStore()
-const cartCount = computed(() =>
-  cartStore.items.reduce((sum, i) => sum + i.quantity, 0)
-)
+const cartCount = computed(() => cartStore.items.reduce((sum, i) => sum + i.quantity, 0))
 
 function closeMobile() {
   isMobileMenuOpen.value = false

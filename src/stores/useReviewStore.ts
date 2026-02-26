@@ -57,18 +57,20 @@ export const useReviewStore = defineStore('reviews', {
       }
     },
 
-    async create(menuItemId: number, payload: {
-      rating: number
-      comment: string
-      reviewerName: string
-    }) {
+    async create(
+      menuItemId: number,
+      payload: {
+        rating: number
+        comment: string
+        reviewerName: string
+      },
+    ) {
       this.error = null
       try {
         await http.post(`/api/menu-items/${menuItemId}/reviews`, payload)
 
         // refresh after submit
         await this.fetchByMenuItem(menuItemId)
-
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e

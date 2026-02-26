@@ -50,7 +50,6 @@ export type MenuItem = {
   averageRating: number
   ratingCount: number
 
-
   // relations
   tags: { id: number; name: string }[]
   sizes: MenuItemSize[]

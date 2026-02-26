@@ -73,26 +73,24 @@
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>
               <div class="item-rating" v-if="item.rating != null">
-  <span class="stars">
-    <span
-      v-for="s in 5"
-      :key="s"
-      class="star"
-      :class="`star--${starType(item.rating ?? 0, s)}`"
-    >
-      ★
-    </span>
-  </span>
+                <span class="stars">
+                  <span
+                    v-for="s in 5"
+                    :key="s"
+                    class="star"
+                    :class="`star--${starType(item.rating ?? 0, s)}`"
+                  >
+                    ★
+                  </span>
+                </span>
 
-  <span class="rating-number">
-    {{ (item.rating ?? 0).toFixed(1) }}
-  </span>
+                <span class="rating-number">
+                  {{ (item.rating ?? 0).toFixed(1) }}
+                </span>
 
-  <!-- ✅ NEW -->
-  <span class="rating-count">
-    ({{ item.ratingCount ?? 0 }})
-  </span>
-</div>
+                <!-- ✅ NEW -->
+                <span class="rating-count"> ({{ item.ratingCount ?? 0 }}) </span>
+              </div>
               <!-- <div class="item-rating" v-if="item.rating != null">
                 <span class="stars">
                   <span
@@ -128,20 +126,16 @@
                   @click="toggleCart(item)"
                 > -->
                 <!-- IF NOT IN CART -->
-<button
-  v-if="!getCartItem(item.id)"
-  class="item-btn"
-  @click="addToCart(item)"
->
-  Add to bag
-</button>
+                <button v-if="!getCartItem(item.id)" class="item-btn" @click="addToCart(item)">
+                  Add to bag
+                </button>
 
-<!-- IF IN CART -->
-<div v-else class="qty-control">
-  <button @click="decreaseQty(item.id)">-</button>
-  <span>{{ getCartItem(item.id)?.quantity }}</span>
-  <button @click="increaseQty(getCartItem(item.id)?.cartId)">+</button>
-</div>
+                <!-- IF IN CART -->
+                <div v-else class="qty-control">
+                  <button @click="decreaseQty(item.id)">-</button>
+                  <span>{{ getCartItem(item.id)?.quantity }}</span>
+                  <button @click="increaseQty(getCartItem(item.id)?.cartId)">+</button>
+                </div>
               </div>
             </div>
           </article>
@@ -246,7 +240,7 @@ const items = computed<ShopItem[]>(() =>
         description: i.shortDesc || 'CafeShop special',
         badge: firstTag?.name,
 
-        sizes: i.sizes ?? [],              // 👈 keep all sizes
+        sizes: i.sizes ?? [], // 👈 keep all sizes
         defaultSize: cheapestSize ?? null, // 👈 store cheapest
 
         imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
@@ -316,12 +310,10 @@ watch([searchText, selectedCategory], () => {
   currentPage.value = 1
 })
 
-const cartCount = computed(() =>
-  cartItems.value.reduce((sum, i) => sum + i.quantity, 0)
-)
+const cartCount = computed(() => cartItems.value.reduce((sum, i) => sum + i.quantity, 0))
 
 function getCartItem(id: number) {
-  return cartItems.value.find(i => i.productId === id)
+  return cartItems.value.find((i) => i.productId === id)
 }
 
 function addToCart(item: any) {

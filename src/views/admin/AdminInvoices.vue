@@ -13,7 +13,12 @@
     <!-- FILTER BAR -->
     <section class="panel panel--filters">
       <div class="filters-row">
-        <input v-model="search" type="text" class="search-input" placeholder="Search by invoice no, customer…" />
+        <input
+          v-model="search"
+          type="text"
+          class="search-input"
+          placeholder="Search by invoice no, customer…"
+        />
 
         <select v-model="statusFilter" class="filter-select">
           <option value="">All statuses</option>
@@ -138,7 +143,6 @@ function statusClass(status: string) {
 function goToCreateInvoice() {
   router.push({ name: 'admin-invoice-new' })
 }
-
 </script>
 
 <style scoped src="@/styles/admin/admin-invoices.css"></style>

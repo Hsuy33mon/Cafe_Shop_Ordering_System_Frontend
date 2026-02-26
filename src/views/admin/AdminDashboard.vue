@@ -1,4 +1,3 @@
-
 <template>
   <main class="content">
     <!-- KPI CARDS -->
@@ -16,18 +15,32 @@
     <section class="middle-grid">
       <div class="revenue-filter">
         <div class="filter-row">
-          <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
-            @click="changeType(t)">
+          <button
+            v-for="t in ['DAILY', 'MONTHLY']"
+            :key="t"
+            :class="{ active: currentType === t }"
+            @click="changeType(t)"
+          >
             {{ t }}
           </button>
 
           <!-- DAILY date picker -->
-          <input v-if="currentType === 'DAILY'" type="date" v-model="selectedDate" @change="fetchWithSelectedPeriod"
-            class="date-input" />
+          <input
+            v-if="currentType === 'DAILY'"
+            type="date"
+            v-model="selectedDate"
+            @change="fetchWithSelectedPeriod"
+            class="date-input"
+          />
 
           <!-- MONTHLY month picker -->
-          <input v-if="currentType === 'MONTHLY'" type="month" v-model="selectedMonth" @change="fetchWithSelectedPeriod"
-            class="date-input" />
+          <input
+            v-if="currentType === 'MONTHLY'"
+            type="month"
+            v-model="selectedMonth"
+            @change="fetchWithSelectedPeriod"
+            class="date-input"
+          />
         </div>
 
         <div class="chart-wrapper">
@@ -48,7 +61,6 @@
           <Bar :data="categoryChartData" :options="categoryChartOptions" />
         </div>
       </div>
-
 
       <!-- RECENT ORDERS -->
       <!-- <article class="panel panel--orders">
@@ -158,19 +170,18 @@ const selectedDate = ref(new Date().toISOString().split('T')[0])
 const selectedMonth = ref(new Date().toISOString().slice(0, 7))
 
 const categoryChartData = computed(() => {
-  const sorted = [...dashboardStore.categoryChart]
-    .sort((a, b) => b.orderCount - a.orderCount)
+  const sorted = [...dashboardStore.categoryChart].sort((a, b) => b.orderCount - a.orderCount)
 
   return {
-    labels: sorted.map(p => p.categoryName),
+    labels: sorted.map((p) => p.categoryName),
     datasets: [
       {
         label: 'Orders',
-        data: sorted.map(p => p.orderCount),
+        data: sorted.map((p) => p.orderCount),
         backgroundColor: '#3b82f6',
-        borderRadius: 6
-      }
-    ]
+        borderRadius: 6,
+      },
+    ],
   }
 })
 
@@ -201,7 +212,6 @@ const kpiCards = computed(() => {
   ]
 })
 
-
 const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
 
 function changeType(type: 'DAILY' | 'MONTHLY') {
@@ -210,16 +220,16 @@ function changeType(type: 'DAILY' | 'MONTHLY') {
 }
 
 const chartData = computed(() => ({
-  labels: dashboardStore.revenueChart.map(p =>
+  labels: dashboardStore.revenueChart.map((p) =>
     new Date(p.date).toLocaleDateString('en-GB', {
       day: '2-digit',
-      month: 'short'
-    })
+      month: 'short',
+    }),
   ),
   datasets: [
     {
       label: 'Revenue (฿)',
-      data: dashboardStore.revenueChart.map(p => p.revenue),
+      data: dashboardStore.revenueChart.map((p) => p.revenue),
       borderColor: '#10b981',
       backgroundColor: 'rgba(16,185,129,0.2)',
       tension: 0.4,
@@ -240,15 +250,15 @@ const chartOptions = computed(() => ({
         display: true,
         text: 'Revenue (฿)',
       },
-      beginAtZero: true
+      beginAtZero: true,
     },
     x: {
       title: {
         display: true,
-        text: currentType.value === 'DAILY' ? 'Date' : 'Month'
-      }
-    }
-  }
+        text: currentType.value === 'DAILY' ? 'Date' : 'Month',
+      },
+    },
+  },
 }))
 
 const categoryChartOptions = {
@@ -266,24 +276,23 @@ const categoryChartOptions = {
           const value = context.raw
           const percent = ((value / total) * 100).toFixed(1)
           return ` ${value} orders (${percent}%)`
-        }
-      }
-    }
+        },
+      },
+    },
   },
   scales: {
     x: {
       beginAtZero: true,
       ticks: {
-        precision: 0
+        precision: 0,
       },
       title: {
         display: true,
-        text: 'Order Count'
-      }
-    }
-  }
+        text: 'Order Count',
+      },
+    },
+  },
 }
-
 
 async function fetchWithSelectedPeriod() {
   if (currentType.value === 'DAILY') {
@@ -294,6 +303,5 @@ async function fetchWithSelectedPeriod() {
     await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
   }
 }
-
 </script>
 <style scoped src="@/styles/admin/dashboard.css"></style>
