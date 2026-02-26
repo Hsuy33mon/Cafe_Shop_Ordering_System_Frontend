@@ -26,7 +26,7 @@
           <option value="PREPARING">Preparing</option>
           <option value="READY">Ready</option>
           <option value="COMPLETED">Completed</option>
-          <option value="Canceled">Canceled</option>
+          <option value="CANCELLED">Cancelled</option>
         </select>
 
         <!-- CHANNEL -->
@@ -37,17 +37,20 @@
           <option value="Take-away">Take-away</option>
         </select>
 
-        <!-- PAYMENT -->
+        <!-- PAYMENT (match backend enum) -->
         <select v-model="paymentFilter" class="filter-select">
           <option value="">All payments</option>
-          <option value="Unpaid">Unpaid</option>
-          <option value="Paid (Cash)">Paid (Cash)</option>
-          <option value="Paid (Card)">Paid (Card)</option>
-          <option value="Paid (QR)">Paid (QR)</option>
+          <option value="PENDING">Pending</option>
+          <option value="PAID">Paid</option>
+          <option value="FAILED">Failed</option>
+          <option value="CANCELED">Canceled</option>
+          <option value="EXPIRED">Expired</option>
+          <option value="REFUNDED">Refunded</option>
         </select>
       </div>
     </section>
 
+    <!-- NEW ORDERS BANNER (from websocket) -->
     <div class="orders-new-banner" v-if="hasNewOrders">
       <div class="orders-new-left">
         <span class="orders-new-dot"></span>
@@ -56,17 +59,20 @@
         </span>
       </div>
 
-      <button class="orders-new-btn" @click="onViewLatest">View latest</button>
+      <div style="display:flex; gap:10px;">
+        <button class="orders-new-btn" @click="onViewLatest">View latest</button>
+        <button v-if="showLatestOnly" class="orders-new-btn" @click="onShowAll">Show all</button>
+      </div>
     </div>
 
     <!-- ORDERS TABLE -->
     <AdminTable :columns="orderColumns" :rows="filteredOrders" title="All orders" :page-size="20">
-      <!-- Details link -->
       <template #cell-details="{ row }">
         <RouterLink :to="{ name: 'admin-order-details', params: { id: row.id } }" class="btn-link">
           Details
         </RouterLink>
       </template>
+
       <template #cell-invoicePaymentStatus="{ value }">
         <span class="status-pill">{{ value }}</span>
       </template>
@@ -78,7 +84,6 @@
       </template>
 
       <template #cell-actions="{ row }">
-        <!-- <button class="btn-link" @click="openStatusDialog(row)">Update</button> -->
         <button class="btn-link btn-link--danger" @click="cancelOrder(row)">Cancel</button>
       </template>
     </AdminTable>
@@ -113,29 +118,58 @@
 
 <script setup lang="ts">
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
+import { useWsStore } from '@/stores/useWsStore'
 import { useRoute } from 'vue-router'
 
+/* =======================
+   Store + Route
+======================= */
 const route = useRoute()
-
 const ordersStore = useOrdersStore()
+const wsStore = useWsStore()
 
 const tableNoFilter = computed<string | null>(() => {
   const v = route.query.tableNo
   return typeof v === 'string' ? v : null
 })
 
-onMounted(() => {
-  ordersStore.fetchAll()
+/* =======================
+   Websocket banner state
+======================= */
+const showLatestOnly = ref(false)
+
+const hasNewOrders = computed(() => wsStore.hasNewOrders)
+const newOrderCount = computed(() => wsStore.newOrderCount)
+
+/* =======================
+   Fetch + connect websocket
+======================= */
+onMounted(async () => {
+  await ordersStore.fetchAll()
+  wsStore.connect()
 })
 
-const hasNewOrders = computed(() => ordersStore.items.some((o) => o.status === 'PENDING'))
+onUnmounted(() => {
+  // If you want websocket to remain app-wide, remove this:
+  // wsStore.disconnect()
+})
 
-const newOrderCount = computed(() => ordersStore.items.filter((o) => o.status === 'PENDING').length)
+/* When websocket ids change, refresh table data */
+watch(
+  () => wsStore.newOrderIds,
+  async (ids) => {
+    if (ids.length) {
+      await ordersStore.fetchAll()
+    }
+  },
+  { deep: true },
+)
 
-const currentPage = ref(1)
-
+/* =======================
+   Types
+======================= */
 type Channel = 'Cafe' | 'Room' | 'Take-away'
 type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED'
 
@@ -154,6 +188,9 @@ type OrderRow = {
   status: OrderStatus
 }
 
+/* =======================
+   Table Columns
+======================= */
 const orderColumns: TableColumn[] = [
   { key: 'id', label: '#', width: '70px', align: 'left' },
   { key: 'date', label: 'Date' },
@@ -169,6 +206,9 @@ const orderColumns: TableColumn[] = [
   { key: 'actions', label: '', align: 'right' },
 ]
 
+/* =======================
+   Filters
+======================= */
 const search = ref('')
 const statusFilter = ref('')
 const channelFilter = ref('')
@@ -176,19 +216,22 @@ const paymentFilter = ref('')
 const startDateFilter = ref('')
 const endDateFilter = ref('')
 
+/* =======================
+   Map backend -> table rows
+======================= */
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o: any) => {
     const customerName =
       o.customerName ??
       o.customer?.name ??
       o.order?.customerName ??
-      o.items?.[0]?.customerName ?? // <-- from your API response screenshot
+      o.items?.[0]?.customerName ??
       '-'
 
     const orderPlaceNo = o.orderPlace?.no ?? o.orderPlaceNo ?? o.tableNo ?? '-'
 
     return {
-      id: o.id,
+      id: Number(o.id),
       orderPlaceId: o.orderPlaceId ?? null,
       orderPlaceNo,
       tableNo: o.tableNo ?? null,
@@ -204,12 +247,20 @@ const orders = computed<OrderRow[]>(() =>
   }),
 )
 
+/* =======================
+   Filtered Orders
+   - supports: websocket "latest only"
+======================= */
 const filteredOrders = computed(() => {
   const s = search.value.trim().toLowerCase()
   const start = startDateFilter.value
   const end = endDateFilter.value
+  const latestSet = wsStore.newOrderIdSet
 
   return orders.value.filter((o) => {
+    // ✅ show only websocket orders
+    if (showLatestOnly.value && !latestSet.has(o.id)) return false
+
     const matchesSearch =
       !s ||
       String(o.id).includes(s) ||
@@ -219,7 +270,6 @@ const filteredOrders = computed(() => {
     const matchesStatus = !statusFilter.value || o.status === statusFilter.value
     const matchesChannel = !channelFilter.value || o.channel === channelFilter.value
     const matchesPayment = !paymentFilter.value || o.invoicePaymentStatus === paymentFilter.value
-
     const matchesTable = !tableNoFilter.value || o.tableNo === tableNoFilter.value
 
     let matchesDate = true
@@ -227,26 +277,40 @@ const filteredOrders = computed(() => {
     else if (start) matchesDate = o.date >= start
     else if (end) matchesDate = o.date <= end
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesChannel &&
-      matchesPayment &&
-      matchesTable &&
-      matchesDate
-    )
+    return matchesSearch && matchesStatus && matchesChannel && matchesPayment && matchesTable && matchesDate
   })
 })
 
+/* =======================
+   Banner actions
+======================= */
+async function onViewLatest() {
+  showLatestOnly.value = true
+  await ordersStore.fetchAll()
+}
+
+function onShowAll() {
+  showLatestOnly.value = false
+  // optional: clear the banner when you go back to all
+  // wsStore.clearNewOrders()
+}
+
+/* =======================
+   Status UI helper
+======================= */
 function statusClass(status: OrderStatus) {
   return {
     'status-pill--new': status === 'PENDING',
     'status-pill--prep': status === 'PREPARING',
-    'status-pill--ready': status === 'SERVED',
-    'status-pill--paid': status === 'CONFIRMED',
+    'status-pill--ready': status === 'READY',
+    'status-pill--paid': status === 'COMPLETED',
+    'status-pill--cancel': status === 'CANCELLED',
   }
 }
 
+/* =======================
+   Dialog (optional)
+======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<OrderRow | null>(null)
 const statusToUpdate = ref<OrderStatus>('PENDING')
@@ -273,20 +337,16 @@ function closeStatusDialog() {
 
 async function confirmStatusUpdate() {
   if (!statusTarget.value) return
-  await ordersStore.update(statusTarget.value.id, {
-    status: statusToUpdate.value,
-  })
+  await ordersStore.update(statusTarget.value.id, { status: statusToUpdate.value })
   statusDialogVisible.value = false
 }
 
+/* =======================
+   Cancel order
+======================= */
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
-}
-
-function onViewLatest() {
-  statusFilter.value = 'PENDING'
-  currentPage.value = 1
 }
 </script>
 
