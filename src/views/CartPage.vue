@@ -26,6 +26,13 @@
               <div class="cart-card-left" @click="goToProductDetails(item)">
                 <img :src="item.imageUrl" :alt="item.name" class="cart-thumb" />
 
+                <!-- <img
+  :src="item.imageUrl"
+  :alt="item.name"
+  class="cart-thumb"
+  @click="goToProductDetails(item)"
+/> -->
+
                 <div class="cart-info">
                   <p class="cart-name">{{ item.name }}</p>
                   <p class="cart-desc">{{ item.description }}</p>
