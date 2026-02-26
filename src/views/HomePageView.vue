@@ -22,7 +22,7 @@
               <span class="stat-label">Various Menu</span>
             </div>
             <div class="stat">
-              <span class="stat-number">{{overallRating}}★</span>
+              <span class="stat-number">{{overallRating.toFixed(2)}}★</span>
               <span class="stat-label">Guest rating</span>
             </div>
             <!-- <div class="stat">
@@ -156,7 +156,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useOrdersStore } from '../stores/useOrderStore'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
@@ -196,6 +196,7 @@ const overallRating = computed(() => {
 function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
+
 
 const featuredCategories = ref([
   {
@@ -272,16 +273,21 @@ const specials = computed(() => {
     return {
       id: fullItem.id,
       name: fullItem.name,
-      category: fullItem.categoryName,
+      category: fullItem.category,
       price: cheapestSize?.sellPrice ?? 0,
       description: fullItem.shortDesc,
       imageUrl: primaryImage,
       badge: index === 0 ? '🔥 Most ordered' : 'Popular',
       rating: fullItem.averageRating ?? 0,
-      ratingCount: fullItem.reviewCount ?? 0,
+      ratingCount: fullItem.ratingCount ?? 0,
     }
   }).filter(Boolean)
 })
+
+watch(specials, (val) => {
+  console.log("Categories loaded:", val)
+})
+
 function goToProducts() {
   router.push('/shop')
 }

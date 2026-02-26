@@ -35,7 +35,7 @@
 
                 <div class="cart-info">
                   <p class="cart-name">{{ item.name }}</p>
-                  <p class="cart-desc">{{ item.description }}</p>
+                  <!-- <p class="cart-desc">{{ item.description }}</p> -->
 
                   <p class="cart-size">Size: {{ item.sizeName }}</p>
 
@@ -93,10 +93,10 @@
             </div>
 
             <div class="summary-actions">
-              <button type="button" class="summary-btn ghost">
+              <!-- <button type="button" class="summary-btn ghost">
                 <span>Update</span>
                 <span class="arrow">→</span>
-              </button>
+              </button> -->
               <button type="button" class="summary-btn primary" @click="goToPayment">
                 <span>Checkout</span>
                 <span class="arrow">→</span>

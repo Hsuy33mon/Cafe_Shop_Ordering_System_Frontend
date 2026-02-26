@@ -594,3 +594,18 @@
   width: 28px;
   height: 28px;
 }
+
+.item-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.item-tag {
+  font-size: 12px;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #3a3a3a;
+  background-color: #f3f4ff;
+}
