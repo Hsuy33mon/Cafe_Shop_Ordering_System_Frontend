@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../../stores/useCartStore'
 
 const router = useRouter()
@@ -23,9 +23,9 @@ const sessionLabel = computed(() => {
 
 const isMobileMenuOpen = ref(false)
 const cartStore = useCartStore()
-const cartCount = computed(() => {
-  return cartStore.items.length
-})
+const cartCount = computed(() =>
+  cartStore.items.reduce((sum, i) => sum + i.quantity, 0)
+)
 
 function closeMobile() {
   isMobileMenuOpen.value = false
@@ -65,14 +65,6 @@ function isActive(basePath: string, exact = true) {
 
         <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
           Menu
-        </RouterLink>
-
-        <RouterLink
-          to="/orders"
-          class="nav-link"
-          :class="{ 'nav-link--active': isActive('/orders', false) }"
-        >
-          Orders
         </RouterLink>
 
         <RouterLink

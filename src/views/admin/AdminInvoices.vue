@@ -13,12 +13,7 @@
     <!-- FILTER BAR -->
     <section class="panel panel--filters">
       <div class="filters-row">
-        <input
-          v-model="search"
-          type="text"
-          class="search-input"
-          placeholder="Search by invoice no, customer…"
-        />
+        <input v-model="search" type="text" class="search-input" placeholder="Search by invoice no, customer…" />
 
         <select v-model="statusFilter" class="filter-select">
           <option value="">All statuses</option>
@@ -51,6 +46,12 @@
         {{ new Date(value).toLocaleString() }}
       </template>
 
+      <template #cell-paymentMethod="{ value }">
+        <span class="payment-pill">
+          {{ value }}
+        </span>
+      </template>
+
       <!-- Status pill -->
       <template #cell-status="{ value }">
         <span class="status-pill" :class="statusClass(value)">
@@ -76,7 +77,7 @@ import { useInvoiceStore } from '@/stores/useInvoiceStore'
 
 const router = useRouter()
 const store = useInvoiceStore()
-const { invoices, loading, error } = storeToRefs(store)
+const { invoices } = storeToRefs(store)
 
 onMounted(() => {
   store.fetchAll()
@@ -85,6 +86,7 @@ onMounted(() => {
 const invoiceColumns: TableColumn[] = [
   { key: 'invoiceNo', label: 'Invoice No', width: '160px' },
   { key: 'customerName', label: 'Customer' },
+  { key: 'method', label: 'Payment Method' },
   { key: 'orderPlaceName', label: 'Order Place', width: '140px' },
   { key: 'grandTotal', label: 'Total (฿)', align: 'right', width: '120px' },
   { key: 'status', label: 'Status', width: '130px' },
@@ -136,6 +138,7 @@ function statusClass(status: string) {
 function goToCreateInvoice() {
   router.push({ name: 'admin-invoice-new' })
 }
+
 </script>
 
 <style scoped src="@/styles/admin/admin-invoices.css"></style>

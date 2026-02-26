@@ -7,7 +7,9 @@
         <button class="back-link" type="button" @click="goBack">← Back to menu items</button>
 
         <h1 class="product-form-title">Edit product</h1>
-        <p class="product-form-subtitle">Update menu item details, prices, sizes and ingredients.</p>
+        <p class="product-form-subtitle">
+          Update menu item details, prices, sizes and ingredients.
+        </p>
       </div>
 
       <div class="product-form-header-right">
@@ -193,7 +195,12 @@
                   placeholder="150"
                 />
 
-                <input v-model="row.desc" type="text" class="field-input" placeholder="e.g. Regular" />
+                <input
+                  v-model="row.desc"
+                  type="text"
+                  class="field-input"
+                  placeholder="e.g. Regular"
+                />
 
                 <button
                   type="button"
@@ -225,7 +232,9 @@
           <div class="field">
             <div class="field-label-row">
               <span class="field-label">Ingredients</span>
-              <button type="button" class="btn-chip" @click="addIngredientRow">+ Add ingredient</button>
+              <button type="button" class="btn-chip" @click="addIngredientRow">
+                + Add ingredient
+              </button>
             </div>
 
             <div class="ingredients-table">
@@ -279,7 +288,9 @@
               </div>
             </div>
 
-            <p class="field-hint">These will appear in the “Ingredients” tab on the product page.</p>
+            <p class="field-hint">
+              These will appear in the “Ingredients” tab on the product page.
+            </p>
           </div>
         </div>
 
@@ -324,9 +335,7 @@
               <option value="INACTIVE">Inactive</option>
               <option value="OUT_OF_STOCK">Out of stock</option>
             </select>
-            <p class="field-hint">
-              <strong>Active</strong> items appear on the menu.
-            </p>
+            <p class="field-hint"><strong>Active</strong> items appear on the menu.</p>
           </div>
 
           <div class="field">
@@ -432,10 +441,18 @@ type SizeRow = {
   desc: string
 }
 
-const sizes = ref<SizeRow[]>([{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }])
+const sizes = ref<SizeRow[]>([
+  { id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' },
+])
 
 function addSizeRow() {
-  sizes.value.push({ id: Date.now() + Math.random(), sizeId: null, sellPrice: null, originalPrice: null, desc: '' })
+  sizes.value.push({
+    id: Date.now() + Math.random(),
+    sizeId: null,
+    sellPrice: null,
+    originalPrice: null,
+    desc: '',
+  })
 }
 
 function removeSizeRow(index: number) {
@@ -455,7 +472,13 @@ type IngredientRow = {
 const ingredients = ref<IngredientRow[]>([{ id: 1, name: '', amount: '', price: null, note: '' }])
 
 function addIngredientRow() {
-  ingredients.value.push({ id: Date.now() + Math.random(), name: '', amount: '', price: null, note: '' })
+  ingredients.value.push({
+    id: Date.now() + Math.random(),
+    name: '',
+    amount: '',
+    price: null,
+    note: '',
+  })
 }
 
 function removeIngredientRow(index: number) {
@@ -579,12 +602,13 @@ onMounted(async () => {
     originalPrice: s.originalPrice ?? null,
     desc: s.description ?? s.desc ?? '',
   }))
-  if (!sizes.value.length) sizes.value = [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
+  if (!sizes.value.length)
+    sizes.value = [{ id: 1, sizeId: null, sellPrice: null, originalPrice: null, desc: '' }]
 
   // ingredients mapping
   ingredients.value = (item.ingredients ?? []).length
     ? item.ingredients.map((i: any) => ({
-        id: i.id ?? (Date.now() + Math.random()),
+        id: i.id ?? Date.now() + Math.random(),
         name: i.name ?? '',
         amount: i.amount ?? '',
         price: i.price ?? null,

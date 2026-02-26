@@ -12,7 +12,14 @@ export type MenuItemImageDto = {
 
 function errMsg(e: any) {
   const d = e?.response?.data
-  return d?.message || d?.error || d?.detail || (typeof d === 'string' ? d : null) || e?.message || 'Request failed'
+  return (
+    d?.message ||
+    d?.error ||
+    d?.detail ||
+    (typeof d === 'string' ? d : null) ||
+    e?.message ||
+    'Request failed'
+  )
 }
 
 export const useMenuItemImageStore = defineStore('menuItemImages', {

@@ -15,23 +15,25 @@ function mapFromApi(x: any): MenuItem {
     shortDesc: x.shortDesc ?? '',
     category: x.categoryName ?? '',
     price: x.sizes?.[0]?.sellPrice ?? 0,
+    averageRating: x.averageRating ?? 0,
+    ratingCount: x.reviewCount ?? 0,
 
     tags: Array.isArray(x.tags) ? x.tags : [],
     sizes: Array.isArray(x.sizes) ? x.sizes : [],
     ingredients: Array.isArray(x.ingredients) ? x.ingredients : [],
-images: Array.isArray(x.images)
-  ? x.images
-      .filter((img: any) => img.active === true) // ✅ only active = true
-      .map((img: any) => ({
-        id: Number(img.id),
-        url: img.url,
-        primary: !!img.primary,
-        active: true,
-        contentType: img.contentType,
-        sizeBytes: img.sizeBytes,
-        createdAt: img.createdAt,
-      }))
-  : [],
+    images: Array.isArray(x.images)
+      ? x.images
+          .filter((img: any) => img.active === true) // ✅ only active = true
+          .map((img: any) => ({
+            id: Number(img.id),
+            url: img.url,
+            primary: !!img.primary,
+            active: true,
+            contentType: img.contentType,
+            sizeBytes: img.sizeBytes,
+            createdAt: img.createdAt,
+          }))
+      : [],
   }
 }
 

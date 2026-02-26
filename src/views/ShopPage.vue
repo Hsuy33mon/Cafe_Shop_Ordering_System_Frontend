@@ -73,6 +73,27 @@
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>
               <div class="item-rating" v-if="item.rating != null">
+  <span class="stars">
+    <span
+      v-for="s in 5"
+      :key="s"
+      class="star"
+      :class="`star--${starType(item.rating ?? 0, s)}`"
+    >
+      ★
+    </span>
+  </span>
+
+  <span class="rating-number">
+    {{ (item.rating ?? 0).toFixed(1) }}
+  </span>
+
+  <!-- ✅ NEW -->
+  <span class="rating-count">
+    ({{ item.ratingCount ?? 0 }})
+  </span>
+</div>
+              <!-- <div class="item-rating" v-if="item.rating != null">
                 <span class="stars">
                   <span
                     v-for="s in 5"
@@ -85,7 +106,7 @@
                 </span>
 
                 <span class="rating-number">{{ (item.rating ?? 0).toFixed(1) }}</span>
-              </div>
+              </div> -->
 
               <p class="item-description">{{ item.description }}</p>
 
@@ -106,20 +127,21 @@
                   :class="{ 'item-btn--added': isInCart(item.id) }"
                   @click="toggleCart(item)"
                 > -->
-                <button
-                  type="button"
-                  class="item-btn"
-                  :class="{
-                    'item-btn--added': isInCart(item.id),
-                    'item-btn--disabled': item.status === 'OUT_OF_STOCK',
-                  }"
-                  :disabled="item.status === 'OUT_OF_STOCK'"
-                  @click="item.status !== 'OUT_OF_STOCK' && toggleCart(item)"
-                >
-                  <span>
-                    {{ isInCart(item.id) ? 'Added' : 'Add to bag' }}
-                  </span>
-                </button>
+                <!-- IF NOT IN CART -->
+<button
+  v-if="!getCartItem(item.id)"
+  class="item-btn"
+  @click="addToCart(item)"
+>
+  Add to bag
+</button>
+
+<!-- IF IN CART -->
+<div v-else class="qty-control">
+  <button @click="decreaseQty(item.id)">-</button>
+  <span>{{ getCartItem(item.id)?.quantity }}</span>
+  <button @click="increaseQty(getCartItem(item.id)?.cartId)">+</button>
+</div>
               </div>
             </div>
           </article>
@@ -173,6 +195,10 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 import { useCategoryStore } from '../stores/useCategoryStore'
+import { useCartStore } from '../stores/useCartStore'
+
+const cartStore = useCartStore()
+const { items: cartItems } = storeToRefs(cartStore)
 
 type ShopItem = {
   id: number
@@ -184,6 +210,7 @@ type ShopItem = {
   badge?: string
   imageUrl: string
   rating?: number
+  ratingCount?: number
   status: 'ACTIVE' | 'OUT_OF_STOCK' | 'INACTIVE'
 }
 
@@ -219,10 +246,12 @@ const items = computed<ShopItem[]>(() =>
         description: i.shortDesc || 'CafeShop special',
         badge: firstTag?.name,
 
-        size: cheapestSize?.shortName ? `Size ${cheapestSize.shortName}` : undefined,
+        sizes: i.sizes ?? [],              // 👈 keep all sizes
+        defaultSize: cheapestSize ?? null, // 👈 store cheapest
 
         imageUrl: 'https://images.pexels.com/photos/324028/pexels-photo-324028.jpeg',
-        rating: 4.5,
+        rating: i.averageRating ?? 0,
+        ratingCount: i.ratingCount ?? 0,
         status: i.status,
       }
     }),
@@ -244,7 +273,6 @@ const currentPage = ref(1)
 const pageSize = ref(12)
 const searchText = ref('')
 const selectedCategory = ref<string>('all')
-const cartIds = ref<number[]>([])
 
 const showingCount = computed(() => paginatedItems.value.length)
 
@@ -288,19 +316,44 @@ watch([searchText, selectedCategory], () => {
   currentPage.value = 1
 })
 
-const cartCount = computed(() => cartIds.value.length)
+const cartCount = computed(() =>
+  cartItems.value.reduce((sum, i) => sum + i.quantity, 0)
+)
 
-function isInCart(id: number): boolean {
-  return cartIds.value.includes(id)
+function getCartItem(id: number) {
+  return cartItems.value.find(i => i.productId === id)
 }
 
-function toggleCart(item: ShopItem) {
-  const index = cartIds.value.indexOf(item.id)
-  if (index === -1) {
-    cartIds.value.push(item.id)
-  } else {
-    cartIds.value.splice(index, 1)
-  }
+function addToCart(item: any) {
+  const size = item.defaultSize
+
+  if (!size) return
+
+  cartStore.addItem({
+    productId: item.id,
+    name: item.name,
+    description: item.description,
+    imageUrl: item.imageUrl,
+
+    sizeId: size.id,
+    sizeName: size.shortName,
+    ingredients: [],
+
+    quantity: 1,
+
+    unitPrice: size.sellPrice,
+    totalPrice: size.sellPrice,
+    totalIngredientPrice: 0,
+  })
+}
+function increaseQty(cartId?: number) {
+  if (!cartId) return
+  cartStore.increaseQty(cartId)
+}
+
+function decreaseQty(cartId?: number) {
+  if (!cartId) return
+  cartStore.decreaseQty(cartId)
 }
 
 function goToCart() {

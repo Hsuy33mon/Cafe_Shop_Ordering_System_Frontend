@@ -58,6 +58,10 @@ export const useInvoiceStore = defineStore('invoice', {
           ...inv,
           invoiceNo: inv.invoiceNo ?? `INV-${inv.id}`,
           orderPlaceName: inv.orderPlaceName ?? '-',
+          method:
+    inv.payments && inv.payments.length
+      ? inv.payments[0].method
+      : '-',
         }))
         console.log('API RESPONSE:', res.data)
       } catch (err: any) {

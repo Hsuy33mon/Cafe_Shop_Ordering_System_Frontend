@@ -47,6 +47,9 @@ export type MenuItem = {
   availableIn: Availability
   internalNote: string
   shortDesc?: string
+  averageRating: number
+  ratingCount: number
+
 
   // relations
   tags: { id: number; name: string }[]

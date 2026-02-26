@@ -128,7 +128,8 @@ export const usePaymentStore = defineStore('payment', () => {
     if (payment.value.status !== 'PENDING') return false
     if (payment.value.method !== payload.method) return false
     if (payment.value.orderPlaceId !== payload.orderPlaceId) return false
-    if ((payment.value.customerName ?? '').trim() !== (payload.customerName ?? '').trim()) return false
+    if ((payment.value.customerName ?? '').trim() !== (payload.customerName ?? '').trim())
+      return false
     if (!expiresAtMs.value) return false
     if (Date.now() >= expiresAtMs.value) return false
     return true
@@ -213,7 +214,11 @@ export const usePaymentStore = defineStore('payment', () => {
   }
 
   /** ✅ Refresh QR = force new payment */
-  async function refreshQr(payload: { orderPlaceId: number; customerName: string; promptPayId: string }) {
+  async function refreshQr(payload: {
+    orderPlaceId: number
+    customerName: string
+    promptPayId: string
+  }) {
     // force new
     payment.value = null
     expiresAtMs.value = null

@@ -111,11 +111,11 @@
             <div class="pd-size-options">
               <button
                 v-for="size in menuItemsStore.currentItem.sizes"
-                :key="size.size_id"
+                :key="size.id"
                 type="button"
                 class="pd-size-btn"
-                :class="{ 'pd-size-btn--active': size.size_id === selectedSizeId }"
-                @click="selectedSizeId = size.size_id"
+                :class="{ 'pd-size-btn--active': size.id === selectedSizeId }"
+                @click="selectedSizeId = size.id"
               >
                 {{ size.shortName }}
               </button>
@@ -226,18 +226,23 @@
                   </span>
                 </div>
                 <p class="pd-reviews-summary-text">
-                  {{ averageRating.toFixed(1) }} out of 5 · {{ reviews.length }} review{{
-                    reviews.length === 1 ? '' : 's'
-                  }}
+                  {{ averageRating.toFixed(1) }} out of 5 ·
+{{ reviewStore.items.length }}
+review{{ reviewStore.items.length === 1 ? '' : 's' }}
+                  <!-- {{ averageRating.toFixed(1) }} out of 5 · {{ reviewStore.items.length }}review{{
+                    reviewStore.items.length=== 1 ? '' : 's'
+                  }} -->
                 </p>
               </div>
             </div>
 
             <!-- list -->
-            <div v-if="reviews.length" class="pd-reviews-list">
-              <article v-for="review in reviews" :key="review.id" class="pd-review-card">
+
+            <div v-if="reviewStore.items.length" class="pd-reviews-list">
+
+              <article v-for="review in reviewStore.items" :key="review.id" class="pd-review-card">
                 <div class="pd-review-header">
-                  <p class="pd-review-name">{{ review.name }}</p>
+                  <p class="pd-review-name">{{ review.reviewerName }}</p>
                   <span class="pd-review-date">{{ review.createdAt }}</span>
                 </div>
 
@@ -351,6 +356,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 import { useCartStore } from '../stores/useCartStore'
+import { useReviewStore } from '@/stores/useReviewStore'
+
+const reviewStore = useReviewStore()
 const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 const cartStore = useCartStore()
@@ -368,11 +376,6 @@ type Product = {
   ratingCount: number
 }
 
-// type IngredientRow = {
-//   left: { label: string; value: string }
-//   right: { label: string; value: string }
-// }
-
 const route = useRoute()
 const productId = Number(route.params.id || 1)
 
@@ -382,6 +385,8 @@ function goToDetails(id: number) {
 
 onMounted(() => {
   menuItemsStore.fetchById(productId)
+  reviewStore.fetchByMenuItem(productId)
+
   restoreFromQuery()
 })
 
@@ -425,7 +430,7 @@ watch(
   cheapestSize,
   (size) => {
     if (size) {
-      selectedSizeId.value = size.size_id
+      selectedSizeId.value = size.id
     }
   },
   { immediate: true },
@@ -435,7 +440,7 @@ const selectedSize = computed(() => {
   const item = menuItemsStore.currentItem
   if (!item || !selectedSizeId.value) return null
 
-  return item.sizes.find((s) => s.size_id === selectedSizeId.value) ?? null
+  return item.sizes.find((s) => s.id === selectedSizeId.value) ?? null
 })
 
 const totalIngredientPrice = computed(() => {
@@ -456,9 +461,6 @@ const finalTotalPrice = computed(() => {
   return displayPrice.value * quantity.value
 })
 
-// const displayPrice = computed(() => {
-//   return selectedSize.value?.sellPrice ?? 0
-// })
 
 const product = computed(() => {
   const item = menuItemsStore.currentItem
@@ -471,8 +473,8 @@ const product = computed(() => {
     label: item.tags?.[0]?.name ?? item.status,
 
     price: item.price, // already mapped from first size
-    rating: 5,
-    ratingCount: 0,
+    rating: item.averageRating ?? 0,
+    ratingCount: item.reviewCount ?? 0,
 
     imageUrl:
       'https://images.pexels.com/photos/2893630/pexels-photo-2893630.jpeg?auto=compress&w=800',
@@ -482,32 +484,6 @@ const product = computed(() => {
     ],
   }
 })
-
-// const ingredientRows = computed<IngredientRow[]>(() => {
-//   const item = menuItemsStore.currentItem
-//   if (!item?.ingredients?.length) return []
-
-//   const rows: IngredientRow[] = []
-
-//   for (let i = 0; i < item.ingredients.length; i += 2) {
-//     rows.push({
-//       left: {
-//         label: item.ingredients[i].name,
-//         value: item.ingredients[i].amount,
-//       },
-//       right: item.ingredients[i + 1]
-//         ? {
-//             label: item.ingredients[i + 1].name,
-//             value: item.ingredients[i + 1].amount,
-//           }
-//         : { label: '', value: '' },
-//     })
-//   }
-
-//   return rows
-// })
-
-// const product = computed(() => allProducts.find((p) => p.id === productId) ?? allProducts[0])
 
 const steps = [
   {
@@ -562,7 +538,7 @@ function toggleCart() {
     description: product.value.description,
     imageUrl: product.value.imageUrl,
 
-    sizeId: selectedSize.value.size_id,
+    sizeId: selectedSize.value.id,
     sizeName: selectedSize.value.shortName,
 
     ingredients: selectedIngredients,
@@ -581,19 +557,6 @@ function toggleCart() {
   }, 2500)
 }
 
-// function toggleCart() {
-//   isInCart.value = !isInCart.value
-//   if (!selectedSize.value) return
-
-//   console.log({
-//     productId: product.value.id,
-//     sizeId: selectedSize.value.size_id,
-//     ingredientIds: selectedIngredientIds.value,
-//     unitPrice: displayPrice.value,
-//     totalPrice: finalTotalPrice.value,
-//     qty: quantity.value,
-//   })
-// }
 
 // Tabs
 const activeTab = ref<'ingredients' | 'details' | 'reviews'>('ingredients')
@@ -606,56 +569,42 @@ const tabList = [
 // Bought-together mock
 const boughtTogether = computed<Product[]>(() => [])
 
-// --- Reviews state ---
-const reviews = ref<Review[]>([
-  {
-    id: 1,
-    name: 'Hotel guest',
-    rating: 5,
-    comment: 'Very fresh and light, perfect for a quick lunch in the room.',
-    createdAt: 'Today',
-  },
-  {
-    id: 2,
-    name: 'Nay Chi',
-    rating: 4,
-    comment: 'Portion size is good, would love a little more dressing next time.',
-    createdAt: 'Yesterday',
-  },
-])
 
 const newReviewName = ref('')
 const newReviewRating = ref(5)
 const newReviewComment = ref('')
 const reviewSubmitted = ref(false)
-
 const averageRating = computed(() => {
-  if (!reviews.value.length) return 0
-  const sum = reviews.value.reduce((acc, r) => acc + r.rating, 0)
-  return sum / reviews.value.length
+  return menuItemsStore.currentItem?.averageRating ?? 0
 })
 
-function submitReview() {
-  if (!newReviewName.value.trim() || !newReviewComment.value.trim()) {
-    return
+async function submitReview() {
+  if (!newReviewName.value.trim() || !newReviewComment.value.trim()) return
+
+  try {
+    await reviewStore.create(productId, {
+      rating: newReviewRating.value,
+      comment: newReviewComment.value.trim(),
+      reviewerName: newReviewName.value.trim(),
+    })
+    await reviewStore.fetchByMenuItem(productId)
+    await menuItemsStore.fetchById(productId)
+
+    newReviewName.value = ''
+    newReviewRating.value = 5
+    newReviewComment.value = ''
+    reviewSubmitted.value = true
+
+    setTimeout(() => {
+      reviewSubmitted.value = false
+    }, 3000)
+
+    // refresh product rating summary
+    await menuItemsStore.fetchById(productId)
+
+  } catch (err) {
+    console.error(err)
   }
-
-  reviews.value.unshift({
-    id: Date.now(),
-    name: newReviewName.value.trim(),
-    rating: newReviewRating.value,
-    comment: newReviewComment.value.trim(),
-    createdAt: 'Just now',
-  })
-
-  newReviewName.value = ''
-  newReviewRating.value = 5
-  newReviewComment.value = ''
-  reviewSubmitted.value = true
-
-  setTimeout(() => {
-    reviewSubmitted.value = false
-  }, 3000)
 }
 
 // --- IMAGE SLIDER ---
