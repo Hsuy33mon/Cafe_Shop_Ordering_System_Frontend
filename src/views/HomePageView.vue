@@ -4,10 +4,10 @@
     <section class="hero">
       <div class="cs-container hero-inner">
         <div class="hero-left">
-          <p class="eyebrow">Welcome to 5:1</p>
+          <p class="eyebrow">Welcome to CafeShop</p>
           <h1 class="hero-title">Feel-good food <span class="highlight">for every mood</span></h1>
           <p class="hero-text">
-            Coffee, Tea and desserts – crafted fresh for food lovers. Eat in, grab &amp; go
+            Bowls, burgers, sushi and coffee – crafted fresh for food lovers. Eat in, grab &amp; go
             or enjoy from your room.
           </p>
 
@@ -18,17 +18,17 @@
 
           <div class="hero-stats">
             <div class="stat">
-              <span class="stat-number">{{totalMenuItems}}++</span>
-              <span class="stat-label">Various Menu</span>
+              <span class="stat-number">25+</span>
+              <span class="stat-label">Signature dishes</span>
             </div>
             <div class="stat">
-              <span class="stat-number">{{overallRating}}★</span>
+              <span class="stat-number">4.8★</span>
               <span class="stat-label">Guest rating</span>
             </div>
-            <!-- <div class="stat">
-              <span class="stat-number">15 min</span>
+            <div class="stat">
+              <span class="stat-number">5 min</span>
               <span class="stat-label">Avg. prep time</span>
-            </div> -->
+            </div>
           </div>
         </div>
 
@@ -52,13 +52,13 @@
     </section>
 
     <!-- CATEGORIES -->
-    <!-- <section class="section categories">
+    <section class="section categories">
       <div class="cs-container">
         <header class="section-header">
           <p class="eyebrow">Explore</p>
           <h2 class="section-title">For every kind of craving</h2>
           <p class="section-subtitle">
-            Cozy coffee or sweet desserts – pick your favourite mood.
+            Light bowls, juicy burgers, cozy coffee or sweet desserts – pick your favourite mood.
           </p>
         </header>
 
@@ -70,14 +70,14 @@
           </article>
         </div>
       </div>
-    </section> -->
+    </section>
 
     <!-- SPECIALS / HIGHLIGHTED ITEMS -->
     <section class="section specials" id="menu">
       <div class="cs-container">
         <header class="section-header specials-header">
           <div>
-            <p class="eyebrow">Best Seller</p>
+            <p class="eyebrow">Today’s picks</p>
             <h2 class="section-title">Made for food lovers</h2>
             <p class="section-subtitle">A few favourites our guests can’t stop talking about.</p>
           </div>
@@ -112,7 +112,7 @@
     </section>
 
     <!-- STORY / CTA -->
-    <!-- <section class="section story">
+    <section class="section story">
       <div class="cs-container story-inner">
         <div class="story-text">
           <p class="eyebrow">Why guests love us</p>
@@ -135,7 +135,7 @@
           <p class="quote-author">— Mai, food lover & guest</p>
         </div>
       </div>
-    </section> -->
+    </section>
 
     <!-- FINAL CTA STRIP -->
     <section class="section cta-strip">
@@ -156,43 +156,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useOrdersStore } from '../stores/useOrderStore'
-import { useMenuItemsStore } from '../stores/useMenuItemStore'
 
 const router = useRouter()
-const orderStore = useOrdersStore()
-const menuItemsStore = useMenuItemsStore()
 
-onMounted(() => {
-  orderStore.fetchAll()
-  menuItemsStore.fetchAll()
-})
-
-const totalMenuItems = computed(() =>
-  menuItemsStore.items.filter(i => i.status !== 'INACTIVE').length
-)
-
-const overallRating = computed(() => {
-  const items = menuItemsStore.items.filter(
-    i => i.averageRating != null && i.ratingCount > 0
-  )
-
-  if (!items.length) return 0
-
-  const totalWeighted = items.reduce(
-    (sum, item) => sum + item.averageRating * item.ratingCount,
-    0
-  )
-
-  const totalReviews = items.reduce(
-    (sum, item) => sum + item.ratingCount,
-    0
-  )
-
-  return totalReviews ? totalWeighted / totalReviews : 0
-})
 function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
@@ -224,64 +192,42 @@ const featuredCategories = ref([
   },
 ])
 
-const specials = computed(() => {
-  const orders = orderStore.items
-  if (!orders.length) return []
+const specials = ref([
+  {
+    id: 1,
+    name: 'Chevrefrit Bowl',
+    category: 'Bowls',
+    price: 189,
+    description: 'Tomatoes, feta, mushrooms, corn and crisp greens.',
+    imageUrl: 'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg',
+    badge: 'Guest favourite',
+    rating: 4.9,
+    ratingCount: 42,
+  },
+  {
+    id: 2,
+    name: 'Saumon Gravlax',
+    category: 'Sushi & Rolls',
+    price: 159,
+    description: 'Salmon, avocado, cucumber, sushi rice & house sauce.',
+    imageUrl: 'https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg',
+    badge: 'Chef’s pick',
+    rating: 4.8,
+    ratingCount: 28,
+  },
+  {
+    id: 3,
+    name: 'Gourmet Burger',
+    category: 'Burgers',
+    price: 139,
+    description: 'Beef patty, cheddar, lettuce, tomato, brioche bun.',
+    imageUrl: 'https://images.pexels.com/photos/1633578/pexels-photo-1633578.jpeg',
+    badge: 'Most ordered',
+    rating: 4.7,
+    ratingCount: 55,
+  },
+])
 
-  const counter: Record<number, { count: number }> = {}
-
-  for (const order of orders) {
-    if (order.status !== 'COMPLETED') continue
-
-    for (const orderItem of order.items) {
-      const menuItem = orderItem.menuItem
-      if (!menuItem) continue
-
-      const id = menuItem.id
-      if (!counter[id]) {
-        counter[id] = { count: 0 }
-      }
-
-      counter[id].count += orderItem.quantity ?? 1
-    }
-  }
-
-  const top3Ids = Object.entries(counter)
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, 3)
-    .map(([id]) => Number(id))
-
-  return top3Ids.map((id, index) => {
-    const fullItem = menuItemsStore.items.find(i => i.id === id)
-    if (!fullItem) return null
-
-    const cheapestSize = fullItem.sizes?.length
-      ? fullItem.sizes.reduce((min: any, s: any) =>
-          s.sellPrice < min.sellPrice ? s : min
-        )
-      : null
-
-    const activeImages =
-      fullItem.images?.filter((img: any) => img.active) ?? []
-
-    const primaryImage =
-      activeImages.find((img: any) => img.primary)?.url ||
-      activeImages[0]?.url ||
-      ''
-
-    return {
-      id: fullItem.id,
-      name: fullItem.name,
-      category: fullItem.categoryName,
-      price: cheapestSize?.sellPrice ?? 0,
-      description: fullItem.shortDesc,
-      imageUrl: primaryImage,
-      badge: index === 0 ? '🔥 Most ordered' : 'Popular',
-      rating: fullItem.averageRating ?? 0,
-      ratingCount: fullItem.reviewCount ?? 0,
-    }
-  }).filter(Boolean)
-})
 function goToProducts() {
   router.push('/shop')
 }

@@ -3,7 +3,6 @@ import { useOrderSessionStore } from '@/stores/orderSession'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../../stores/useCartStore'
-import { ShoppingCartIcon } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
 const route = useRoute()
@@ -54,13 +53,13 @@ function isActive(basePath: string, exact = true) {
           >Home</RouterLink
         >
 
-        <!-- <RouterLink
+        <RouterLink
           to="/about"
           class="nav-link"
           :class="{ 'nav-link--active': isActive('/about') }"
         >
           About
-        </RouterLink> -->
+        </RouterLink>
 
         <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
           Menu
@@ -78,26 +77,8 @@ function isActive(basePath: string, exact = true) {
       <!-- RIGHT: PURCHASE / BAG + HAMBURGER -->
       <div class="navbar-actions">
         <button type="button" class="purchase-btn" @click="goToCart">
-         <ShoppingCartIcon class="cart-icon" />
-          <!-- <span class="purchase-icon">🛒</span> -->
-           <!-- <span class="purchase-icon">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <circle cx="9" cy="21" r="1"></circle>
-    <circle cx="20" cy="21" r="1"></circle>
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-  </svg>
-</span> -->
-          <span class="purchase-label">Cart</span>
+          <span class="purchase-icon">🛍</span>
+          <span class="purchase-label">Purchase</span>
           <span v-if="cartCount > 0" class="purchase-count">{{ cartCount }}</span>
         </button>
 
@@ -137,6 +118,13 @@ function isActive(basePath: string, exact = true) {
           :class="{ 'mobile-link--active': isActive('/shop') }"
           @click="closeMobile"
           >Menu</RouterLink
+        >
+        <RouterLink
+          to="/orders"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/orders', false) }"
+          @click="closeMobile"
+          >Orders</RouterLink
         >
         <RouterLink
           to="/contact"
