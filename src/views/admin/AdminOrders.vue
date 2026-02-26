@@ -32,9 +32,8 @@
         <!-- CHANNEL -->
         <select v-model="channelFilter" class="filter-select">
           <option value="">All channels</option>
-          <option value="Cafe">Cafe</option>
-          <option value="Room">Room</option>
-          <option value="Take-away">Take-away</option>
+          <option value="TABLE">Table</option>
+          <option value="ROOM">Room</option>
         </select>
 
         <!-- PAYMENT (match backend enum) -->
@@ -72,6 +71,11 @@
           Details
         </RouterLink>
       </template>
+      <template #cell-channel="{ value }">
+  <span class="status-pill status-pill--channel">
+    {{ value === 'ROOM' ? 'Room' : 'Table' }}
+  </span>
+</template>
 
       <template #cell-invoicePaymentStatus="{ value }">
         <span class="status-pill">{{ value }}</span>
@@ -170,7 +174,7 @@ watch(
 /* =======================
    Types
 ======================= */
-type Channel = 'Cafe' | 'Room' | 'Take-away'
+type channel = 'TABLE' | 'ROOM'
 type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED'
 
 type OrderRow = {
@@ -181,7 +185,7 @@ type OrderRow = {
   date: string
   time: string
   customerName: string
-  channel: Channel
+  channel: channel
   itemsSummary: string
   total: number
   invoicePaymentStatus: InvoicePaymentStatus
@@ -324,11 +328,6 @@ const statusOptions: OrderStatus[] = [
   'CANCELLED',
 ]
 
-function openStatusDialog(order: OrderRow) {
-  statusTarget.value = order
-  statusToUpdate.value = order.status
-  statusDialogVisible.value = true
-}
 
 function closeStatusDialog() {
   statusDialogVisible.value = false

@@ -35,7 +35,7 @@ export type Order = {
   date: string
   time: string
   customerName: string
-  channel: 'Cafe' | 'Room' | 'Take-away'
+  channel: string
   status: OrderStatus
   invoicePaymentStatus: string
   customerNote?: string
@@ -57,7 +57,7 @@ function mapFromApi(x: any): Order {
     date: created.toISOString().slice(0, 10),
     time: created.toTimeString().slice(0, 5),
     customerName: x.customerName,
-    channel: 'Cafe',
+    channel: x.orderPlace?.type?.toUpperCase() ?? 'TABLE',
     status: x.status,
     invoicePaymentStatus: x.invoicePaymentStatus ?? '--',
     customerNote: x.note,

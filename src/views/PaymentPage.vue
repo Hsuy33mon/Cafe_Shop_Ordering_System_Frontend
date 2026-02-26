@@ -23,19 +23,29 @@
           <div class="order-card">
             <h2 class="section-title">Order summary</h2>
 
-            <!-- delivery type -->
-            <div class="order-meta">
-              <div class="meta-row">
-                <span class="meta-label">Delivery type</span>
-                <span class="meta-value">
-                  {{ orderType === 'shop' ? 'Take in shop' : 'Room delivery' }}
-                </span>
-              </div>
-              <div class="meta-row" v-if="orderType === 'room'">
-                <span class="meta-label">Room number</span>
-                <span class="meta-value">{{ roomNo }}</span>
-              </div>
-            </div>
+<div class="order-session-info">
+  <div class="session-row">
+    <span class="session-label">Customer</span>
+    <span class="session-value">{{ customerName }}</span>
+  </div>
+
+  <div class="session-row">
+    <span class="session-label">Order type</span>
+    <span class="session-value">{{ orderTypeLabel }}</span>
+  </div>
+
+  <div
+    v-if="session.orderType === 'ROOM' || session.orderType === 'TABLE'"
+    class="session-row"
+  >
+    <span class="session-label">
+      {{ session.orderType === 'ROOM' ? 'Room number' : 'Table number' }}
+    </span>
+    <span class="session-value">{{ placeNumber }}</span>
+  </div>
+</div>
+
+<hr class="divider" />
 
             <hr class="divider" />
 
@@ -141,6 +151,7 @@
 import { computed, ref } from 'vue'
 import { useCartStore } from '../stores/useCartStore'
 import { useRouter } from 'vue-router'
+import { useOrderSessionStore } from '@/stores/orderSession'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -150,12 +161,21 @@ const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
 const total = computed(() => subtotal.value)
 
-type OrderType = 'shop' | 'room'
+const session = useOrderSessionStore()
+session.hydrate()
+
 type PaymentMethod = 'card' | 'promptpay' | 'cash'
 
-// mock (replace later with real order data)
-const orderType = ref<OrderType>('room')
-const roomNo = ref('1205')
+const customerName = computed(() => session.customerName)
+
+const orderTypeLabel = computed(() =>
+  session.orderType === 'ROOM' ? 'Room delivery' : 'Take in shop'
+)
+
+const placeNumber = computed(() =>
+  session.placeNumber || session.tableNumber || ''
+)
+
 
 // choose only
 const selectedMethod = ref<PaymentMethod>('promptpay')
