@@ -168,26 +168,6 @@ export const useOrdersStore = defineStore('orders', {
       }
     },
 
-    // async update(id: number, payload: { status?: OrderStatus }) {
-    //   this.loading = true
-    //   this.error = null
-    //   try {
-    //     const res = await http.put(`/api/admin/orders/${id}`, payload)
-
-    //     const updated = mapFromApi(res.data)
-    //     const idx = this.items.findIndex((x) => x.id === id)
-    //     if (idx !== -1) this.items[idx] = updated
-    //     if (this.currentOrder?.id === id) this.currentOrder = updated
-
-    //     return res.data
-    //   } catch (e: any) {
-    //     this.error = axiosErrorMessage(e)
-    //     throw e
-    //   } finally {
-    //     this.loading = false
-    //   }
-    // },
-
     async remove(id: number) {
       this.loading = true
       this.error = null

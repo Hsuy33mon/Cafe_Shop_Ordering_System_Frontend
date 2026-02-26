@@ -43,7 +43,7 @@
           {{ order.status }}
         </span>
         <span class="order-payment-pill">
-          {{ order.paymentStatus }}
+          {{ order.invoicePaymentStatus }}
         </span>
       </div>
     </section>
@@ -158,39 +158,31 @@
             </select>
           </label>
 
-          <label class="manage-field">
-            <span class="manage-label">Payment status</span>
-            <select v-model="editPaymentStatus" class="manage-select">
-              <option value="UNPAID">Unpaid</option>
-              <option value="PAID">Paid</option>
-            </select>
-          </label>
+<label class="manage-field">
+  <span class="manage-label">Payment status</span>
+  <select v-model="editPaymentStatus" class="manage-select" disabled>
+    <option value="PENDING">Pending</option>
+    <option value="PAID">Paid</option>
+    <option value="FAILED">Failed</option>
+    <option value="CANCELED">Canceled</option>
+    <option value="EXPIRED">Expired</option>
+    <option value="REFUNDED">Refunded</option>
+  </select>
+</label>
 
           <label class="manage-field">
             <span class="manage-label">Payment type</span>
             <select
               v-model="editPaymentType"
               class="manage-select"
-              :disabled="editPaymentStatus === 'UNPAID'"
+             disabled
             >
               <option value="CASH">Cash</option>
               <option value="CARD">Card</option>
               <option value="QR">QR</option>
             </select>
           </label>
-
           <button class="manage-btn-primary" @click="applyOrderUpdate">Update order</button>
-
-          <!-- <p v-if="lastUpdateMessage" class="manage-hint">
-            {{ lastUpdateMessage }}
-          </p> -->
-          <!-- <div
-  v-if="lastUpdateMessage"
-  class="manage-message"
-  :class="{ 'manage-message--error': lastUpdateMessage.includes('Failed') }"
->
-  {{ lastUpdateMessage }}
-</div> -->
         </article>
       </aside>
     </section>
@@ -235,8 +227,8 @@ const order = computed(() => ordersStore.currentOrder)
 /* =======================
    Payment (frontend-only for now)
 ======================= */
-type PaymentStatus = 'UNPAID' | 'PAID'
-type PaymentType = 'CASH' | 'CARD' | 'QR'
+type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED' |'--'
+type PaymentType =     'PROMPTPAY_QR' | 'CASH' | 'CARD' | '--'
 
 // const paymentStatusOptions: PaymentStatus[] = ['UNPAID', 'PAID']
 // const paymentTypeOptions: PaymentType[] = ['CASH', 'CARD', 'QR']
@@ -263,15 +255,14 @@ const statusOptions: OrderStatus[] = [
 
 const editStatus = ref<OrderStatus>('PENDING')
 const lastUpdateMessage = ref('')
-const editPaymentStatus = ref<PaymentStatus>('UNPAID')
-const editPaymentType = ref<PaymentType>('CASH')
+const editPaymentStatus = ref<PaymentStatus>('--')
+const editPaymentType = ref<PaymentType>('--')
 
 watch(order, (o) => {
   if (!o) return
 
   editStatus.value = o.status
-  editPaymentStatus.value = o.paymentStatus
-  // ✅ only set payment type if paid
+  editPaymentStatus.value = o.invoicePaymentStatus
   editPaymentType.value = 'CASH'
 })
 
@@ -286,7 +277,7 @@ async function applyOrderUpdate() {
   try {
     await ordersStore.update(order.value.id, {
       status: editStatus.value,
-      paymentStatus: editPaymentStatus.value,
+      invoicePaymentStatus: editPaymentStatus.value,
       paymentType: editPaymentType.value,
     })
 
