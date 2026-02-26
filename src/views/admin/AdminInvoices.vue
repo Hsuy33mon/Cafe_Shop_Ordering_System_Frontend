@@ -41,7 +41,7 @@
       :columns="invoiceColumns"
       :rows="filteredInvoices"
       title="All invoices"
-      :page-size="10"
+      :page-size="20"
       @page-change="onPageChange"
     >
       <!-- Total -->

@@ -39,7 +39,6 @@
             <hr class="divider" />
 
             <ul class="items-list">
-              <!-- ✅ use cartId -->
               <li v-for="item in items" :key="item.cartId" class="item-row">
                 <div class="item-info">
                   <div class="thumb">
@@ -172,9 +171,8 @@ const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
 const tableNumber = computed(() => session.placeNumber || '12')
 const orderPlaceId = computed(() => Number(tableNumber.value) || 1)
 
-const promptPayId = computed(() => '0891234567') // or from config/store
+const promptPayId = computed(() => '0891234567') 
 
-// bind UI from store
 const payment = computed(() => paymentStore.payment)
 const loading = computed(() => paymentStore.loading)
 const errorMsg = computed(() => paymentStore.error)
@@ -182,7 +180,7 @@ const expiresInText = computed(() => paymentStore.expiresInText)
 const expiresInSec = computed(() => paymentStore.expiresInSec)
 
 const paidConfirmed = computed({
-  get: () => false, // keep your local checkbox if you want
+  get: () => false, 
   set: () => {},
 })
 
@@ -198,8 +196,8 @@ async function refreshQr() {
   })
 }
 
+
 function changeMethod() {
-  // if user changes method, cancel current payment locally (and optionally API cancel)
   paymentStore.cancelPayment()
   router.push({ name: 'checkoutPaymentMethod' })
 }
@@ -219,28 +217,21 @@ async function confirmPaid() {
 let timer: number | undefined
 
 onMounted(async () => {
-  // ✅ IMPORTANT: reuse existing payment on refresh
+  await refreshQr()
   await paymentStore.ensurePromptPayPayment({
     orderPlaceId: orderPlaceId.value,
     customerName: customerName.value,
     promptPayId: promptPayId.value,
   })
 
-  // countdown tick (store manages expiration)
   timer = window.setInterval(() => {
     paymentStore.tick()
-
-    // optional: if expired, auto back to method page
-    if (expiresInSec.value <= 0) {
-      // stop and move user
-      // paymentStore.cancelPayment() // optional
-      // router.push({ name: 'checkoutPaymentMethod' })
-    }
   }, 1000)
 })
 
 onUnmounted(() => {
   if (timer) window.clearInterval(timer)
+  paymentStore.cancelPayment()
 })
 </script>
 

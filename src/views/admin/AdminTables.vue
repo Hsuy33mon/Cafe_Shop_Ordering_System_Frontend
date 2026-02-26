@@ -51,7 +51,7 @@
       :columns="tableColumns"
       :rows="filteredTables"
       title="All tables"
-      :page-size="12"
+      :page-size="20"
       @page-change="onPageChange"
     >
       <!-- Status column pill -->

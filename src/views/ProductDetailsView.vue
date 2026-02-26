@@ -556,7 +556,7 @@ function toggleCart() {
   const unitPrice = selectedSize.value.sellPrice + totalIngredientPrice
 
   cartStore.addItem({
-    productId: product.value.id, // ✅ REQUIRED
+    productId: product.value.id, 
 
     name: product.value.name,
     description: product.value.description,

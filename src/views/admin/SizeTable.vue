@@ -27,7 +27,7 @@
       :columns="sizeColumns"
       :rows="filteredSizes"
       title="All sizes"
-      :page-size="10"
+      :page-size="20"
       @page-change="onPageChange"
     >
       <!-- ACTIONS -->

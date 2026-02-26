@@ -60,7 +60,7 @@
     </div>
 
     <!-- ORDERS TABLE -->
-    <AdminTable :columns="orderColumns" :rows="filteredOrders" title="All orders" :page-size="5">
+    <AdminTable :columns="orderColumns" :rows="filteredOrders" title="All orders" :page-size="20">
       <!-- Details link -->
       <template #cell-details="{ row }">
         <RouterLink :to="{ name: 'admin-order-details', params: { id: row.id } }" class="btn-link">
@@ -144,10 +144,11 @@ type PaymentStatus = 'Unpaid' | 'Paid (Cash)' | 'Paid (Card)' | 'Paid (QR)'
 type OrderRow = {
   id: number
   orderPlaceId: number | null
+  orderPlaceNo: string
   tableNo: string | null
   date: string
   time: string
-  customer: string
+  customerName: string
   channel: Channel
   itemsSummary: string
   total: number
@@ -159,7 +160,8 @@ const orderColumns: TableColumn[] = [
   { key: 'id', label: '#', width: '70px', align: 'left' },
   { key: 'date', label: 'Date' },
   { key: 'time', label: 'Time' },
-  { key: 'customer', label: 'Customer' },
+  { key: 'orderPlaceNo', label: 'Order Place' },
+  { key: 'customerName', label: 'Customer' },
   { key: 'channel', label: 'Channel' },
   { key: 'itemsSummary', label: 'Items' },
   { key: 'total', label: 'Total (฿)', align: 'right' },
@@ -177,19 +179,37 @@ const startDateFilter = ref('')
 const endDateFilter = ref('')
 
 const orders = computed<OrderRow[]>(() =>
-  ordersStore.items.map((o) => ({
-    id: o.id,
-    orderPlaceId: o.orderPlaceId,
-    tableNo: o.tableNo,
-    date: o.date,
-    time: o.time,
-    customer: o.customer,
-    channel: o.channel,
-    itemsSummary: o.items.map((i) => `${i.quantity}× ${i.name}`).join(', '),
-    total: o.total,
-    paymentStatus: o.paymentStatus,
-    status: o.status,
-  })),
+  ordersStore.items.map((o: any) => {
+    // ✅ CUSTOMER NAME (handle all possible shapes)
+    const customerName =
+      o.customerName ??
+      o.customer?.name ??
+      o.order?.customerName ??
+      o.items?.[0]?.customerName ?? // <-- from your API response screenshot
+      '-'
+
+    // ✅ ORDER PLACE NO
+    const orderPlaceNo =
+      o.orderPlace?.no ??
+      o.orderPlaceNo ??
+      o.tableNo ??
+      '-'
+
+    return {
+      id: o.id,
+      orderPlaceId: o.orderPlaceId ?? null,
+      orderPlaceNo,
+      tableNo: o.tableNo ?? null,
+      date: o.date,
+      time: o.time,
+      customerName,
+      channel: o.channel,
+      itemsSummary: (o.items ?? []).map((i: any) => `${i.quantity}× ${i.name}`).join(', '),
+      total: o.total ?? 0,
+      paymentStatus: o.paymentStatus ?? 'Unpaid',
+      status: o.status,
+    }
+  }),
 )
 
 const filteredOrders = computed(() => {
@@ -201,7 +221,7 @@ const filteredOrders = computed(() => {
     const matchesSearch =
       !s ||
       String(o.id).includes(s) ||
-      o.customer.toLowerCase().includes(s) ||
+      o.customerName.toLowerCase().includes(s) ||
       o.itemsSummary.toLowerCase().includes(s)
 
     const matchesStatus = !statusFilter.value || o.status === statusFilter.value

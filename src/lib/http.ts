@@ -8,11 +8,9 @@ export const http = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Auto attach token on every request
 http.interceptors.request.use((config) => {
   const auth = useAuthStore()
   const token = auth.token || localStorage.getItem('token')
-
   if (token) {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
