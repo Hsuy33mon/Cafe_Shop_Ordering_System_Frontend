@@ -20,13 +20,23 @@
         <div class="hero-filters">
           <div class="input-wrapper">
             <span class="input-icon">🔍</span>
-            <input v-model="searchText" type="text" class="search-input" placeholder="Search shop items…" />
+            <input
+              v-model="searchText"
+              type="text"
+              class="search-input"
+              placeholder="Search shop items…"
+            />
           </div>
 
           <div class="category-tabs">
-            <button v-for="category in allCategories" :key="category.value" type="button" class="tab-btn"
+            <button
+              v-for="category in allCategories"
+              :key="category.value"
+              type="button"
+              class="tab-btn"
               :class="{ 'tab-btn--active': selectedCategory === category.value }"
-              @click="selectedCategory = category.value">
+              @click="selectedCategory = category.value"
+            >
               {{ category.label }}
             </button>
           </div>
@@ -36,17 +46,27 @@
       <!-- PRODUCTS GRID -->
       <section class="cs-container">
         <div class="items-grid">
-          <article v-for="(item, index) in paginatedItems" :key="item.id" class="item-card"
-            :style="{ '--stagger': index }">
-            <div class="item-media" :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
-              @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)">
-              <img :src="item.imageUrl || '/images/default.png'" :alt="item.name" class="item-image" />
+          <article
+            v-for="(item, index) in paginatedItems"
+            :key="item.id"
+            class="item-card"
+            :style="{ '--stagger': index }"
+          >
+            <div
+              class="item-media"
+              :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
+              @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)"
+            >
+              <img
+                :src="item.imageUrl || '/images/default.png'"
+                :alt="item.name"
+                class="item-image"
+              />
               <!-- <img
 :src="item.imageUrl || '/images/default-product.png'"
   :alt="item.name"
   class="cart-thumb"
 /> -->
-
 
               <!-- TAG BADGE (Season, Winter, etc.) -->
               <div v-if="item.badge && item.status !== 'OUT_OF_STOCK'" class="item-badge">
@@ -63,7 +83,12 @@
               <h3 class="item-name">{{ item.name }}</h3>
               <div class="item-rating" v-if="item.rating != null">
                 <span class="stars">
-                  <span v-for="s in 5" :key="s" class="star" :class="`star--${starType(item.rating ?? 0, s)}`">
+                  <span
+                    v-for="s in 5"
+                    :key="s"
+                    class="star"
+                    :class="`star--${starType(item.rating ?? 0, s)}`"
+                  >
                     ★
                   </span>
                 </span>
@@ -118,7 +143,12 @@
             <span class="page-total">· {{ showingCount }} of {{ totalItems }} items</span>
           </div>
 
-          <button type="button" class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
+          <button
+            type="button"
+            class="page-btn"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
             Next
           </button>
         </div>
@@ -128,7 +158,9 @@
       <transition name="fade-up">
         <div v-if="cartCount > 0" class="cart-summary">
           <div class="cart-summary-info">
-            <span class="cart-summary-count">{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span>
+            <span class="cart-summary-count"
+              >{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span
+            >
             <span class="cart-summary-text">in your bag</span>
           </div>
           <button type="button" class="cart-summary-btn" @click="goToCart">View bag</button>
@@ -186,13 +218,10 @@ const items = computed<ShopItem[]>(() =>
         ? i.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
         : null
       const firstTag = i.tags?.[0]
-      const activeImages =
-        i.images?.filter((img: any) => img.active) ?? []
+      const activeImages = i.images?.filter((img: any) => img.active) ?? []
 
       const primaryImage =
-        activeImages.find((img: any) => img.primary)?.url ||
-        activeImages[0]?.url ||
-        ''
+        activeImages.find((img: any) => img.primary)?.url || activeImages[0]?.url || ''
 
       return {
         id: i.id,

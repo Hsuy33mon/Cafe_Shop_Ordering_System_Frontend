@@ -222,7 +222,9 @@
   border: 1px solid rgba(248, 250, 252, 0.9);
   display: flex;
   flex-direction: column;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .item-card:hover {
@@ -444,8 +446,13 @@
 ========================================================= */
 
 @keyframes floatShape {
-  0%,100% { transform: translate3d(0,0,0); }
-  50% { transform: translate3d(14px,-18px,0); }
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(14px, -18px, 0);
+  }
 }
 
 /* =========================================================
@@ -480,7 +487,7 @@
   color: #111827;
 
   /* box-shadow: 0 8px 18px rgba(252, 211, 77, 0.5); */
-  box-shadow: var( --cs-border-soft);
+  box-shadow: var(--cs-border-soft);
   cursor: pointer;
   transition: all 150ms ease;
 }

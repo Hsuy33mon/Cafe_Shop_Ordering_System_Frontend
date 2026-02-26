@@ -59,9 +59,12 @@
         </span>
       </div>
 
-      <div style="display:flex; gap:10px;">
+      <div style="display: flex; gap: 10px">
         <button class="orders-new-btn" @click="onViewLatest">View latest</button>
+
         <button v-if="showLatestOnly" class="orders-new-btn" @click="onShowAll">Show all</button>
+
+        <button class="orders-new-btn" @click="onClearNoti">Clear</button>
       </div>
     </div>
 
@@ -277,7 +280,14 @@ const filteredOrders = computed(() => {
     else if (start) matchesDate = o.date >= start
     else if (end) matchesDate = o.date <= end
 
-    return matchesSearch && matchesStatus && matchesChannel && matchesPayment && matchesTable && matchesDate
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesChannel &&
+      matchesPayment &&
+      matchesTable &&
+      matchesDate
+    )
   })
 })
 
@@ -347,6 +357,10 @@ async function confirmStatusUpdate() {
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
+}
+function onClearNoti() {
+  wsStore.clearNewOrders()
+  showLatestOnly.value = false
 }
 </script>
 

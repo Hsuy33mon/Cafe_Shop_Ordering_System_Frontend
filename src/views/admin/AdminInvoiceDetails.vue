@@ -175,12 +175,14 @@
       <div>
         <button class="btn-secondary">Edit</button>
         <button class="btn-danger">Cancel Invoice</button>
+        <button @click="onPrint">Print Invoice</button>
       </div>
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
+import { printInvoiceThermal } from '@/stores/thermalPrint'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -243,6 +245,10 @@ async function updatePaymentStatus(paymentId: number) {
   } finally {
     saving[paymentId] = false
   }
+}
+async function onPrint() {
+  if (!invoice.value) return
+  await printInvoiceThermal(invoice.value)
 }
 </script>
 

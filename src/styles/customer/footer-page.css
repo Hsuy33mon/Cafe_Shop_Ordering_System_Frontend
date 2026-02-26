@@ -99,7 +99,9 @@
   font-size: 0.85rem;
   color: #e5e7eb;
   opacity: 0.75;
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .footer-link:hover {

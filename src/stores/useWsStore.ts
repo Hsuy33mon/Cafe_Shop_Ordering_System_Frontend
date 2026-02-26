@@ -19,7 +19,7 @@ export const useWsStore = defineStore('ws', {
   state: () => ({
     client: null as Client | null,
     connected: false,
-    newOrderIds: [] as number[], 
+    newOrderIds: [] as number[],
   }),
 
   getters: {

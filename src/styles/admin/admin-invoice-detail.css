@@ -317,3 +317,9 @@
   font-size: 12px;
   color: #c0392b;
 }
+
+@media print {
+  body {
+    width: 58mm;
+  }
+}

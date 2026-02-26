@@ -112,8 +112,9 @@
               </span>
 
               <span class="pd-rating-text">
-                ({{ reviewStore.items.length }})
-                rating{{ reviewStore.items.length === 1 ? '' : 's' }}
+                ({{ reviewStore.items.length }}) rating{{
+                  reviewStore.items.length === 1 ? '' : 's'
+                }}
               </span>
             </div>
 
@@ -388,8 +389,10 @@ const product = computed(() => {
   if (!item) return null
 
   const activeImages =
-    item.images?.filter((img: any) => img?.active).map((img: any) => img?.url).filter(Boolean) ??
-    []
+    item.images
+      ?.filter((img: any) => img?.active)
+      .map((img: any) => img?.url)
+      .filter(Boolean) ?? []
 
   const primaryImage =
     item.images?.find((img: any) => img?.primary && img?.active)?.url || activeImages[0] || ''

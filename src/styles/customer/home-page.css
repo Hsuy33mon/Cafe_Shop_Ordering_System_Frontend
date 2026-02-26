@@ -250,7 +250,9 @@
   border-radius: var(--cs-radius-lg);
   padding: 1.3rem 1.2rem;
   box-shadow: var(--cs-shadow-soft);
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .category-card:hover {
@@ -456,18 +458,34 @@
 /* ---------- ANIMATIONS ---------- */
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes floatIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes plateFloat {
-  from { transform: translateY(0); }
-  to { transform: translateY(-12px); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-12px);
+  }
 }
 
 /* ---------- RESPONSIVE ---------- */

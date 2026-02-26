@@ -158,25 +158,21 @@
             </select>
           </label>
 
-<label class="manage-field">
-  <span class="manage-label">Payment status</span>
-  <select v-model="editPaymentStatus" class="manage-select" disabled>
-    <option value="PENDING">Pending</option>
-    <option value="PAID">Paid</option>
-    <option value="FAILED">Failed</option>
-    <option value="CANCELED">Canceled</option>
-    <option value="EXPIRED">Expired</option>
-    <option value="REFUNDED">Refunded</option>
-  </select>
-</label>
+          <label class="manage-field">
+            <span class="manage-label">Payment status</span>
+            <select v-model="editPaymentStatus" class="manage-select" disabled>
+              <option value="PENDING">Pending</option>
+              <option value="PAID">Paid</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELED">Canceled</option>
+              <option value="EXPIRED">Expired</option>
+              <option value="REFUNDED">Refunded</option>
+            </select>
+          </label>
 
           <label class="manage-field">
             <span class="manage-label">Payment type</span>
-            <select
-              v-model="editPaymentType"
-              class="manage-select"
-             disabled
-            >
+            <select v-model="editPaymentType" class="manage-select" disabled>
               <option value="CASH">Cash</option>
               <option value="CARD">Card</option>
               <option value="QR">QR</option>
@@ -227,8 +223,8 @@ const order = computed(() => ordersStore.currentOrder)
 /* =======================
    Payment (frontend-only for now)
 ======================= */
-type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED' |'--'
-type PaymentType =     'PROMPTPAY_QR' | 'CASH' | 'CARD' | '--'
+type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED' | '--'
+type PaymentType = 'PROMPTPAY_QR' | 'CASH' | 'CARD' | '--'
 
 // const paymentStatusOptions: PaymentStatus[] = ['UNPAID', 'PAID']
 // const paymentTypeOptions: PaymentType[] = ['CASH', 'CARD', 'QR']
