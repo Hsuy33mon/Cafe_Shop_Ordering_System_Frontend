@@ -251,7 +251,6 @@ const allCategories = computed(() => [
 ])
 
 function goToDetails(id: number) {
-  
   router.push({ name: 'product-details', params: { id } })
 }
 

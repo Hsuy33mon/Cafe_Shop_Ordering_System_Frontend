@@ -75,10 +75,10 @@
         </RouterLink>
       </template>
       <template #cell-channel="{ value }">
-  <span class="status-pill status-pill--channel">
-    {{ value === 'ROOM' ? 'Room' : 'Table' }}
-  </span>
-</template>
+        <span class="status-pill status-pill--channel">
+          {{ value === 'ROOM' ? 'Room' : 'Table' }}
+        </span>
+      </template>
 
       <template #cell-invoicePaymentStatus="{ value }">
         <span class="status-pill">{{ value }}</span>
@@ -337,7 +337,6 @@ const statusOptions: OrderStatus[] = [
   'COMPLETED',
   'CANCELLED',
 ]
-
 
 function closeStatusDialog() {
   statusDialogVisible.value = false

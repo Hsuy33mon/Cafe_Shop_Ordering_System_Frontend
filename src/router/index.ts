@@ -74,6 +74,11 @@ const routes = [
         name: 'checkoutPay',
         component: () => import('@/views/CheckoutPay.vue'),
       },
+      {
+  path: 'payment/success',
+  name: 'paymentSuccess',
+  component: () => import('@/views/PaymentSuccess.vue'),
+}
 
       { path: 'shop', name: 'shop', component: ShopPage },
       { path: 'contact', name: 'contact', component: ContactPage },

@@ -231,8 +231,10 @@ onMounted(async () => {
 
       wsStore.subscribePayment(Number(paymentId), (evt) => {
         console.log('PAYMENT EVT', evt)
-        if (evt.paymentStatus === 'PAID') {
-          router.push({ name: 'paymentSuccess' })
+        console.log('payment status--> ', evt.paymentStatus)
+
+        if ((evt.paymentStatus || '').toUpperCase() === 'PAID') {
+          router.replace('/payment/success').catch(() => {})
         }
       })
     },

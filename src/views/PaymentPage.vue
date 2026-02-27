@@ -23,29 +23,29 @@
           <div class="order-card">
             <h2 class="section-title">Order summary</h2>
 
-<div class="order-session-info">
-  <div class="session-row">
-    <span class="session-label">Customer</span>
-    <span class="session-value">{{ customerName }}</span>
-  </div>
+            <div class="order-session-info">
+              <div class="session-row">
+                <span class="session-label">Customer</span>
+                <span class="session-value">{{ customerName }}</span>
+              </div>
 
-  <div class="session-row">
-    <span class="session-label">Order type</span>
-    <span class="session-value">{{ orderTypeLabel }}</span>
-  </div>
+              <div class="session-row">
+                <span class="session-label">Order type</span>
+                <span class="session-value">{{ orderTypeLabel }}</span>
+              </div>
 
-  <div
-    v-if="session.orderType === 'ROOM' || session.orderType === 'TABLE'"
-    class="session-row"
-  >
-    <span class="session-label">
-      {{ session.orderType === 'ROOM' ? 'Room number' : 'Table number' }}
-    </span>
-    <span class="session-value">{{ placeNumber }}</span>
-  </div>
-</div>
+              <div
+                v-if="session.orderType === 'ROOM' || session.orderType === 'TABLE'"
+                class="session-row"
+              >
+                <span class="session-label">
+                  {{ session.orderType === 'ROOM' ? 'Room number' : 'Table number' }}
+                </span>
+                <span class="session-value">{{ placeNumber }}</span>
+              </div>
+            </div>
 
-<hr class="divider" />
+            <hr class="divider" />
 
             <hr class="divider" />
 
@@ -169,13 +169,10 @@ type PaymentMethod = 'card' | 'promptpay' | 'cash'
 const customerName = computed(() => session.customerName)
 
 const orderTypeLabel = computed(() =>
-  session.orderType === 'ROOM' ? 'Room delivery' : 'Take in shop'
+  session.orderType === 'ROOM' ? 'Room delivery' : 'Take in shop',
 )
 
-const placeNumber = computed(() =>
-  session.placeNumber || session.tableNumber || ''
-)
-
+const placeNumber = computed(() => session.placeNumber || session.tableNumber || '')
 
 // choose only
 const selectedMethod = ref<PaymentMethod>('promptpay')

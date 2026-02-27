@@ -190,8 +190,7 @@ onMounted(() => {
   window.addEventListener('resize', updateIsMobile)
   session.hydrate?.()
 
-    session.clear()
-
+  session.clear()
 
   customerName.value = session.customerName || ''
   orderType.value = (session.orderType as OrderType) || 'TABLE'
