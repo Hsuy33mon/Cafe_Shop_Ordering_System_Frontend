@@ -216,26 +216,21 @@ let timer: number | undefined
 let subscribed = false
 
 onMounted(async () => {
-  await refreshQr()
-
   await paymentStore.ensurePromptPayPayment({
     orderPlaceId: orderPlaceId.value,
     customerName: customerName.value,
     promptPayId: promptPayId.value,
   })
 
-  // ✅ connect websocket once
   wsStore.connect()
 
-  // ✅ subscribe when we have paymentId
   watch(
     () => payment.value?.id,
     (paymentId) => {
-      if (!paymentId || subscribed) return
-      subscribed = true
+      if (!paymentId) return
 
       wsStore.subscribePayment(Number(paymentId), (evt) => {
-        // ✅ redirect only on PAID
+        console.log('PAYMENT EVT', evt)
         if (evt.paymentStatus === 'PAID') {
           router.push({ name: 'paymentSuccess' })
         }
