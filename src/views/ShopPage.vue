@@ -8,7 +8,7 @@
       <!-- HERO -->
       <section class="cs-container hero">
         <div class="hero-header">
-          <span class="hero-pill">CafeShop Store</span>
+          <span class="hero-pill">Five Two One Cafe & Bakery</span>
           <h1 class="cs-heading-xl hero-title">Take a piece of CafeShop home.</h1>
           <p class="cs-body-muted hero-subtitle">
             Beans, bottles, gift cards and cozy merch inspired by our cafe – perfect for yourself or
@@ -251,6 +251,7 @@ const allCategories = computed(() => [
 ])
 
 function goToDetails(id: number) {
+  
   router.push({ name: 'product-details', params: { id } })
 }
 

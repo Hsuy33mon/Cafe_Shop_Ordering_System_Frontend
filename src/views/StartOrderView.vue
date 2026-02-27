@@ -133,7 +133,6 @@
             </div>
 
             <div class="video-frame">
-              <!-- ✅ autoplay helps iOS -->
               <video ref="videoEl" class="video" playsinline autoplay muted></video>
             </div>
 
@@ -161,6 +160,10 @@ const router = useRouter()
 const route = useRoute()
 const session = useOrderSessionStore()
 
+/**
+ * ✅ Keep local inputs separate from store,
+ * ✅ but DON'T clear store automatically on mount.
+ */
 const customerName = ref(session.customerName || '')
 const orderType = ref<OrderType>((session.orderType as OrderType) || 'TABLE')
 const placeNumber = ref(session.placeNumber || session.tableNumber || '')
@@ -174,6 +177,8 @@ const videoEl = ref<HTMLVideoElement | null>(null)
 let reader: BrowserMultiFormatReader | null = null
 let activeStream: MediaStream | null = null
 
+let handledScan = false
+
 // responsive
 const isMobile = ref(false)
 function updateIsMobile() {
@@ -183,12 +188,15 @@ function updateIsMobile() {
 onMounted(() => {
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
+  session.hydrate?.()
 
-  session.clear()
+    session.clear()
 
-  customerName.value = ''
-  orderType.value = 'TABLE'
-  placeNumber.value = ''
+
+  customerName.value = session.customerName || ''
+  orderType.value = (session.orderType as OrderType) || 'TABLE'
+  placeNumber.value = session.placeNumber || session.tableNumber || ''
+
   errorMsg.value = ''
   manualMode.value = false
 })
@@ -254,6 +262,7 @@ function parseOrderFromQr(text: string): { orderType?: OrderType; placeNumber?: 
 async function openScanner() {
   errorMsg.value = ''
   scanning.value = true
+  handledScan = false
 
   await nextTick()
 
@@ -264,7 +273,6 @@ async function openScanner() {
   }
 
   stopScanner()
-
   reader = new BrowserMultiFormatReader()
 
   try {
@@ -273,19 +281,20 @@ async function openScanner() {
       audio: false,
     })
 
-    // attach stream to video
     videoEl.value.srcObject = activeStream
     await videoEl.value.play()
 
-    // decode QR from stream
     await reader.decodeFromStream(activeStream, videoEl.value, (result) => {
-      if (!result) return
+      // ✅ prevent multiple triggers
+      if (!result || handledScan) return
+      handledScan = true
 
       const raw = result.getText()
       const parsed = parseOrderFromQr(raw)
 
       if (!parsed?.placeNumber) {
         errorMsg.value = 'QR detected, but format is not supported.'
+        handledScan = false // allow rescan
         return
       }
 
@@ -294,6 +303,7 @@ async function openScanner() {
 
       closeScanner()
 
+      // If name already filled, continue immediately
       if (customerName.value.trim().length >= 2) onContinue()
       else errorMsg.value = `${placeLabel.value} detected. Please enter your name to continue.`
     })
@@ -310,19 +320,16 @@ function closeScanner() {
 }
 
 function stopScanner() {
-  // stop ZXing
   try {
     reader?.reset()
   } catch {}
   reader = null
 
-  // stop camera tracks
   try {
     activeStream?.getTracks().forEach((t) => t.stop())
   } catch {}
   activeStream = null
 
-  // clear video element
   try {
     if (videoEl.value) videoEl.value.srcObject = null
   } catch {}
@@ -346,10 +353,11 @@ function onContinue() {
     return
   }
 
+  // ✅ save into store (should persist to localStorage inside store)
   session.setSession({
-    customerName: customerName.value,
+    customerName: customerName.value.trim(),
     orderType: orderType.value,
-    placeNumber: placeNumber.value,
+    placeNumber: placeNumber.value.trim(),
   })
 
   const redirect = (route.query.redirect as string) || '/shop'

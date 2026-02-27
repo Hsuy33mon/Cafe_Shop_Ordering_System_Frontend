@@ -8,7 +8,7 @@
     <main class="main">
       <section class="cs-container hero">
         <div class="hero-header cs-text-center">
-          <span class="hero-pill">CafeShop · Starters</span>
+          <span class="hero-pill">Five Two One Cafe & Bakery · Starters</span>
           <h1 class="cs-heading-xl">Starters</h1>
           <p class="cs-body-muted hero-subtitle">
             Discover our curated cafe menu – fresh bowls, sushi plates and gourmet burgers to start
