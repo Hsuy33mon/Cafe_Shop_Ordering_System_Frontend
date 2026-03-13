@@ -218,15 +218,17 @@ function goToPaymentSuccess() {
 
   cartStore.clearCart?.()
 
-  router.replace({
-    name: 'paymentSuccess',
-    query: {
-      paymentId: String(payment.value.id),
-      invoiceId: payment.value.invoiceId ? String(payment.value.invoiceId) : '',
-      method: payment.value.paymentType || 'PROMPTPAY',
-      status: payment.value.status || 'PAID',
-    },
-  }).catch(() => {})
+  router
+    .replace({
+      name: 'paymentSuccess',
+      query: {
+        paymentId: String(payment.value.id),
+        invoiceId: payment.value.invoiceId ? String(payment.value.invoiceId) : '',
+        method: payment.value.paymentType || 'PROMPTPAY',
+        status: payment.value.status || 'PAID',
+      },
+    })
+    .catch(() => {})
 }
 
 // fallback button
@@ -237,15 +239,17 @@ async function confirmPaid() {
   }
 
   // optional fallback if user manually confirms before WS arrives
-  router.replace({
-    name: 'paymentSuccess',
-    query: {
-      paymentId: String(payment.value?.id || ''),
-      invoiceId: payment.value?.invoiceId ? String(payment.value.invoiceId) : '',
-      method: payment.value?.paymentType || 'PROMPTPAY',
-      status: payment.value?.status || 'PENDING',
-    },
-  }).catch(() => {})
+  router
+    .replace({
+      name: 'paymentSuccess',
+      query: {
+        paymentId: String(payment.value?.id || ''),
+        invoiceId: payment.value?.invoiceId ? String(payment.value.invoiceId) : '',
+        method: payment.value?.paymentType || 'PROMPTPAY',
+        status: payment.value?.status || 'PENDING',
+      },
+    })
+    .catch(() => {})
 }
 
 let timer: number | undefined

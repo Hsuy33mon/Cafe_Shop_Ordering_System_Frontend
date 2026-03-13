@@ -23,7 +23,7 @@ function mapFromApi(x: any): MenuItem {
     ingredients: Array.isArray(x.ingredients) ? x.ingredients : [],
     images: Array.isArray(x.images)
       ? x.images
-          .filter((img: any) => img.active === true) 
+          .filter((img: any) => img.active === true)
           .map((img: any) => ({
             id: Number(img.id),
             url: img.url,
@@ -69,7 +69,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get('/api/admin/menu-items',{ skipAuth: true })
+        const res = await http.get('/api/admin/menu-items', { skipAuth: true })
 
         const data = res.data
         const list = Array.isArray(data)
@@ -91,7 +91,7 @@ export const useMenuItemsStore = defineStore('menuItems', {
 
     async fetchById(id: number) {
       try {
-        const res = await http.get(`/api/admin/menu-items/${id}`,{ skipAuth: true })
+        const res = await http.get(`/api/admin/menu-items/${id}`, { skipAuth: true })
         const item = mapFromApi(res.data)
         this.currentItem = item
         return item

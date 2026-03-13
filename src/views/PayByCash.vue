@@ -100,9 +100,7 @@
           </div>
 
           <p v-if="errorText" class="error">{{ errorText }}</p>
-          <p class="hint">
-            After confirming, you will see the success page immediately.
-          </p>
+          <p class="hint">After confirming, you will see the success page immediately.</p>
         </section>
       </div>
     </main>
