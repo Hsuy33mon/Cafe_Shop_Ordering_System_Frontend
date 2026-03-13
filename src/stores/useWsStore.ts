@@ -1,7 +1,7 @@
 // src/stores/useWsStore.ts
 import { defineStore } from 'pinia'
 import SockJS from 'sockjs-client'
-import { Client } from '@stomp/stompjs'
+import { Client, type StompSubscription } from '@stomp/stompjs'
 
 type PaymentUpdateEvent = {
   invoiceId?: number
@@ -23,8 +23,10 @@ export const useWsStore = defineStore('ws', {
     // admin list banner
     newOrderIds: [] as number[],
 
-    // ✅ customer payment page
+    // customer payment page
     lastPaymentEvent: null as PaymentUpdateEvent | null,
+
+    paymentSubscriptions: {} as Record<number, StompSubscription>,
   }),
 
   getters: {
@@ -48,6 +50,7 @@ export const useWsStore = defineStore('ws', {
 
       client.onConnect = () => {
         this.connected = true
+
         client.subscribe('/topic/orders/payment', (msg) => {
           const evt = JSON.parse(msg.body) as PaymentUpdateEvent
           const ids = (evt.orderIds ?? []).map(Number).filter(Boolean)
@@ -66,18 +69,58 @@ export const useWsStore = defineStore('ws', {
       client.activate()
       this.client = client
     },
+
     subscribePayment(paymentId: number, onEvent?: (evt: PaymentUpdateEvent) => void) {
-      if (!this.client || !this.connected) return
       if (!paymentId) return
-      
-      this.client.subscribe(`/topic/payments/${paymentId}`, (msg) => {
-        const evt = JSON.parse(msg.body) as PaymentUpdateEvent
-        this.lastPaymentEvent = evt
-        onEvent?.(evt)
-      })
+
+      if (!this.client?.active) {
+        this.connect()
+      }
+
+      const doSubscribe = () => {
+        if (!this.client || !this.connected) return
+
+        // avoid duplicate subscribe
+        if (this.paymentSubscriptions[paymentId]) return
+
+        const sub = this.client.subscribe(`/topic/payments/${paymentId}`, (msg) => {
+          const evt = JSON.parse(msg.body) as PaymentUpdateEvent
+          this.lastPaymentEvent = evt
+          onEvent?.(evt)
+        })
+
+        this.paymentSubscriptions[paymentId] = sub
+      }
+
+      if (this.connected) {
+        doSubscribe()
+        return
+      }
+
+      const timer = window.setInterval(() => {
+        if (this.connected) {
+          window.clearInterval(timer)
+          doSubscribe()
+        }
+      }, 300)
+
+      window.setTimeout(() => {
+        window.clearInterval(timer)
+      }, 10000)
+    },
+
+    unsubscribePayment(paymentId: number) {
+      const sub = this.paymentSubscriptions[paymentId]
+      if (sub) {
+        sub.unsubscribe()
+        delete this.paymentSubscriptions[paymentId]
+      }
     },
 
     disconnect() {
+      Object.values(this.paymentSubscriptions).forEach((sub) => sub.unsubscribe())
+      this.paymentSubscriptions = {}
+
       this.client?.deactivate()
       this.client = null
       this.connected = false

@@ -179,7 +179,8 @@ const loading = computed(() => paymentStore.loading)
 const errorMsg = computed(() => paymentStore.error)
 const expiresInText = computed(() => paymentStore.expiresInText)
 
-const paidConfirmed = ref(false) // ✅ FIX
+const paidConfirmed = ref(false)
+const redirected = ref(false)
 
 function formatMoney(value: number): string {
   return `฿${Number(value).toFixed(0)}`
@@ -206,14 +207,86 @@ function goToHome() {
   router.push({ name: 'home' })
 }
 
-// optional button: keep or remove
+function isPaidStatus(status?: string) {
+  return ['PAID', 'SUCCESS', 'COMPLETED'].includes(String(status || '').toUpperCase())
+}
+
+function goToPaymentSuccess() {
+  if (!payment.value?.id || redirected.value) return
+
+  redirected.value = true
+
+  cartStore.clearCart?.()
+
+  router.replace({
+    name: 'paymentSuccess',
+    query: {
+      paymentId: String(payment.value.id),
+      invoiceId: payment.value.invoiceId ? String(payment.value.invoiceId) : '',
+      method: payment.value.paymentType || 'PROMPTPAY',
+      status: payment.value.status || 'PAID',
+    },
+  }).catch(() => {})
+}
+
+// fallback button
 async function confirmPaid() {
-  // you can keep this as fallback, but WS should auto redirect
-  router.push({ name: 'paymentSuccess' })
+  if (isPaidStatus(payment.value?.status)) {
+    goToPaymentSuccess()
+    return
+  }
+
+  // optional fallback if user manually confirms before WS arrives
+  router.replace({
+    name: 'paymentSuccess',
+    query: {
+      paymentId: String(payment.value?.id || ''),
+      invoiceId: payment.value?.invoiceId ? String(payment.value.invoiceId) : '',
+      method: payment.value?.paymentType || 'PROMPTPAY',
+      status: payment.value?.status || 'PENDING',
+    },
+  }).catch(() => {})
 }
 
 let timer: number | undefined
-let subscribed = false
+let currentSubscribedPaymentId: number | null = null
+
+watch(
+  () => payment.value?.id,
+  (paymentId) => {
+    if (!paymentId) return
+
+    const numericPaymentId = Number(paymentId)
+
+    if (currentSubscribedPaymentId === numericPaymentId) return
+
+    if (currentSubscribedPaymentId) {
+      wsStore.unsubscribePayment(currentSubscribedPaymentId)
+    }
+
+    currentSubscribedPaymentId = numericPaymentId
+
+    wsStore.subscribePayment(numericPaymentId, (evt) => {
+      console.log('PAYMENT EVT', evt)
+      console.log('payment status -->', evt.paymentStatus)
+
+      // keep latest event in store already handled by wsStore
+      if (isPaidStatus(evt.paymentStatus)) {
+        goToPaymentSuccess()
+      }
+    })
+  },
+  { immediate: true },
+)
+
+watch(
+  () => payment.value?.status,
+  (status) => {
+    if (isPaidStatus(status)) {
+      goToPaymentSuccess()
+    }
+  },
+)
 
 onMounted(async () => {
   await paymentStore.ensurePromptPayPayment({
@@ -224,29 +297,23 @@ onMounted(async () => {
 
   wsStore.connect()
 
-  watch(
-    () => payment.value?.id,
-    (paymentId) => {
-      if (!paymentId) return
-
-      wsStore.subscribePayment(Number(paymentId), (evt) => {
-        console.log('PAYMENT EVT', evt)
-        console.log('payment status--> ', evt.paymentStatus)
-
-        if ((evt.paymentStatus || '').toUpperCase() === 'PAID') {
-          router.replace('/payment/success').catch(() => {})
-        }
-      })
-    },
-    { immediate: true },
-  )
-
-  timer = window.setInterval(() => paymentStore.tick(), 1000)
+  timer = window.setInterval(() => {
+    paymentStore.tick()
+  }, 1000)
 })
 
 onUnmounted(() => {
   if (timer) window.clearInterval(timer)
-  paymentStore.cancelPayment()
+
+  if (currentSubscribedPaymentId) {
+    wsStore.unsubscribePayment(currentSubscribedPaymentId)
+  }
+
+  // only cancel if still unpaid
+  if (!isPaidStatus(payment.value?.status)) {
+    paymentStore.cancelPayment()
+  }
+
   // optional: don't disconnect global ws if other pages use it
   // wsStore.disconnect()
 })
