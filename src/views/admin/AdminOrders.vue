@@ -334,9 +334,9 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   const total = invoiceOrders.reduce((sum: number, order: any) => sum + Number(order.total ?? 0), 0)
 
   return {
-    shopName: 'Five Two One Cafe & Bakery',
-    address: 'Patong Beach, Phuket',
-    phone: '0999999999',
+    shopName: '512',
+    address: 'BKK',
+    phone: '0924662568',
     orderNo: invoiceId,
     customerName: first.customerName ?? '-',
     orderType: first.channel ?? '-',
