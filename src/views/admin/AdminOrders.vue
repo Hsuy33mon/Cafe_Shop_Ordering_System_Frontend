@@ -159,6 +159,7 @@ const printedInvoiceIds = ref<Set<number>>(new Set())
    Fetch + connect websocket
 ======================= */
 onMounted(async () => {
+  localStorage.setItem('selectedPrinter', 'ZN- ZN58U')
   await ordersStore.fetchAll()
   wsStore.connect()
 })
@@ -219,47 +220,30 @@ const startDateFilter = ref('')
 const endDateFilter = ref('')
 
 /* =======================
-   Map backend -> table rows
+   Map store -> table rows
+   Use mapped store shape only
 ======================= */
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o: any) => {
-    const createdAt = o.createdAt ? new Date(o.createdAt) : null
+    const firstItem = Array.isArray(o.items) && o.items.length > 0 ? o.items[0] : null
 
-    const customerName =
-      o.customerName ??
-      o.customer?.name ??
-      '-'
-
-    const orderPlaceNo =
-      o.orderPlace?.no ??
-      o.orderPlaceNo ??
-      o.tableNo ??
-      '-'
-
-    const channel =
-      o.orderPlace?.type ??
-      o.channel ??
-      'TABLE'
-
-    const itemName = o.menuItem?.name ?? '-'
-    const itemSize = o.size?.shortName ? ` (${o.size.shortName})` : ''
-    const qty = Number(o.qty ?? 0)
+    const itemName = firstItem?.name ?? '-'
+    const itemSize = firstItem?.size ? ` (${firstItem.size})` : ''
+    const itemQty = Number(firstItem?.quantity ?? 0)
 
     return {
       id: Number(o.id),
-      invoiceId: o.invoiceId ?? o.invoice?.id ?? null,
-      orderPlaceId: o.orderPlaceId ?? o.orderPlace?.id ?? null,
-      orderPlaceNo,
-      tableNo: o.tableNo ?? o.orderPlace?.no ?? null,
-      date: createdAt ? createdAt.toISOString().slice(0, 10) : '',
-      time: createdAt
-        ? createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
-        : '',
-      customerName,
-      channel,
-      itemsSummary: `${qty}x ${itemName}${itemSize}`,
-      total: Number(o.totalPrice ?? o.total ?? 0),
-      invoicePaymentStatus: o.invoicePaymentStatus,
+      invoiceId: o.invoiceId != null ? Number(o.invoiceId) : null,
+      orderPlaceId: o.orderPlaceId != null ? Number(o.orderPlaceId) : null,
+      orderPlaceNo: o.tableNo ?? '-',
+      tableNo: o.tableNo ?? null,
+      date: o.date ?? '',
+      time: o.time ?? '',
+      customerName: o.customerName ?? '-',
+      channel: (o.channel ?? 'TABLE') as channel,
+      itemsSummary: `${itemQty}x ${itemName}${itemSize}`,
+      total: Number(o.total ?? 0),
+      invoicePaymentStatus: (o.invoicePaymentStatus ?? 'PENDING') as InvoicePaymentStatus,
       status: o.status,
     }
   }),
@@ -313,56 +297,40 @@ function getSelectedPrinterName() {
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
-  const invoiceOrders = ordersStore.items.filter((o: any) => {
-    const currentInvoiceId = o.invoiceId ?? o.invoice?.id ?? null
-    return Number(currentInvoiceId) === Number(invoiceId)
-  })
+  const invoiceOrders = ordersStore.items.filter((o: any) => Number(o.invoiceId) === Number(invoiceId))
 
   if (!invoiceOrders.length) return null
 
   const first = invoiceOrders[0]
 
-  const receiptItems: ReceiptItem[] = invoiceOrders.map((o: any) => {
-    const itemName = o.menuItem?.name ?? '-'
-    const sizeName = o.size?.shortName ? ` (${o.size.shortName})` : ''
-    return {
-      name: `${itemName}${sizeName}`,
-      qty: Number(o.qty ?? 0),
-      price: Number(o.unitPrice ?? o.price ?? 0),
-    }
+  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((o: any) => {
+    const orderItems = Array.isArray(o.items) ? o.items : []
+
+    return orderItems.map((item: any) => {
+      const sizeText = item.size ? ` (${item.size})` : ''
+      return {
+        name: `${item.name ?? '-'}${sizeText}`,
+        qty: Number(item.quantity ?? 0),
+        price: Number(item.unitPrice ?? 0),
+      }
+    })
   })
 
+  if (!receiptItems.length) {
+    return null
+  }
+
   const subtotal = receiptItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-
-  const total = invoiceOrders.reduce(
-    (sum: number, o: any) => sum + Number(o.totalPrice ?? 0),
-    0,
-  )
-
-  const customerName =
-    first.customerName ??
-    first.customer?.name ??
-    '-'
-
-  const place =
-    first.orderPlace?.no ??
-    first.orderPlaceNo ??
-    first.tableNo ??
-    '-'
-
-  const orderType =
-    first.orderPlace?.type ??
-    first.channel ??
-    '-'
+  const total = invoiceOrders.reduce((sum: number, o: any) => sum + Number(o.total ?? 0), 0)
 
   return {
     shopName: 'Five Two One Cafe & Bakery',
     address: 'Your cafe address',
     phone: '0999999999',
     orderNo: invoiceId,
-    customerName,
-    orderType,
-    place,
+    customerName: first.customerName ?? '-',
+    orderType: first.channel ?? '-',
+    place: first.tableNo ?? '-',
     method: first.invoicePaymentStatus ?? '-',
     status: first.status ?? '-',
     items: receiptItems,
@@ -386,20 +354,18 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
       return
     }
 
-    console.log('targetOrder -->', targetOrder)
-
-    const invoiceId = targetOrder.invoiceId ?? targetOrder.invoice?.id ?? null
+    const invoiceId = targetOrder.invoiceId != null ? Number(targetOrder.invoiceId) : null
     if (!invoiceId) {
       console.warn(`Order ${orderId} has no invoiceId`)
       return
     }
 
-    if (printedInvoiceIds.value.has(Number(invoiceId))) {
+    if (printedInvoiceIds.value.has(invoiceId)) {
       console.log(`Invoice ${invoiceId} already printed`)
       return
     }
 
-    const receipt = buildReceiptFromInvoiceOrders(Number(invoiceId))
+    const receipt = buildReceiptFromInvoiceOrders(invoiceId)
     if (!receipt) {
       console.warn(`Cannot build receipt for invoice ${invoiceId}`)
       return
@@ -409,7 +375,7 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
     console.log('receipt -->', receipt)
 
     await printDirectThermalReceipt(printerName, receipt)
-    printedInvoiceIds.value.add(Number(invoiceId))
+    printedInvoiceIds.value.add(invoiceId)
 
     console.log(`Invoice ${invoiceId} printed successfully`)
   } catch (error) {
