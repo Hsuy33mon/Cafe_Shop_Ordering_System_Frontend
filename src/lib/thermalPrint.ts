@@ -72,17 +72,22 @@ function buildEscPosReceipt(data: ReceiptData) {
   const out: string[] = []
 
   out.push('\x1B\x40') // init
+  out.push('\x1B\x74\x00') // code page default
+  out.push('\x1B\x61\x01') // center
 
   // Header
-  out.push('\x1B\x61\x01') // center
-  out.push(safeText(data.shopName, RECEIPT_WIDTH))
-  if (data.address) out.push(safeText(data.address, RECEIPT_WIDTH))
-  if (data.phone) out.push(safeText(data.phone, RECEIPT_WIDTH))
+  out.push('\x1D\x21\x11') // double width + double height
+  out.push(data.shopName || '')
+  out.push('\x1D\x21\x00') // normal size
+
+  if (data.address) out.push(data.address)
+  if (data.phone) out.push(data.phone)
   out.push('')
 
-  // Meta
+  // Body
   out.push('\x1B\x61\x00') // left
   out.push(separator())
+
   if (data.orderNo != null) out.push(line('Order No', String(data.orderNo)))
   if (data.customerName) out.push(line('Customer', data.customerName))
   if (data.orderType) out.push(line('Type', data.orderType))
@@ -92,22 +97,19 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(line('Printed', new Date().toLocaleString()))
   out.push(separator())
 
-  // Items
   data.items.forEach((item) => {
-    const itemName = safeText(item.name, RECEIPT_WIDTH)
+    const itemName = `${item.name}`.slice(0, 30)
     const amount = money(item.qty * item.price)
 
     out.push(itemName)
     out.push(line(`${item.qty} x ${money(item.price)}`, amount))
 
-    // show product vs ingredient separately
     out.push(line('  Product', money(item.basePrice)))
     out.push(line('  Ingredient', money(item.ingredientPrice)))
 
-    // optional ingredient detail lines
     if (Array.isArray(item.ingredients) && item.ingredients.length > 0) {
       item.ingredients.forEach((ing) => {
-        const ingName = safeText(`  + ${ing.name}`, RECEIPT_WIDTH - 8)
+        const ingName = `  + ${ing.name}`.slice(0, 24)
         const ingAmount = money(Number(ing.price || 0) * Number(ing.qty || 0))
         out.push(line(ingName, ingAmount))
       })
@@ -122,8 +124,8 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(separator())
 
   out.push('\x1B\x61\x01') // center
-  out.push(center('Thank you'))
-  out.push(center('Please come again'))
+  out.push('Thank you')
+  out.push('Please come again')
   out.push('')
   out.push('')
   out.push('')

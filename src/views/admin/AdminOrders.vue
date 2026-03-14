@@ -206,6 +206,34 @@ function buildItemSummary(order: any) {
 
   return `${qty}x ${firstItem.name ?? '-'}${sizeText}`
 }
+function playNewOrderBeep() {
+  try {
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext
+
+    if (!AudioContextClass) return
+
+    const audioCtx = new AudioContextClass()
+    const oscillator = audioCtx.createOscillator()
+    const gainNode = audioCtx.createGain()
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime) // high beep
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime)
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioCtx.destination)
+
+    oscillator.start()
+    oscillator.stop(audioCtx.currentTime + 0.15)
+
+    oscillator.onended = () => {
+      audioCtx.close()
+    }
+  } catch (error) {
+    console.warn('Beep failed:', error)
+  }
+}
 
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o: any) => ({
@@ -267,9 +295,7 @@ function getSelectedPrinterName() {
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
-  const invoiceOrders = ordersStore.items.filter(
-    (o: any) => Number(o.invoiceId) === Number(invoiceId),
-  )
+  const invoiceOrders = ordersStore.items.filter((o: any) => Number(o.invoiceId) === Number(invoiceId))
   if (!invoiceOrders.length) return null
 
   const first = invoiceOrders[0]
@@ -310,7 +336,7 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   return {
     shopName: 'Five Two One Cafe & Bakery',
     address: 'Patong Beach, Phuket',
-    phone: '0924662568',
+    phone: '0999999999',
     orderNo: invoiceId,
     customerName: first.customerName ?? '-',
     orderType: first.channel ?? '-',
@@ -322,7 +348,6 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
     total,
   }
 }
-
 async function autoPrintInvoiceByOrderId(orderId: number) {
   try {
     const printerName = getSelectedPrinterName()
@@ -373,6 +398,7 @@ watch(
     if (!trulyNewIds.length) return
 
     await ordersStore.fetchAll()
+    playNewOrderBeep()
 
     for (const orderId of trulyNewIds) {
       await autoPrintInvoiceByOrderId(orderId)
