@@ -20,7 +20,7 @@ const payment = computed(() => paymentStore.payment)
 
 async function handleDirectPrint() {
   try {
-    await printDirectThermalReceipt('ZN- ZN58U', {
+    await printDirectThermalReceipt('POS58_9209', {
       shopName: 'Cafe Shop',
       address: 'Patong Beach, Phuket',
       phone: '089-123-4567',
