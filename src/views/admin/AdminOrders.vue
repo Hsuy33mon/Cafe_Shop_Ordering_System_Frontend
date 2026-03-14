@@ -275,11 +275,29 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((order: any) => {
     const orderItems = Array.isArray(order.items) ? order.items : []
 
-    return orderItems.map((item: any) => ({
-      name: `${item.name ?? '-'}${item.size ? ` (${item.size})` : ''}`,
-      qty: Number(item.quantity ?? 0),
-      price: Number(item.unitPrice ?? 0),
-    }))
+    return orderItems.map((item: any) => {
+      const ingredientList = Array.isArray(item.orderIngredients) ? item.orderIngredients : []
+
+      const ingredientPrice = ingredientList.reduce(
+        (sum: number, ing: any) => sum + Number(ing.price ?? 0) * Number(ing.qty ?? 0),
+        0,
+      )
+
+      const basePrice = Math.max(0, Number(item.unitPrice ?? 0) - ingredientPrice)
+
+      return {
+        name: `${item.name ?? '-'}${item.size ? ` (${item.size})` : ''}`,
+        qty: Number(item.quantity ?? 0),
+        basePrice,
+        ingredientPrice,
+        price: Number(item.unitPrice ?? 0),
+        ingredients: ingredientList.map((ing: any) => ({
+          name: ing.ingredientName ?? '-',
+          qty: Number(ing.qty ?? 0),
+          price: Number(ing.price ?? 0),
+        })),
+      }
+    })
   })
 
   if (!receiptItems.length) return null

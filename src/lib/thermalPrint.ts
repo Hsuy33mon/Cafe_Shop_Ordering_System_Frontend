@@ -3,7 +3,14 @@ import qz from 'qz-tray'
 export type ReceiptItem = {
   name: string
   qty: number
+  basePrice: number
+  ingredientPrice: number
   price: number
+  ingredients?: Array<{
+    name: string
+    qty: number
+    price: number
+  }>
 }
 
 export type ReceiptData = {
@@ -23,41 +30,58 @@ export type ReceiptData = {
 
 let qzInitialized = false
 
+const RECEIPT_WIDTH = 32
+
 function money(v: number) {
   return `${Number(v || 0).toFixed(0)}`
 }
 
+function safeText(value: string, max = RECEIPT_WIDTH) {
+  const s = String(value ?? '')
+  return s.length > max ? s.slice(0, max) : s
+}
+
 function padRight(value: string, len: number) {
-  return value.length >= len ? value.slice(0, len) : value + ' '.repeat(len - value.length)
+  const text = String(value ?? '')
+  return text.length >= len ? text.slice(0, len) : text + ' '.repeat(len - text.length)
 }
 
-function line(left = '', right = '', width = 32) {
-  const rightText = String(right)
+function line(left = '', right = '', width = RECEIPT_WIDTH) {
+  const leftText = String(left ?? '')
+  const rightText = String(right ?? '')
+
+  if (leftText.length + rightText.length >= width) {
+    return `${leftText.slice(0, Math.max(0, width - rightText.length - 1))} ${rightText}`
+  }
+
   const leftWidth = Math.max(0, width - rightText.length)
-  return padRight(String(left), leftWidth) + rightText
+  return padRight(leftText, leftWidth) + rightText
 }
 
-function center(text: string, width = 32) {
-  const t = String(text)
+function center(text: string, width = RECEIPT_WIDTH) {
+  const t = safeText(text, width)
   const left = Math.max(0, Math.floor((width - t.length) / 2))
   return ' '.repeat(left) + t
 }
 
-function separator(width = 32) {
+function separator(width = RECEIPT_WIDTH) {
   return '-'.repeat(width)
 }
 
 function buildEscPosReceipt(data: ReceiptData) {
   const out: string[] = []
 
-  out.push('\x1B\x40')
-  out.push('\x1B\x61\x01')
+  out.push('\x1B\x40') // init
+
+  // Header
+  out.push('\x1B\x61\x01') // center
   out.push(center(data.shopName))
   if (data.address) out.push(center(data.address))
   if (data.phone) out.push(center(data.phone))
   out.push('')
 
-  out.push('\x1B\x61\x00')
+  // Meta
+  out.push('\x1B\x61\x00') // left
   out.push(separator())
   if (data.orderNo != null) out.push(line('Order No', String(data.orderNo)))
   if (data.customerName) out.push(line('Customer', data.customerName))
@@ -68,13 +92,28 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(line('Printed', new Date().toLocaleString()))
   out.push(separator())
 
+  // Items
   data.items.forEach((item) => {
-    const name = `${item.name}`.slice(0, 30)
-    const qtyPrice = `${item.qty} x ${money(item.price)}`
+    const itemName = safeText(item.name, RECEIPT_WIDTH)
     const amount = money(item.qty * item.price)
 
-    out.push(name)
-    out.push(line(qtyPrice, amount))
+    out.push(itemName)
+    out.push(line(`${item.qty} x ${money(item.price)}`, amount))
+
+    // show product vs ingredient separately
+    out.push(line('  Product', money(item.basePrice)))
+    out.push(line('  Ingredient', money(item.ingredientPrice)))
+
+    // optional ingredient detail lines
+    if (Array.isArray(item.ingredients) && item.ingredients.length > 0) {
+      item.ingredients.forEach((ing) => {
+        const ingName = safeText(`  + ${ing.name}`, RECEIPT_WIDTH - 8)
+        const ingAmount = money(Number(ing.price || 0) * Number(ing.qty || 0))
+        out.push(line(ingName, ingAmount))
+      })
+    }
+
+    out.push('')
   })
 
   out.push(separator())
@@ -82,14 +121,14 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(line('Total', money(data.total)))
   out.push(separator())
 
-  out.push('\x1B\x61\x01')
+  out.push('\x1B\x61\x01') // center
   out.push(center('Thank you'))
   out.push(center('Please come again'))
   out.push('')
   out.push('')
   out.push('')
 
-  out.push('\x1D\x56\x00')
+  out.push('\x1D\x56\x00') // cut
 
   return out.join('\n')
 }
