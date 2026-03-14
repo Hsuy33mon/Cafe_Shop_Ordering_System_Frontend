@@ -357,14 +357,14 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
       return
     }
 
-    const targetOrder = ordersStore.items.find((o: any) => Number(o.id) === Number(orderId))
+    const targetOrder = orders.value.find((o: any) => Number(o.id) === Number(orderId))
     if (!targetOrder) {
       console.warn(`Order not found for id=${orderId}`)
       return
     }
     console.log("targetOrder-->",targetOrder)
 
-    const invoiceId = targetOrder.invoiceId ?? targetOrder.invoice?.id ?? null
+    const invoiceId = targetOrder.invoiceId ?? null
     if (!invoiceId) {
       console.warn(`Order ${orderId} has no invoiceId`)
       return
