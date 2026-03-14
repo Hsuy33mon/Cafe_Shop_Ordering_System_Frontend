@@ -223,27 +223,42 @@ const endDateFilter = ref('')
 ======================= */
 const orders = computed<OrderRow[]>(() =>
   ordersStore.items.map((o: any) => {
+    const createdAt = o.createdAt ? new Date(o.createdAt) : null
+
     const customerName =
       o.customerName ??
       o.customer?.name ??
-      o.order?.customerName ??
-      o.items?.[0]?.customerName ??
       '-'
 
-    const orderPlaceNo = o.orderPlace?.no ?? o.orderPlaceNo ?? o.tableNo ?? '-'
+    const orderPlaceNo =
+      o.orderPlace?.no ??
+      o.orderPlaceNo ??
+      o.tableNo ??
+      '-'
+
+    const channel =
+      o.orderPlace?.type ??
+      o.channel ??
+      'TABLE'
+
+    const itemName = o.menuItem?.name ?? '-'
+    const itemSize = o.size?.shortName ? ` (${o.size.shortName})` : ''
+    const qty = Number(o.qty ?? 0)
 
     return {
       id: Number(o.id),
       invoiceId: o.invoiceId ?? o.invoice?.id ?? null,
-      orderPlaceId: o.orderPlaceId ?? null,
+      orderPlaceId: o.orderPlaceId ?? o.orderPlace?.id ?? null,
       orderPlaceNo,
-      tableNo: o.tableNo ?? null,
-      date: o.date,
-      time: o.time,
+      tableNo: o.tableNo ?? o.orderPlace?.no ?? null,
+      date: createdAt ? createdAt.toISOString().slice(0, 10) : '',
+      time: createdAt
+        ? createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+        : '',
       customerName,
-      channel: o.channel,
-      itemsSummary: (o.items ?? []).map((i: any) => `${i.quantity}× ${i.name}`).join(', '),
-      total: Number(o.total ?? 0),
+      channel,
+      itemsSummary: `${qty}x ${itemName}${itemSize}`,
+      total: Number(o.totalPrice ?? o.total ?? 0),
       invoicePaymentStatus: o.invoicePaymentStatus,
       status: o.status,
     }
@@ -307,34 +322,46 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
 
   const first = invoiceOrders[0]
 
-  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((o: any) =>
-    (o.items ?? []).map((item: any) => ({
-      name: String(item.name ?? '-'),
-      qty: Number(item.quantity ?? item.qty ?? 0),
-      price: Number(item.price ?? item.unitPrice ?? 0),
-    })),
-  )
+  const receiptItems: ReceiptItem[] = invoiceOrders.map((o: any) => {
+    const itemName = o.menuItem?.name ?? '-'
+    const sizeName = o.size?.shortName ? ` (${o.size.shortName})` : ''
+    return {
+      name: `${itemName}${sizeName}`,
+      qty: Number(o.qty ?? 0),
+      price: Number(o.unitPrice ?? o.price ?? 0),
+    }
+  })
 
   const subtotal = receiptItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-  const total =
-    Number(first.invoice?.totalAmount ?? first.invoice?.total ?? first.total ?? subtotal) || subtotal
+
+  const total = invoiceOrders.reduce(
+    (sum: number, o: any) => sum + Number(o.totalPrice ?? 0),
+    0,
+  )
 
   const customerName =
     first.customerName ??
     first.customer?.name ??
-    first.order?.customerName ??
-    first.items?.[0]?.customerName ??
     '-'
 
-  const place = first.orderPlace?.no ?? first.orderPlaceNo ?? first.tableNo ?? '-'
+  const place =
+    first.orderPlace?.no ??
+    first.orderPlaceNo ??
+    first.tableNo ??
+    '-'
+
+  const orderType =
+    first.orderPlace?.type ??
+    first.channel ??
+    '-'
 
   return {
-    shopName: ' Five Two One Cafe & Bakery',
+    shopName: 'Five Two One Cafe & Bakery',
     address: 'Your cafe address',
     phone: '0999999999',
     orderNo: invoiceId,
     customerName,
-    orderType: first.channel ?? '-',
+    orderType,
     place,
     method: first.invoicePaymentStatus ?? '-',
     status: first.status ?? '-',
@@ -347,19 +374,21 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
 async function autoPrintInvoiceByOrderId(orderId: number) {
   try {
     const printerName = getSelectedPrinterName()
-    if (!printerName) {
-      console.warn('No selectedPrinter in localStorage. Skip auto print.')
+
+    if (!printerName || !printerName.trim()) {
+      console.warn('No selected printer. Skip auto print.')
       return
     }
 
-    const targetOrder = orders.value.find((o: any) => Number(o.id) === Number(orderId))
+    const targetOrder = ordersStore.items.find((o: any) => Number(o.id) === Number(orderId))
     if (!targetOrder) {
       console.warn(`Order not found for id=${orderId}`)
       return
     }
-    console.log("targetOrder-->",targetOrder)
 
-    const invoiceId = targetOrder.invoiceId ?? null
+    console.log('targetOrder -->', targetOrder)
+
+    const invoiceId = targetOrder.invoiceId ?? targetOrder.invoice?.id ?? null
     if (!invoiceId) {
       console.warn(`Order ${orderId} has no invoiceId`)
       return
@@ -375,6 +404,9 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
       console.warn(`Cannot build receipt for invoice ${invoiceId}`)
       return
     }
+
+    console.log('printerName -->', printerName)
+    console.log('receipt -->', receipt)
 
     await printDirectThermalReceipt(printerName, receipt)
     printedInvoiceIds.value.add(Number(invoiceId))
