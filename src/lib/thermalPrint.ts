@@ -24,7 +24,7 @@ export type ReceiptData = {
 let qzInitialized = false
 
 function money(v: number) {
-  return `฿${Number(v || 0).toFixed(0)}`
+  return `${Number(v || 0).toFixed(0)}`
 }
 
 function padRight(value: string, len: number) {
@@ -50,14 +50,14 @@ function separator(width = 32) {
 function buildEscPosReceipt(data: ReceiptData) {
   const out: string[] = []
 
-  out.push('\x1B\x40') // init
-  out.push('\x1B\x61\x01') // center
+  out.push('\x1B\x40')
+  out.push('\x1B\x61\x01')
   out.push(center(data.shopName))
   if (data.address) out.push(center(data.address))
   if (data.phone) out.push(center(data.phone))
   out.push('')
 
-  out.push('\x1B\x61\x00') // left
+  out.push('\x1B\x61\x00')
   out.push(separator())
   if (data.orderNo != null) out.push(line('Order No', String(data.orderNo)))
   if (data.customerName) out.push(line('Customer', data.customerName))
@@ -69,7 +69,7 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(separator())
 
   data.items.forEach((item) => {
-    const name = `${item.name}`.slice(0, 20)
+    const name = `${item.name}`.slice(0, 30)
     const qtyPrice = `${item.qty} x ${money(item.price)}`
     const amount = money(item.qty * item.price)
 
@@ -89,7 +89,7 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push('')
   out.push('')
 
-  out.push('\x1D\x56\x00') // cut
+  out.push('\x1D\x56\x00')
 
   return out.join('\n')
 }
@@ -179,10 +179,12 @@ export async function findAvailablePrinters() {
 
 export async function printDirectThermalReceipt(printerName: string, data: ReceiptData) {
   await ensureQzConnection()
-  console.log('printerName value =', printerName)
-  console.log('printerName type =', typeof printerName)
 
-  const config = qz.configs.create(printerName, {
+  if (!printerName || !printerName.trim()) {
+    throw new Error('Printer name is empty')
+  }
+
+  const config = qz.configs.create(printerName.trim(), {
     copies: 1,
     encoding: 'CP437',
   })

@@ -130,9 +130,6 @@ import { useWsStore } from '@/stores/useWsStore'
 import { useRoute } from 'vue-router'
 import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
 
-/* =======================
-   Store + Route
-======================= */
 const route = useRoute()
 const ordersStore = useOrdersStore()
 const wsStore = useWsStore()
@@ -142,22 +139,13 @@ const tableNoFilter = computed<string | null>(() => {
   return typeof v === 'string' ? v : null
 })
 
-/* =======================
-   Websocket banner state
-======================= */
 const showLatestOnly = ref(false)
 
 const hasNewOrders = computed(() => wsStore.hasNewOrders)
 const newOrderCount = computed(() => wsStore.newOrderCount)
 
-/* =======================
-   Prevent duplicate invoice print
-======================= */
 const printedInvoiceIds = ref<Set<number>>(new Set())
 
-/* =======================
-   Fetch + connect websocket
-======================= */
 onMounted(async () => {
   localStorage.setItem('selectedPrinter', 'ZN- ZN58U')
   await ordersStore.fetchAll()
@@ -165,13 +153,9 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  // If websocket should stay global, keep disconnected commented out
   // wsStore.disconnect()
 })
 
-/* =======================
-   Types
-======================= */
 type channel = 'TABLE' | 'ROOM'
 type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED'
 
@@ -191,9 +175,6 @@ type OrderRow = {
   status: OrderStatus
 }
 
-/* =======================
-   Table Columns
-======================= */
 const orderColumns: TableColumn[] = [
   { key: 'id', label: '#', width: '70px', align: 'left' },
   { key: 'date', label: 'Date' },
@@ -209,9 +190,6 @@ const orderColumns: TableColumn[] = [
   { key: 'actions', label: '', align: 'right' },
 ]
 
-/* =======================
-   Filters
-======================= */
 const search = ref('')
 const statusFilter = ref('')
 const channelFilter = ref('')
@@ -219,39 +197,34 @@ const paymentFilter = ref('')
 const startDateFilter = ref('')
 const endDateFilter = ref('')
 
-/* =======================
-   Map store -> table rows
-   Use mapped store shape only
-======================= */
+function buildItemSummary(order: any) {
+  const firstItem = Array.isArray(order.items) && order.items.length > 0 ? order.items[0] : null
+  if (!firstItem) return '-'
+
+  const sizeText = firstItem.size ? ` (${firstItem.size})` : ''
+  const qty = Number(firstItem.quantity ?? 0)
+
+  return `${qty}x ${firstItem.name ?? '-'}${sizeText}`
+}
+
 const orders = computed<OrderRow[]>(() =>
-  ordersStore.items.map((o: any) => {
-    const firstItem = Array.isArray(o.items) && o.items.length > 0 ? o.items[0] : null
-
-    const itemName = firstItem?.name ?? '-'
-    const itemSize = firstItem?.size ? ` (${firstItem.size})` : ''
-    const itemQty = Number(firstItem?.quantity ?? 0)
-
-    return {
-      id: Number(o.id),
-      invoiceId: o.invoiceId != null ? Number(o.invoiceId) : null,
-      orderPlaceId: o.orderPlaceId != null ? Number(o.orderPlaceId) : null,
-      orderPlaceNo: o.tableNo ?? '-',
-      tableNo: o.tableNo ?? null,
-      date: o.date ?? '',
-      time: o.time ?? '',
-      customerName: o.customerName ?? '-',
-      channel: (o.channel ?? 'TABLE') as channel,
-      itemsSummary: `${itemQty}x ${itemName}${itemSize}`,
-      total: Number(o.total ?? 0),
-      invoicePaymentStatus: (o.invoicePaymentStatus ?? 'PENDING') as InvoicePaymentStatus,
-      status: o.status,
-    }
-  }),
+  ordersStore.items.map((o: any) => ({
+    id: Number(o.id),
+    invoiceId: o.invoiceId != null ? Number(o.invoiceId) : null,
+    orderPlaceId: o.orderPlaceId != null ? Number(o.orderPlaceId) : null,
+    orderPlaceNo: o.tableNo ?? '-',
+    tableNo: o.tableNo ?? null,
+    date: o.date ?? '',
+    time: o.time ?? '',
+    customerName: o.customerName ?? '-',
+    channel: (o.channel ?? 'TABLE') as channel,
+    itemsSummary: buildItemSummary(o),
+    total: Number(o.total ?? 0),
+    invoicePaymentStatus: (o.invoicePaymentStatus ?? 'PENDING') as InvoicePaymentStatus,
+    status: o.status,
+  })),
 )
 
-/* =======================
-   Filtered Orders
-======================= */
 const filteredOrders = computed(() => {
   const s = search.value.trim().toLowerCase()
   const start = startDateFilter.value
@@ -289,43 +262,34 @@ const filteredOrders = computed(() => {
   })
 })
 
-/* =======================
-   Print helpers
-======================= */
 function getSelectedPrinterName() {
   return localStorage.getItem('selectedPrinter') || 'ZN- ZN58U'
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   const invoiceOrders = ordersStore.items.filter((o: any) => Number(o.invoiceId) === Number(invoiceId))
-
   if (!invoiceOrders.length) return null
 
   const first = invoiceOrders[0]
 
-  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((o: any) => {
-    const orderItems = Array.isArray(o.items) ? o.items : []
+  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((order: any) => {
+    const orderItems = Array.isArray(order.items) ? order.items : []
 
-    return orderItems.map((item: any) => {
-      const sizeText = item.size ? ` (${item.size})` : ''
-      return {
-        name: `${item.name ?? '-'}${sizeText}`,
-        qty: Number(item.quantity ?? 0),
-        price: Number(item.unitPrice ?? 0),
-      }
-    })
+    return orderItems.map((item: any) => ({
+      name: `${item.name ?? '-'}${item.size ? ` (${item.size})` : ''}`,
+      qty: Number(item.quantity ?? 0),
+      price: Number(item.unitPrice ?? 0),
+    }))
   })
 
-  if (!receiptItems.length) {
-    return null
-  }
+  if (!receiptItems.length) return null
 
   const subtotal = receiptItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-  const total = invoiceOrders.reduce((sum: number, o: any) => sum + Number(o.total ?? 0), 0)
+  const total = invoiceOrders.reduce((sum: number, order: any) => sum + Number(order.total ?? 0), 0)
 
   return {
     shopName: 'Five Two One Cafe & Bakery',
-    address: 'Your cafe address',
+    address: 'Patong Beach, Phuket',
     phone: '0999999999',
     orderNo: invoiceId,
     customerName: first.customerName ?? '-',
@@ -371,9 +335,6 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
       return
     }
 
-    console.log('printerName -->', printerName)
-    console.log('receipt -->', receipt)
-
     await printDirectThermalReceipt(printerName, receipt)
     printedInvoiceIds.value.add(invoiceId)
 
@@ -383,9 +344,6 @@ async function autoPrintInvoiceByOrderId(orderId: number) {
   }
 }
 
-/* =======================
-   When websocket ids change
-======================= */
 watch(
   () => [...wsStore.newOrderIds],
   async (newIds, oldIds = []) => {
@@ -403,9 +361,6 @@ watch(
   { deep: true },
 )
 
-/* =======================
-   Banner actions
-======================= */
 async function onViewLatest() {
   showLatestOnly.value = true
   await ordersStore.fetchAll()
@@ -420,9 +375,6 @@ function onClearNoti() {
   showLatestOnly.value = false
 }
 
-/* =======================
-   Status UI helper
-======================= */
 function statusClass(status: OrderStatus) {
   return {
     'status-pill--new': status === 'PENDING',
@@ -433,9 +385,6 @@ function statusClass(status: OrderStatus) {
   }
 }
 
-/* =======================
-   Dialog
-======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<OrderRow | null>(null)
 const statusToUpdate = ref<OrderStatus>('PENDING')
@@ -461,9 +410,6 @@ async function confirmStatusUpdate() {
   statusTarget.value = null
 }
 
-/* =======================
-   Cancel order
-======================= */
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
