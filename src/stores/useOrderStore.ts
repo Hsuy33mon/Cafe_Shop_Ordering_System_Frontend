@@ -37,6 +37,7 @@ export type Order = {
   customerName: string
   channel: string
   status: OrderStatus
+  invoiceId: string
   invoicePaymentStatus: string
   customerNote?: string
   items: OrderItem[]
@@ -59,6 +60,7 @@ function mapFromApi(x: any): Order {
     customerName: x.customerName,
     channel: x.orderPlace?.type?.toUpperCase() ?? 'TABLE',
     status: x.status,
+    invoiceId: x.invoiceId,
     invoicePaymentStatus: x.invoicePaymentStatus ?? '--',
     customerNote: x.note,
     items: [
