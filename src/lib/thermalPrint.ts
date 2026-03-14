@@ -179,6 +179,8 @@ export async function findAvailablePrinters() {
 
 export async function printDirectThermalReceipt(printerName: string, data: ReceiptData) {
   await ensureQzConnection()
+  console.log('printerName value =', printerName)
+  console.log('printerName type =', typeof printerName)
 
   const config = qz.configs.create(printerName, {
     copies: 1,

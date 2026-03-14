@@ -293,13 +293,8 @@ const filteredOrders = computed(() => {
 /* =======================
    Print helpers
 ======================= */
-async function getSelectedPrinterName() {
-  const saved = localStorage.getItem('selectedPrinter')
-  if (saved && saved.trim()) return saved
-
-  const defaultPrinter = 'ZN- ZN58U'
-  localStorage.setItem('selectedPrinter', defaultPrinter)
-  return defaultPrinter
+function getSelectedPrinterName() {
+  return localStorage.getItem('selectedPrinter') || 'ZN- ZN58U'
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
