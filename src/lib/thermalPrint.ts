@@ -1,13 +1,12 @@
-// src/utils/thermalPrinter.ts
 import qz from 'qz-tray'
 
-type ReceiptItem = {
+export type ReceiptItem = {
   name: string
   qty: number
   price: number
 }
 
-type ReceiptData = {
+export type ReceiptData = {
   shopName: string
   address?: string
   phone?: string
@@ -25,7 +24,7 @@ type ReceiptData = {
 let qzInitialized = false
 
 function money(v: number) {
-  return `฿${Number(v).toFixed(0)}`
+  return `฿${Number(v || 0).toFixed(0)}`
 }
 
 function padRight(value: string, len: number) {
@@ -96,7 +95,6 @@ function buildEscPosReceipt(data: ReceiptData) {
 }
 
 function getBackendBaseUrl() {
-  // if you already have VITE_API_BASE_URL, use it
   return (import.meta.env.VITE_API_BASE_URL as string)?.replace(/\/$/, '') || ''
 }
 

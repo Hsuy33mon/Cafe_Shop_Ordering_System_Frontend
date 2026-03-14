@@ -122,13 +122,13 @@
     </div>
   </main>
 </template>
-
 <script setup lang="ts">
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
 import { useWsStore } from '@/stores/useWsStore'
 import { useRoute } from 'vue-router'
+import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
 
 /* =======================
    Store + Route
@@ -151,6 +151,11 @@ const hasNewOrders = computed(() => wsStore.hasNewOrders)
 const newOrderCount = computed(() => wsStore.newOrderCount)
 
 /* =======================
+   Prevent duplicate invoice print
+======================= */
+const printedInvoiceIds = ref<Set<number>>(new Set())
+
+/* =======================
    Fetch + connect websocket
 ======================= */
 onMounted(async () => {
@@ -159,20 +164,9 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  // If you want websocket to remain app-wide, remove this:
+  // If websocket should stay global, keep disconnected commented out
   // wsStore.disconnect()
 })
-
-/* When websocket ids change, refresh table data */
-watch(
-  () => wsStore.newOrderIds,
-  async (ids) => {
-    if (ids.length) {
-      await ordersStore.fetchAll()
-    }
-  },
-  { deep: true },
-)
 
 /* =======================
    Types
@@ -182,6 +176,7 @@ type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRE
 
 type OrderRow = {
   id: number
+  invoiceId: number | null
   orderPlaceId: number | null
   orderPlaceNo: string
   tableNo: string | null
@@ -239,6 +234,7 @@ const orders = computed<OrderRow[]>(() =>
 
     return {
       id: Number(o.id),
+      invoiceId: o.invoiceId ?? o.invoice?.id ?? null,
       orderPlaceId: o.orderPlaceId ?? null,
       orderPlaceNo,
       tableNo: o.tableNo ?? null,
@@ -247,7 +243,7 @@ const orders = computed<OrderRow[]>(() =>
       customerName,
       channel: o.channel,
       itemsSummary: (o.items ?? []).map((i: any) => `${i.quantity}× ${i.name}`).join(', '),
-      total: o.total ?? 0,
+      total: Number(o.total ?? 0),
       invoicePaymentStatus: o.invoicePaymentStatus,
       status: o.status,
     }
@@ -256,7 +252,6 @@ const orders = computed<OrderRow[]>(() =>
 
 /* =======================
    Filtered Orders
-   - supports: websocket "latest only"
 ======================= */
 const filteredOrders = computed(() => {
   const s = search.value.trim().toLowerCase()
@@ -265,13 +260,13 @@ const filteredOrders = computed(() => {
   const latestSet = wsStore.newOrderIdSet
 
   return orders.value.filter((o) => {
-    // ✅ show only websocket orders
     if (showLatestOnly.value && !latestSet.has(o.id)) return false
 
     const matchesSearch =
       !s ||
       String(o.id).includes(s) ||
       o.customerName.toLowerCase().includes(s) ||
+      o.orderPlaceNo.toLowerCase().includes(s) ||
       o.itemsSummary.toLowerCase().includes(s)
 
     const matchesStatus = !statusFilter.value || o.status === statusFilter.value
@@ -296,6 +291,120 @@ const filteredOrders = computed(() => {
 })
 
 /* =======================
+   Print helpers
+======================= */
+function getSelectedPrinterName() {
+  return localStorage.getItem('selectedPrinter') || ''
+}
+
+function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
+  const invoiceOrders = ordersStore.items.filter((o: any) => {
+    const currentInvoiceId = o.invoiceId ?? o.invoice?.id ?? null
+    return Number(currentInvoiceId) === Number(invoiceId)
+  })
+
+  if (!invoiceOrders.length) return null
+
+  const first = invoiceOrders[0]
+
+  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((o: any) =>
+    (o.items ?? []).map((item: any) => ({
+      name: String(item.name ?? '-'),
+      qty: Number(item.quantity ?? item.qty ?? 0),
+      price: Number(item.price ?? item.unitPrice ?? 0),
+    })),
+  )
+
+  const subtotal = receiptItems.reduce((sum, item) => sum + item.qty * item.price, 0)
+  const total =
+    Number(first.invoice?.totalAmount ?? first.invoice?.total ?? first.total ?? subtotal) || subtotal
+
+  const customerName =
+    first.customerName ??
+    first.customer?.name ??
+    first.order?.customerName ??
+    first.items?.[0]?.customerName ??
+    '-'
+
+  const place = first.orderPlace?.no ?? first.orderPlaceNo ?? first.tableNo ?? '-'
+
+  return {
+    shopName: ' Five Two One Cafe & Bakery',
+    address: 'Your cafe address',
+    phone: '0999999999',
+    orderNo: invoiceId,
+    customerName,
+    orderType: first.channel ?? '-',
+    place,
+    method: first.invoicePaymentStatus ?? '-',
+    status: first.status ?? '-',
+    items: receiptItems,
+    subtotal,
+    total,
+  }
+}
+
+async function autoPrintInvoiceByOrderId(orderId: number) {
+  try {
+    const printerName = getSelectedPrinterName()
+    if (!printerName) {
+      console.warn('No selectedPrinter in localStorage. Skip auto print.')
+      return
+    }
+
+    const targetOrder = ordersStore.items.find((o: any) => Number(o.id) === Number(orderId))
+    if (!targetOrder) {
+      console.warn(`Order not found for id=${orderId}`)
+      return
+    }
+
+    const invoiceId = targetOrder.invoiceId ?? targetOrder.invoice?.id ?? null
+    if (!invoiceId) {
+      console.warn(`Order ${orderId} has no invoiceId`)
+      return
+    }
+
+    if (printedInvoiceIds.value.has(Number(invoiceId))) {
+      console.log(`Invoice ${invoiceId} already printed`)
+      return
+    }
+
+    const receipt = buildReceiptFromInvoiceOrders(Number(invoiceId))
+    if (!receipt) {
+      console.warn(`Cannot build receipt for invoice ${invoiceId}`)
+      return
+    }
+
+    await printDirectThermalReceipt(printerName, receipt)
+    printedInvoiceIds.value.add(Number(invoiceId))
+
+    console.log(`Invoice ${invoiceId} printed successfully`)
+  } catch (error) {
+    console.error('Auto print failed:', error)
+  }
+}
+
+/* =======================
+   When websocket ids change
+======================= */
+watch(
+  () => [...wsStore.newOrderIds],
+  async (newIds, oldIds = []) => {
+    const oldSet = new Set(oldIds)
+    const trulyNewIds = newIds.filter((id) => !oldSet.has(id))
+
+    if (!trulyNewIds.length) return
+
+    await ordersStore.fetchAll()
+
+    for (const orderId of trulyNewIds) {
+      await autoPrintInvoiceByOrderId(orderId)
+    }
+  },
+  { deep: true },
+)
+
+/* =======================
    Banner actions
 ======================= */
 async function onViewLatest() {
@@ -305,8 +414,11 @@ async function onViewLatest() {
 
 function onShowAll() {
   showLatestOnly.value = false
-  // optional: clear the banner when you go back to all
-  // wsStore.clearNewOrders()
+}
+
+function onClearNoti() {
+  wsStore.clearNewOrders()
+  showLatestOnly.value = false
 }
 
 /* =======================
@@ -323,7 +435,7 @@ function statusClass(status: OrderStatus) {
 }
 
 /* =======================
-   Dialog (optional)
+   Dialog
 ======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<OrderRow | null>(null)
@@ -347,6 +459,7 @@ async function confirmStatusUpdate() {
   if (!statusTarget.value) return
   await ordersStore.update(statusTarget.value.id, { status: statusToUpdate.value })
   statusDialogVisible.value = false
+  statusTarget.value = null
 }
 
 /* =======================
@@ -356,10 +469,5 @@ async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
 }
-function onClearNoti() {
-  wsStore.clearNewOrders()
-  showLatestOnly.value = false
-}
 </script>
-
 <style scoped src="@/styles/admin/orders.css"></style>
