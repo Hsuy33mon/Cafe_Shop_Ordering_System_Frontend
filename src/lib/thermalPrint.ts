@@ -75,9 +75,9 @@ function buildEscPosReceipt(data: ReceiptData) {
 
   // Header
   out.push('\x1B\x61\x01') // center
-  out.push(center(data.shopName))
-  if (data.address) out.push(center(data.address))
-  if (data.phone) out.push(center(data.phone))
+  out.push(safeText(data.shopName, RECEIPT_WIDTH))
+  if (data.address) out.push(safeText(data.address, RECEIPT_WIDTH))
+  if (data.phone) out.push(safeText(data.phone, RECEIPT_WIDTH))
   out.push('')
 
   // Meta

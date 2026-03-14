@@ -267,7 +267,9 @@ function getSelectedPrinterName() {
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
-  const invoiceOrders = ordersStore.items.filter((o: any) => Number(o.invoiceId) === Number(invoiceId))
+  const invoiceOrders = ordersStore.items.filter(
+    (o: any) => Number(o.invoiceId) === Number(invoiceId),
+  )
   if (!invoiceOrders.length) return null
 
   const first = invoiceOrders[0]
@@ -308,7 +310,7 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   return {
     shopName: 'Five Two One Cafe & Bakery',
     address: 'Patong Beach, Phuket',
-    phone: '0999999999',
+    phone: '0924662568',
     orderNo: invoiceId,
     customerName: first.customerName ?? '-',
     orderType: first.channel ?? '-',
