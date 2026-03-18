@@ -208,8 +208,7 @@ function buildItemSummary(order: any) {
 }
 function playNewOrderBeep() {
   try {
-    const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
 
     if (!AudioContextClass) return
 
@@ -295,30 +294,35 @@ function getSelectedPrinterName() {
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
-  const invoiceOrders = ordersStore.items.filter((o: any) => Number(o.invoiceId) === Number(invoiceId))
+  const invoiceOrders = ordersStore.items.filter(
+    (o: any) => Number(o.invoiceId) === Number(invoiceId),
+  )
   if (!invoiceOrders.length) return null
 
   const first = invoiceOrders[0]
-
   const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((order: any) => {
     const orderItems = Array.isArray(order.items) ? order.items : []
 
     return orderItems.map((item: any) => {
+      const qty = Number(item.quantity ?? 0)
       const ingredientList = Array.isArray(item.orderIngredients) ? item.orderIngredients : []
 
-      const ingredientPrice = ingredientList.reduce(
+      const ingredientUnitPrice = ingredientList.reduce(
         (sum: number, ing: any) => sum + Number(ing.price ?? 0) * Number(ing.qty ?? 0),
         0,
       )
 
-      const basePrice = Math.max(0, Number(item.unitPrice ?? 0) - ingredientPrice)
+      const lineIngredientPrice = ingredientUnitPrice * qty
+      const unitPrice = Number(item.unitPrice ?? 0)
+      const baseUnitPrice = Math.max(0, unitPrice - ingredientUnitPrice)
+      const lineBasePrice = baseUnitPrice * qty
 
       return {
         name: `${item.name ?? '-'}${item.size ? ` (${item.size})` : ''}`,
-        qty: Number(item.quantity ?? 0),
-        basePrice,
-        ingredientPrice,
-        price: Number(item.unitPrice ?? 0),
+        qty,
+        basePrice: lineBasePrice,
+        ingredientPrice: lineIngredientPrice,
+        price: unitPrice,
         ingredients: ingredientList.map((ing: any) => ({
           name: ing.ingredientName ?? '-',
           qty: Number(ing.qty ?? 0),
@@ -330,8 +334,9 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
 
   if (!receiptItems.length) return null
 
-  const subtotal = receiptItems.reduce((sum, item) => sum + item.qty * item.price, 0)
-  const total = invoiceOrders.reduce((sum: number, order: any) => sum + Number(order.total ?? 0), 0)
+  const subtotal = receiptItems.reduce((sum, item) => sum + item.basePrice, 0)
+  const ingredientTotal = receiptItems.reduce((sum, item) => sum + item.ingredientPrice, 0)
+  const total = subtotal + ingredientTotal
 
   return {
     shopName: '512',
@@ -345,6 +350,7 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
     status: first.status ?? '-',
     items: receiptItems,
     subtotal,
+    ingredientTotal,
     total,
   }
 }

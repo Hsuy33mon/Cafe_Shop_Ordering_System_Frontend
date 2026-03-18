@@ -25,6 +25,7 @@ export type ReceiptData = {
   status?: string
   items: ReceiptItem[]
   subtotal: number
+  ingredientTotal: number
   total: number
 }
 
@@ -71,21 +72,19 @@ function separator(width = RECEIPT_WIDTH) {
 function buildEscPosReceipt(data: ReceiptData) {
   const out: string[] = []
 
-  out.push('\x1B\x40') // init
-  out.push('\x1B\x74\x00') // code page default
-  out.push('\x1B\x61\x01') // center
+  out.push('\x1B\x40')
+  out.push('\x1B\x74\x00')
+  out.push('\x1B\x61\x01')
 
-  // Header
-  out.push('\x1D\x21\x11') // double width + double height
+  out.push('\x1D\x21\x11')
   out.push(data.shopName || '')
-  out.push('\x1D\x21\x00') // normal size
+  out.push('\x1D\x21\x00')
 
   if (data.address) out.push(data.address)
   if (data.phone) out.push(data.phone)
   out.push('')
 
-  // Body
-  out.push('\x1B\x61\x00') // left
+  out.push('\x1B\x61\x00')
   out.push(separator())
 
   if (data.orderNo != null) out.push(line('Order No', String(data.orderNo)))
@@ -120,17 +119,18 @@ function buildEscPosReceipt(data: ReceiptData) {
 
   out.push(separator())
   out.push(line('Subtotal', money(data.subtotal)))
+  out.push(line('Ingredient', money(data.ingredientTotal)))
   out.push(line('Total', money(data.total)))
   out.push(separator())
 
-  out.push('\x1B\x61\x01') // center
+  out.push('\x1B\x61\x01')
   out.push('Thank you')
   out.push('Please come again')
   out.push('')
   out.push('')
   out.push('')
 
-  out.push('\x1D\x56\x00') // cut
+  out.push('\x1D\x56\x00')
 
   return out.join('\n')
 }
