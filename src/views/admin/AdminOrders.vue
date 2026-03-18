@@ -58,9 +58,12 @@
         </span>
       </div>
 
-      <div style="display:flex; gap:10px;">
+      <div style="display: flex; gap: 10px">
         <button class="orders-new-btn" @click="onViewLatest">View latest</button>
+
         <button v-if="showLatestOnly" class="orders-new-btn" @click="onShowAll">Show all</button>
+
+        <button class="orders-new-btn" @click="onClearNoti">Clear</button>
       </div>
     </div>
 
@@ -72,10 +75,10 @@
         </RouterLink>
       </template>
       <template #cell-channel="{ value }">
-  <span class="status-pill status-pill--channel">
-    {{ value === 'ROOM' ? 'Room' : 'Table' }}
-  </span>
-</template>
+        <span class="status-pill status-pill--channel">
+          {{ value === 'ROOM' ? 'Room' : 'Table' }}
+        </span>
+      </template>
 
       <template #cell-invoicePaymentStatus="{ value }">
         <span class="status-pill">{{ value }}</span>
@@ -119,17 +122,14 @@
     </div>
   </main>
 </template>
-
 <script setup lang="ts">
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useOrdersStore, type OrderStatus } from '@/stores/useOrderStore'
 import { useWsStore } from '@/stores/useWsStore'
 import { useRoute } from 'vue-router'
+import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
 
-/* =======================
-   Store + Route
-======================= */
 const route = useRoute()
 const ordersStore = useOrdersStore()
 const wsStore = useWsStore()
@@ -139,46 +139,29 @@ const tableNoFilter = computed<string | null>(() => {
   return typeof v === 'string' ? v : null
 })
 
-/* =======================
-   Websocket banner state
-======================= */
 const showLatestOnly = ref(false)
 
 const hasNewOrders = computed(() => wsStore.hasNewOrders)
 const newOrderCount = computed(() => wsStore.newOrderCount)
 
-/* =======================
-   Fetch + connect websocket
-======================= */
+const printedInvoiceIds = ref<Set<number>>(new Set())
+
 onMounted(async () => {
+  localStorage.setItem('selectedPrinter', 'ZN- ZN58U')
   await ordersStore.fetchAll()
   wsStore.connect()
 })
 
 onUnmounted(() => {
-  // If you want websocket to remain app-wide, remove this:
   // wsStore.disconnect()
 })
 
-/* When websocket ids change, refresh table data */
-watch(
-  () => wsStore.newOrderIds,
-  async (ids) => {
-    if (ids.length) {
-      await ordersStore.fetchAll()
-    }
-  },
-  { deep: true },
-)
-
-/* =======================
-   Types
-======================= */
 type channel = 'TABLE' | 'ROOM'
 type InvoicePaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED' | 'EXPIRED' | 'REFUNDED'
 
 type OrderRow = {
   id: number
+  invoiceId: number | null
   orderPlaceId: number | null
   orderPlaceNo: string
   tableNo: string | null
@@ -192,9 +175,6 @@ type OrderRow = {
   status: OrderStatus
 }
 
-/* =======================
-   Table Columns
-======================= */
 const orderColumns: TableColumn[] = [
   { key: 'id', label: '#', width: '70px', align: 'left' },
   { key: 'date', label: 'Date' },
@@ -210,9 +190,6 @@ const orderColumns: TableColumn[] = [
   { key: 'actions', label: '', align: 'right' },
 ]
 
-/* =======================
-   Filters
-======================= */
 const search = ref('')
 const statusFilter = ref('')
 const channelFilter = ref('')
@@ -220,41 +197,61 @@ const paymentFilter = ref('')
 const startDateFilter = ref('')
 const endDateFilter = ref('')
 
-/* =======================
-   Map backend -> table rows
-======================= */
-const orders = computed<OrderRow[]>(() =>
-  ordersStore.items.map((o: any) => {
-    const customerName =
-      o.customerName ??
-      o.customer?.name ??
-      o.order?.customerName ??
-      o.items?.[0]?.customerName ??
-      '-'
+function buildItemSummary(order: any) {
+  const firstItem = Array.isArray(order.items) && order.items.length > 0 ? order.items[0] : null
+  if (!firstItem) return '-'
 
-    const orderPlaceNo = o.orderPlace?.no ?? o.orderPlaceNo ?? o.tableNo ?? '-'
+  const sizeText = firstItem.size ? ` (${firstItem.size})` : ''
+  const qty = Number(firstItem.quantity ?? 0)
 
-    return {
-      id: Number(o.id),
-      orderPlaceId: o.orderPlaceId ?? null,
-      orderPlaceNo,
-      tableNo: o.tableNo ?? null,
-      date: o.date,
-      time: o.time,
-      customerName,
-      channel: o.channel,
-      itemsSummary: (o.items ?? []).map((i: any) => `${i.quantity}× ${i.name}`).join(', '),
-      total: o.total ?? 0,
-      invoicePaymentStatus: o.invoicePaymentStatus,
-      status: o.status,
+  return `${qty}x ${firstItem.name ?? '-'}${sizeText}`
+}
+function playNewOrderBeep() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+
+    if (!AudioContextClass) return
+
+    const audioCtx = new AudioContextClass()
+    const oscillator = audioCtx.createOscillator()
+    const gainNode = audioCtx.createGain()
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime) // high beep
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime)
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioCtx.destination)
+
+    oscillator.start()
+    oscillator.stop(audioCtx.currentTime + 0.15)
+
+    oscillator.onended = () => {
+      audioCtx.close()
     }
-  }),
+  } catch (error) {
+    console.warn('Beep failed:', error)
+  }
+}
+
+const orders = computed<OrderRow[]>(() =>
+  ordersStore.items.map((o: any) => ({
+    id: Number(o.id),
+    invoiceId: o.invoiceId != null ? Number(o.invoiceId) : null,
+    orderPlaceId: o.orderPlaceId != null ? Number(o.orderPlaceId) : null,
+    orderPlaceNo: o.tableNo ?? '-',
+    tableNo: o.tableNo ?? null,
+    date: o.date ?? '',
+    time: o.time ?? '',
+    customerName: o.customerName ?? '-',
+    channel: (o.channel ?? 'TABLE') as channel,
+    itemsSummary: buildItemSummary(o),
+    total: Number(o.total ?? 0),
+    invoicePaymentStatus: (o.invoicePaymentStatus ?? 'PENDING') as InvoicePaymentStatus,
+    status: o.status,
+  })),
 )
 
-/* =======================
-   Filtered Orders
-   - supports: websocket "latest only"
-======================= */
 const filteredOrders = computed(() => {
   const s = search.value.trim().toLowerCase()
   const start = startDateFilter.value
@@ -262,13 +259,13 @@ const filteredOrders = computed(() => {
   const latestSet = wsStore.newOrderIdSet
 
   return orders.value.filter((o) => {
-    // ✅ show only websocket orders
     if (showLatestOnly.value && !latestSet.has(o.id)) return false
 
     const matchesSearch =
       !s ||
       String(o.id).includes(s) ||
       o.customerName.toLowerCase().includes(s) ||
+      o.orderPlaceNo.toLowerCase().includes(s) ||
       o.itemsSummary.toLowerCase().includes(s)
 
     const matchesStatus = !statusFilter.value || o.status === statusFilter.value
@@ -281,13 +278,141 @@ const filteredOrders = computed(() => {
     else if (start) matchesDate = o.date >= start
     else if (end) matchesDate = o.date <= end
 
-    return matchesSearch && matchesStatus && matchesChannel && matchesPayment && matchesTable && matchesDate
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesChannel &&
+      matchesPayment &&
+      matchesTable &&
+      matchesDate
+    )
   })
 })
 
-/* =======================
-   Banner actions
-======================= */
+function getSelectedPrinterName() {
+  return localStorage.getItem('selectedPrinter') || 'ZN- ZN58U'
+}
+
+function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
+  const invoiceOrders = ordersStore.items.filter(
+    (o: any) => Number(o.invoiceId) === Number(invoiceId),
+  )
+  if (!invoiceOrders.length) return null
+
+  const first = invoiceOrders[0]
+  const receiptItems: ReceiptItem[] = invoiceOrders.flatMap((order: any) => {
+    const orderItems = Array.isArray(order.items) ? order.items : []
+
+    return orderItems.map((item: any) => {
+      const qty = Number(item.quantity ?? 0)
+      const ingredientList = Array.isArray(item.orderIngredients) ? item.orderIngredients : []
+
+      const ingredientUnitPrice = ingredientList.reduce(
+        (sum: number, ing: any) => sum + Number(ing.price ?? 0) * Number(ing.qty ?? 0),
+        0,
+      )
+
+      const lineIngredientPrice = ingredientUnitPrice * qty
+      const unitPrice = Number(item.unitPrice ?? 0)
+      const baseUnitPrice = Math.max(0, unitPrice - ingredientUnitPrice)
+      const lineBasePrice = baseUnitPrice * qty
+
+      return {
+        name: `${item.name ?? '-'}${item.size ? ` (${item.size})` : ''}`,
+        qty,
+        basePrice: lineBasePrice,
+        ingredientPrice: lineIngredientPrice,
+        price: unitPrice,
+        ingredients: ingredientList.map((ing: any) => ({
+          name: ing.ingredientName ?? '-',
+          qty: Number(ing.qty ?? 0),
+          price: Number(ing.price ?? 0),
+        })),
+      }
+    })
+  })
+
+  if (!receiptItems.length) return null
+
+  const subtotal = receiptItems.reduce((sum, item) => sum + item.basePrice, 0)
+  const ingredientTotal = receiptItems.reduce((sum, item) => sum + item.ingredientPrice, 0)
+  const total = subtotal + ingredientTotal
+
+  return {
+    shopName: '512',
+    address: 'BKK',
+    phone: '0924662568',
+    orderNo: invoiceId,
+    customerName: first.customerName ?? '-',
+    orderType: first.channel ?? '-',
+    place: first.tableNo ?? '-',
+    method: first.invoicePaymentStatus ?? '-',
+    status: first.status ?? '-',
+    items: receiptItems,
+    subtotal,
+    ingredientTotal,
+    total,
+  }
+}
+async function autoPrintInvoiceByOrderId(orderId: number) {
+  try {
+    const printerName = getSelectedPrinterName()
+
+    if (!printerName || !printerName.trim()) {
+      console.warn('No selected printer. Skip auto print.')
+      return
+    }
+
+    const targetOrder = ordersStore.items.find((o: any) => Number(o.id) === Number(orderId))
+    if (!targetOrder) {
+      console.warn(`Order not found for id=${orderId}`)
+      return
+    }
+
+    const invoiceId = targetOrder.invoiceId != null ? Number(targetOrder.invoiceId) : null
+    if (!invoiceId) {
+      console.warn(`Order ${orderId} has no invoiceId`)
+      return
+    }
+
+    if (printedInvoiceIds.value.has(invoiceId)) {
+      console.log(`Invoice ${invoiceId} already printed`)
+      return
+    }
+
+    const receipt = buildReceiptFromInvoiceOrders(invoiceId)
+    if (!receipt) {
+      console.warn(`Cannot build receipt for invoice ${invoiceId}`)
+      return
+    }
+
+    await printDirectThermalReceipt(printerName, receipt)
+    printedInvoiceIds.value.add(invoiceId)
+
+    console.log(`Invoice ${invoiceId} printed successfully`)
+  } catch (error) {
+    console.error('Auto print failed:', error)
+  }
+}
+
+watch(
+  () => [...wsStore.newOrderIds],
+  async (newIds, oldIds = []) => {
+    const oldSet = new Set(oldIds)
+    const trulyNewIds = newIds.filter((id) => !oldSet.has(id))
+
+    if (!trulyNewIds.length) return
+
+    await ordersStore.fetchAll()
+    playNewOrderBeep()
+
+    for (const orderId of trulyNewIds) {
+      await autoPrintInvoiceByOrderId(orderId)
+    }
+  },
+  { deep: true },
+)
+
 async function onViewLatest() {
   showLatestOnly.value = true
   await ordersStore.fetchAll()
@@ -295,13 +420,13 @@ async function onViewLatest() {
 
 function onShowAll() {
   showLatestOnly.value = false
-  // optional: clear the banner when you go back to all
-  // wsStore.clearNewOrders()
 }
 
-/* =======================
-   Status UI helper
-======================= */
+function onClearNoti() {
+  wsStore.clearNewOrders()
+  showLatestOnly.value = false
+}
+
 function statusClass(status: OrderStatus) {
   return {
     'status-pill--new': status === 'PENDING',
@@ -312,9 +437,6 @@ function statusClass(status: OrderStatus) {
   }
 }
 
-/* =======================
-   Dialog (optional)
-======================= */
 const statusDialogVisible = ref(false)
 const statusTarget = ref<OrderRow | null>(null)
 const statusToUpdate = ref<OrderStatus>('PENDING')
@@ -328,7 +450,6 @@ const statusOptions: OrderStatus[] = [
   'CANCELLED',
 ]
 
-
 function closeStatusDialog() {
   statusDialogVisible.value = false
   statusTarget.value = null
@@ -338,15 +459,12 @@ async function confirmStatusUpdate() {
   if (!statusTarget.value) return
   await ordersStore.update(statusTarget.value.id, { status: statusToUpdate.value })
   statusDialogVisible.value = false
+  statusTarget.value = null
 }
 
-/* =======================
-   Cancel order
-======================= */
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
 }
 </script>
-
 <style scoped src="@/styles/admin/orders.css"></style>

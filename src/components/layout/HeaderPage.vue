@@ -78,9 +78,9 @@ function isActive(basePath: string, exact = true) {
       <!-- RIGHT: PURCHASE / BAG + HAMBURGER -->
       <div class="navbar-actions">
         <button type="button" class="purchase-btn" @click="goToCart">
-         <ShoppingCartIcon class="cart-icon" />
+          <ShoppingCartIcon class="cart-icon" />
           <!-- <span class="purchase-icon">🛒</span> -->
-           <!-- <span class="purchase-icon">
+          <!-- <span class="purchase-icon">
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="18"

@@ -7,8 +7,8 @@
           <p class="eyebrow">Welcome to 5:1</p>
           <h1 class="hero-title">Feel-good food <span class="highlight">for every mood</span></h1>
           <p class="hero-text">
-            Coffee, Tea and desserts – crafted fresh for food lovers. Eat in, grab &amp; go
-            or enjoy from your room.
+            Coffee, Tea and desserts – crafted fresh for food lovers. Eat in, grab &amp; go or enjoy
+            from your room.
           </p>
 
           <div class="hero-actions">
@@ -18,11 +18,11 @@
 
           <div class="hero-stats">
             <div class="stat">
-              <span class="stat-number">{{totalMenuItems}}++</span>
+              <span class="stat-number">{{ totalMenuItems }}++</span>
               <span class="stat-label">Various Menu</span>
             </div>
             <div class="stat">
-              <span class="stat-number">{{overallRating.toFixed(2)}}★</span>
+              <span class="stat-number">{{ overallRating }}★</span>
               <span class="stat-label">Guest rating</span>
             </div>
             <!-- <div class="stat">
@@ -170,26 +170,18 @@ onMounted(() => {
   menuItemsStore.fetchAll()
 })
 
-const totalMenuItems = computed(() =>
-  menuItemsStore.items.filter(i => i.status !== 'INACTIVE').length
+const totalMenuItems = computed(
+  () => menuItemsStore.items.filter((i) => i.status !== 'INACTIVE').length,
 )
 
 const overallRating = computed(() => {
-  const items = menuItemsStore.items.filter(
-    i => i.averageRating != null && i.ratingCount > 0
-  )
+  const items = menuItemsStore.items.filter((i) => i.averageRating != null && i.ratingCount > 0)
 
   if (!items.length) return 0
 
-  const totalWeighted = items.reduce(
-    (sum, item) => sum + item.averageRating * item.ratingCount,
-    0
-  )
+  const totalWeighted = items.reduce((sum, item) => sum + item.averageRating * item.ratingCount, 0)
 
-  const totalReviews = items.reduce(
-    (sum, item) => sum + item.ratingCount,
-    0
-  )
+  const totalReviews = items.reduce((sum, item) => sum + item.ratingCount, 0)
 
   return totalReviews ? totalWeighted / totalReviews : 0
 })
@@ -252,36 +244,33 @@ const specials = computed(() => {
     .slice(0, 3)
     .map(([id]) => Number(id))
 
-  return top3Ids.map((id, index) => {
-    const fullItem = menuItemsStore.items.find(i => i.id === id)
-    if (!fullItem) return null
+  return top3Ids
+    .map((id, index) => {
+      const fullItem = menuItemsStore.items.find((i) => i.id === id)
+      if (!fullItem) return null
 
-    const cheapestSize = fullItem.sizes?.length
-      ? fullItem.sizes.reduce((min: any, s: any) =>
-          s.sellPrice < min.sellPrice ? s : min
-        )
-      : null
+      const cheapestSize = fullItem.sizes?.length
+        ? fullItem.sizes.reduce((min: any, s: any) => (s.sellPrice < min.sellPrice ? s : min))
+        : null
 
-    const activeImages =
-      fullItem.images?.filter((img: any) => img.active) ?? []
+      const activeImages = fullItem.images?.filter((img: any) => img.active) ?? []
 
-    const primaryImage =
-      activeImages.find((img: any) => img.primary)?.url ||
-      activeImages[0]?.url ||
-      ''
+      const primaryImage =
+        activeImages.find((img: any) => img.primary)?.url || activeImages[0]?.url || ''
 
-    return {
-      id: fullItem.id,
-      name: fullItem.name,
-      category: fullItem.category,
-      price: cheapestSize?.sellPrice ?? 0,
-      description: fullItem.shortDesc,
-      imageUrl: primaryImage,
-      badge: index === 0 ? '🔥 Most ordered' : 'Popular',
-      rating: fullItem.averageRating ?? 0,
-      ratingCount: fullItem.ratingCount ?? 0,
-    }
-  }).filter(Boolean)
+      return {
+        id: fullItem.id,
+        name: fullItem.name,
+        category: fullItem.categoryName,
+        price: cheapestSize?.sellPrice ?? 0,
+        description: fullItem.shortDesc,
+        imageUrl: primaryImage,
+        badge: index === 0 ? '🔥 Most ordered' : 'Popular',
+        rating: fullItem.averageRating ?? 0,
+        ratingCount: fullItem.reviewCount ?? 0,
+      }
+    })
+    .filter(Boolean)
 })
 
 watch(specials, (val) => {

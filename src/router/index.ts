@@ -27,6 +27,7 @@ import AdminSettings from '@/views/admin/AdminSettings.vue'
 import AdminTables from '@/views/admin/AdminTables.vue'
 import MenuItemCreate from '@/views/admin/MenuItemCreate.vue'
 import MenuItemUpdate from '@/views/admin/MenuItemUpdate.vue'
+import PrintTest from '@/views/admin/PrintTest.vue'
 
 // Category/Tags/Size
 import CategoryTable from '@/views/admin/CategoryTable.vue'
@@ -74,8 +75,18 @@ const routes = [
         name: 'checkoutPay',
         component: () => import('@/views/CheckoutPay.vue'),
       },
+      {
+        path: 'payment/success',
+        name: 'paymentSuccess',
+        component: () => import('@/views/PaymentSuccess.vue'),
+      },
 
-      { path: 'shop', name: 'shop', component: ShopPage },
+     {
+  path: '/shop',
+  name: 'shop',
+  component: ShopPage,
+  meta: { requiresAuth: false }
+},
       { path: 'contact', name: 'contact', component: ContactPage },
       { path: 'about', name: 'about', component: aboutPage },
       { path: 'products', name: 'products', component: ProductsPage },
@@ -90,6 +101,7 @@ const routes = [
     children: [
       { path: '', name: 'admin-dashboard', component: AdminDashboard },
       { path: 'orders', name: 'admin-orders', component: AdminOrders },
+      { path: 'print', name: 'test-print', component: PrintTest },
       { path: 'menu', name: 'admin-menu', component: AdminMenu },
       { path: 'tables', name: 'admin-tables', component: AdminTables },
       { path: 'invoices', name: 'admin-invoices', component: AdminInvoices },

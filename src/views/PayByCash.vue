@@ -1,103 +1,195 @@
 <template>
-  <div class="payment-page">
-    <!-- HEADER -->
-    <section class="checkout-hero">
-      <div class="cs-container checkout-hero-inner">
-        <h1 class="checkout-title">Cash Payment</h1>
+  <div class="cash-page">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="cs-container hero-inner">
+        <div>
+          <h1 class="hero-title">Cash Payment</h1>
+          <p class="hero-sub">
+            Pay by cash at counter / delivery. Your payment status will be
+            <b>PENDING</b> and staff will confirm later.
+          </p>
+        </div>
 
-        <div class="breadcrumb-pill">
-          <span class="crumb crumb--link" @click="goHome">Home</span>
-          <span class="crumb-sep">/</span>
-          <span class="crumb crumb--link" @click="goMethod">Checkout</span>
-          <span class="crumb-sep">/</span>
-          <span class="crumb crumb--active">Cash</span>
+        <div class="crumb-pill">
+          <span class="crumb" @click="goHome">Home</span>
+          <span class="sep">/</span>
+          <span class="crumb" @click="goCart">Checkout</span>
+          <span class="sep">/</span>
+          <span class="crumb active">Cash</span>
         </div>
       </div>
     </section>
 
-    <main class="payment-main">
-      <section class="cs-container payment-layout">
-        <!-- LEFT: Order summary -->
-        <section class="summary-left">
-          <div class="order-card">
-            <h2 class="section-title">Order summary</h2>
+    <main class="cs-container main">
+      <div class="grid">
+        <!-- LEFT: SUMMARY -->
+        <section class="card">
+          <h2 class="card-title">Order summary</h2>
 
-            <div class="totals">
-              <div class="totals-row totals-row--strong">
-                <span>Total</span>
-                <span class="total-highlight">{{ formatMoney(total) }}</span>
+          <div class="meta">
+            <div class="meta-row">
+              <span class="k">Customer</span>
+              <span class="v">{{ customerName }}</span>
+            </div>
+            <div class="meta-row">
+              <span class="k">{{ placeLabel }}</span>
+              <span class="v">{{ placeText }}</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <ul class="items">
+            <li v-for="it in items" :key="it.cartId" class="item">
+              <div class="left">
+                <img class="thumb" :src="it.imageUrl" :alt="it.name" />
+                <div class="txt">
+                  <p class="name">{{ it.name }} ({{ it.sizeName }})</p>
+                  <p class="desc">{{ it.description }}</p>
+                </div>
               </div>
+
+              <div class="right">
+                <span class="qty">x{{ it.quantity }}</span>
+                <span class="price">{{ money(it.unitPrice * it.quantity) }}</span>
+              </div>
+            </li>
+          </ul>
+
+          <div class="divider"></div>
+
+          <div class="totals">
+            <div class="row">
+              <span>Subtotal</span>
+              <span>{{ money(subtotal) }}</span>
+            </div>
+            <div class="row">
+              <span>Ingredients</span>
+              <span>{{ money(totalIngredientPrice) }}</span>
+            </div>
+            <div class="row strong">
+              <span>Total</span>
+              <span class="total">{{ money(total) }}</span>
             </div>
           </div>
         </section>
 
-        <!-- RIGHT: Cash confirmation -->
-        <section class="payment-right">
-          <div class="pay-card">
-            <h2 class="section-title">Confirm cash payment</h2>
+        <!-- RIGHT: CONFIRM -->
+        <section class="card card-accent">
+          <div class="badge">💵 CASH</div>
+          <h2 class="card-title">Confirm cash order</h2>
 
-            <div class="cash-panel">
-              <div class="cash-badge">💵 Cash</div>
+          <ul class="tips">
+            <li>Please prepare the exact amount.</li>
+            <li>Staff will collect payment upon delivery / counter.</li>
+            <li>Order will be placed as <b>PENDING_CASH</b> (or PENDING).</li>
+          </ul>
 
-              <p class="cash-text">
-                You selected <strong>Cash</strong>. Please prepare the exact amount.
-              </p>
+          <div class="divider"></div>
 
-              <ul class="cash-list">
-                <li>Staff will collect payment upon delivery.</li>
-                <li>Your order will be placed as <strong>PENDING_CASH</strong>.</li>
-              </ul>
+          <div class="action-row">
+            <button class="btn ghost" :disabled="loading" @click="changeMethod">
+              Change method
+            </button>
 
-              <div class="cash-total">
-                <span>Total</span>
-                <strong>{{ formatMoney(total) }}</strong>
-              </div>
-            </div>
-
-            <hr class="divider" />
-
-            <div class="actions">
-              <button type="button" class="btn-secondary" @click="goMethod">Change method</button>
-
-              <button type="button" class="pay-btn" @click="confirmCash">
-                Confirm order – {{ formatMoney(total) }}
-              </button>
-            </div>
-
-            <p class="helper-note">If you want to pay by QR or Card, click “Change method”.</p>
+            <button class="btn primary" :disabled="loading || items.length === 0" @click="confirm">
+              <span v-if="!loading">Confirm order — {{ money(total) }}</span>
+              <span v-else>Placing order...</span>
+            </button>
           </div>
+
+          <p v-if="errorText" class="error">{{ errorText }}</p>
+          <p class="hint">After confirming, you will see the success page immediately.</p>
         </section>
-      </section>
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/useCartStore'
+import { useOrderSessionStore } from '@/stores/orderSession'
+import { usePaymentStore } from '@/stores/usePaymentStore'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const session = useOrderSessionStore()
+const paymentStore = usePaymentStore()
 
-const total = computed(() => cartStore.cartSubtotal)
+const errorText = ref('')
 
-function formatMoney(value: number) {
-  return `฿${value.toFixed(0)}`
-}
+const items = computed(() => cartStore.items)
+const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
+const subtotal = computed(() => cartStore.cartSubtotal - totalIngredientPrice.value)
+const total = computed(() => subtotal.value + totalIngredientPrice.value)
 
-function goMethod() {
-  router.push({ name: 'checkoutPaymentMethod' })
+const customerName = computed(() => session.customerName || 'Customer')
+const placeLabel = computed(() => (session.orderType === 'ROOM' ? 'Room' : 'Table'))
+const placeText = computed(() => {
+  const no = session.placeNumber || session.tableNumber || '-'
+  return session.orderType === 'ROOM' ? String(no) : `T-${no}`
+})
+
+const orderPlaceId = computed(() => Number(session.orderPlaceId || session.placeNumber || 1) || 1)
+
+const loading = computed(() => paymentStore.loading)
+
+function money(v: number) {
+  return `฿${Number(v).toFixed(0)}`
 }
 
 function goHome() {
   router.push({ name: 'home' })
 }
+function goCart() {
+  router.push({ name: 'cart' })
+}
 
-function confirmCash() {
-  // TODO: call backend to set payment method CASH and create order
-  router.push({ name: 'paymentSuccess' })
+function changeMethod() {
+  router.push({ name: 'payment' })
+}
+
+async function confirm() {
+  errorText.value = ''
+
+  if (!items.value.length) {
+    errorText.value = 'Your cart is empty.'
+    return
+  }
+  if (!customerName.value.trim()) {
+    errorText.value = 'Customer name is missing.'
+    return
+  }
+
+  try {
+    // ✅ THIS CALLS BACKEND: POST api/payments
+    const pay = await paymentStore.createPayment({
+      orderPlaceId: orderPlaceId.value,
+      customerName: customerName.value,
+      method: 'CASH',
+      gateway: 'CASH',
+    })
+
+    // optional: clear cart
+    cartStore.clearCart?.()
+
+    router.replace({
+      name: 'paymentSuccess',
+      query: {
+        paymentId: String(pay.id),
+        invoiceId: String(pay.invoiceId),
+        method: 'CASH',
+        status: pay.status,
+      },
+    })
+  } catch (e: any) {
+    // show store error
+    errorText.value = paymentStore.error || e?.message || 'Cash confirm failed'
+  }
 }
 </script>
 
-<style scoped src="@/styles/customer/payment-page.css"></style>
+<style scoped src="@/styles/customer/cash-pay-page.css"></style>

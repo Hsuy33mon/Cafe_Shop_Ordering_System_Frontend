@@ -169,14 +169,6 @@
         </table>
       </div>
     </section>
-
-    <!-- FOOTER -->
-    <section class="footer-actions">
-      <div>
-        <button class="btn-secondary">Edit</button>
-        <button class="btn-danger">Cancel Invoice</button>
-      </div>
-    </section>
   </main>
 </template>
 

@@ -60,7 +60,7 @@
             <div class="totals">
               <div class="totals-row">
                 <span>Subtotal</span>
-                <span>{{ formatMoney(subtotal) }}</span>
+                <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
               </div>
               <div class="totals-row">
                 <span>Ingredients</span>
@@ -68,7 +68,7 @@
               </div>
               <div class="totals-row totals-row--strong">
                 <span>Total</span>
-                <span class="total-highlight">{{ formatMoney(total) }}</span>
+                <span class="total-highlight">{{ formatMoney((subtotal - totalIngredientPrice) + totalIngredientPrice) }}</span>
               </div>
             </div>
           </div>
@@ -98,7 +98,7 @@
 
                   <p class="scan-text">
                     Use your banking app to scan this QR code. Amount:
-                    <strong>{{ formatMoney(payment?.amount ?? total) }}</strong>
+                    <strong>{{ formatMoney((subtotal - totalIngredientPrice) + totalIngredientPrice) }}</strong>
                   </p>
 
                   <div class="scan-meta">
@@ -151,16 +151,18 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/useCartStore'
 import { useOrderSessionStore } from '../stores/orderSession'
 import { usePaymentStore } from '../stores/usePaymentStore'
+import { useWsStore } from '@/stores/useWsStore'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const session = useOrderSessionStore()
 const paymentStore = usePaymentStore()
+const wsStore = useWsStore()
 
 const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
@@ -170,19 +172,15 @@ const total = computed(() => subtotal.value + totalIngredientPrice.value)
 const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
 const tableNumber = computed(() => session.placeNumber || '12')
 const orderPlaceId = computed(() => Number(tableNumber.value) || 1)
-
 const promptPayId = computed(() => '0891234567')
 
 const payment = computed(() => paymentStore.payment)
 const loading = computed(() => paymentStore.loading)
 const errorMsg = computed(() => paymentStore.error)
 const expiresInText = computed(() => paymentStore.expiresInText)
-const expiresInSec = computed(() => paymentStore.expiresInSec)
 
-const paidConfirmed = computed({
-  get: () => false,
-  set: () => {},
-})
+const paidConfirmed = ref(false)
+const redirected = ref(false)
 
 function formatMoney(value: number): string {
   return `฿${Number(value).toFixed(0)}`
@@ -209,19 +207,99 @@ function goToHome() {
   router.push({ name: 'home' })
 }
 
+function isPaidStatus(status?: string) {
+  return ['PAID', 'SUCCESS', 'COMPLETED'].includes(String(status || '').toUpperCase())
+}
+
+function goToPaymentSuccess() {
+  if (!payment.value?.id || redirected.value) return
+
+  redirected.value = true
+
+  cartStore.clearCart?.()
+
+  router
+    .replace({
+      name: 'paymentSuccess',
+      query: {
+        paymentId: String(payment.value.id),
+        invoiceId: payment.value.invoiceId ? String(payment.value.invoiceId) : '',
+        method: payment.value.paymentType || 'PROMPTPAY',
+        status: payment.value.status || 'PAID',
+      },
+    })
+    .catch(() => {})
+}
+
+// fallback button
 async function confirmPaid() {
-  router.push({ name: 'paymentSuccess' })
+  if (isPaidStatus(payment.value?.status)) {
+    goToPaymentSuccess()
+    return
+  }
+
+  // optional fallback if user manually confirms before WS arrives
+  router
+    .replace({
+      name: 'paymentSuccess',
+      query: {
+        paymentId: String(payment.value?.id || ''),
+        invoiceId: payment.value?.invoiceId ? String(payment.value.invoiceId) : '',
+        method: payment.value?.paymentType || 'PROMPTPAY',
+        status: payment.value?.status || 'PENDING',
+      },
+    })
+    .catch(() => {})
 }
 
 let timer: number | undefined
+let currentSubscribedPaymentId: number | null = null
+
+watch(
+  () => payment.value?.id,
+  (paymentId) => {
+    if (!paymentId) return
+
+    const numericPaymentId = Number(paymentId)
+
+    if (currentSubscribedPaymentId === numericPaymentId) return
+
+    if (currentSubscribedPaymentId) {
+      wsStore.unsubscribePayment(currentSubscribedPaymentId)
+    }
+
+    currentSubscribedPaymentId = numericPaymentId
+
+    wsStore.subscribePayment(numericPaymentId, (evt) => {
+      console.log('PAYMENT EVT', evt)
+      console.log('payment status -->', evt.paymentStatus)
+
+      // keep latest event in store already handled by wsStore
+      if (isPaidStatus(evt.paymentStatus)) {
+        goToPaymentSuccess()
+      }
+    })
+  },
+  { immediate: true },
+)
+
+watch(
+  () => payment.value?.status,
+  (status) => {
+    if (isPaidStatus(status)) {
+      goToPaymentSuccess()
+    }
+  },
+)
 
 onMounted(async () => {
-  await refreshQr()
   await paymentStore.ensurePromptPayPayment({
     orderPlaceId: orderPlaceId.value,
     customerName: customerName.value,
     promptPayId: promptPayId.value,
   })
+
+  wsStore.connect()
 
   timer = window.setInterval(() => {
     paymentStore.tick()
@@ -230,8 +308,18 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (timer) window.clearInterval(timer)
-  paymentStore.cancelPayment()
+
+  if (currentSubscribedPaymentId) {
+    wsStore.unsubscribePayment(currentSubscribedPaymentId)
+  }
+
+  // only cancel if still unpaid
+  if (!isPaidStatus(payment.value?.status)) {
+    paymentStore.cancelPayment()
+  }
+
+  // optional: don't disconnect global ws if other pages use it
+  // wsStore.disconnect()
 })
 </script>
-
 <style scoped src="@/styles/customer/payment-page.css"></style>

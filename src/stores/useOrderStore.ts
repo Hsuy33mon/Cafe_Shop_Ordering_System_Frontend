@@ -9,23 +9,24 @@ export type OrderStatus =
   | 'COMPLETED'
   | 'CANCELLED'
 
+export type OrderIngredient = {
+  id: number
+  ingredientId: number
+  ingredientName: string
+  qty: number
+  price: number
+  note?: string | null
+}
+
 export type OrderItem = {
   name: string
-  size?: string
+  size?: string | null
   quantity: number
   unitPrice: number
   total: number
   note?: string
   orderIngredients?: OrderIngredient[]
   menuItem?: any
-}
-
-export type OrderIngredient = {
-  id: number
-  ingredientId: number
-  ingredientName: string
-  qty: number
-  note?: string | null
 }
 
 export type Order = {
@@ -37,6 +38,7 @@ export type Order = {
   customerName: string
   channel: string
   status: OrderStatus
+  invoiceId: number | null
   invoicePaymentStatus: string
   customerNote?: string
   items: OrderItem[]
@@ -49,42 +51,55 @@ export type Order = {
 function mapFromApi(x: any): Order {
   const created = new Date(x.createdAt)
 
+  const orderIngredients: OrderIngredient[] = Array.isArray(x.orderIngredients)
+    ? x.orderIngredients.map((oi: any) => ({
+        id: Number(oi.id),
+        ingredientId: Number(oi.ingredientId),
+        ingredientName: oi.ingredientName ?? 'Unknown ingredient',
+        qty: Number(oi.qty ?? 0),
+        price: Number(oi.price ?? 0),
+        note: oi.note ?? null,
+      }))
+    : []
+
+  const baseUnitPrice = Number(x.menuItemSize?.sellPrice ?? x.unitPrice ?? 0)
+  const ingredientTotal = orderIngredients.reduce(
+    (sum, ing) => sum + Number(ing.price ?? 0) * Number(ing.qty ?? 0),
+    0,
+  )
+
+  const finalUnitPrice = Number(x.unitPrice ?? baseUnitPrice + ingredientTotal)
+  const quantity = Number(x.qty ?? 0)
+  const lineTotal = Number(x.totalPrice ?? finalUnitPrice * quantity)
+
   return {
     id: Number(x.id),
     orderPlaceId: x.orderPlaceId != null ? Number(x.orderPlaceId) : null,
-    // orderPlaceId: x.orderPlaceId != null? Number(x.orderPlaceId): x.orderPlace?.id != null? Number(x.orderPlace.id): null,
     tableNo: x.orderPlace?.no ?? null,
     date: created.toISOString().slice(0, 10),
     time: created.toTimeString().slice(0, 5),
-    customerName: x.customerName,
+    customerName: x.customerName ?? '-',
     channel: x.orderPlace?.type?.toUpperCase() ?? 'TABLE',
     status: x.status,
+    invoiceId: x.invoiceId != null ? Number(x.invoiceId) : null,
     invoicePaymentStatus: x.invoicePaymentStatus ?? '--',
     customerNote: x.note,
     items: [
       {
         name: x.menuItem?.name ?? 'Unknown item',
         size: x.size?.shortName ?? x.size?.name ?? null,
-        quantity: x.qty,
-        unitPrice: Number(x.unitPrice),
-        total: Number(x.totalPrice),
+        quantity,
+        unitPrice: finalUnitPrice,
+        total: lineTotal,
         note: x.note,
         menuItem: x.menuItem,
-        orderIngredients: Array.isArray(x.orderIngredients)
-          ? x.orderIngredients.map((oi: any) => ({
-              id: oi.id,
-              ingredientId: oi.ingredientId,
-              ingredientName: oi.ingredientName,
-              qty: Number(oi.qty),
-              note: oi.note,
-            }))
-          : [],
+        orderIngredients,
       },
     ],
-    subtotal: Number(x.totalPrice),
+    subtotal: lineTotal,
     serviceCharge: 0,
     tax: 0,
-    total: Number(x.totalPrice),
+    total: lineTotal,
   }
 }
 
@@ -137,9 +152,11 @@ export const useOrdersStore = defineStore('orders', {
         this.loading = false
       }
     },
+
     async updateOrderItem(orderId: number, itemId: number, payload: any) {
       await http.put(`/api/admin/orders/${orderId}/items/${itemId}`, payload)
     },
+
     async update(
       id: number,
       payload: {

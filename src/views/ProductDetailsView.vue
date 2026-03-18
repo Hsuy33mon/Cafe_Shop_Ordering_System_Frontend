@@ -17,47 +17,40 @@
       <!-- TOP LAYOUT: IMAGE + MAIN INFO -->
       <section class="cs-container pd-top">
         <!-- FULLSCREEN ZOOM MODAL -->
-<transition name="fade">
-  <div v-if="isZoomOpen" class="zoom-overlay" @click.self="closeZoom">
+        <transition name="fade">
+          <div v-if="isZoomOpen" class="zoom-overlay" @click.self="closeZoom">
+            <button class="zoom-close" @click="closeZoom">×</button>
 
-    <button class="zoom-close" @click="closeZoom">×</button>
+            <button
+              v-if="productImages.length > 1"
+              class="zoom-nav zoom-nav--left"
+              @click.stop="prevImage"
+            >
+              ‹
+            </button>
 
-    <!-- left arrow -->
-    <button
-      v-if="productImages.length > 1"
-      class="zoom-nav zoom-nav--left"
-      @click.stop="prevImage"
-    >
-      ‹
-    </button>
+            <img :src="currentImage" :alt="product.name" class="zoom-image" />
 
-    <img
-      :src="currentImage"
-      :alt="product.name"
-      class="zoom-image"
-    />
+            <button
+              v-if="productImages.length > 1"
+              class="zoom-nav zoom-nav--right"
+              @click.stop="nextImage"
+            >
+              ›
+            </button>
+          </div>
+        </transition>
 
-    <!-- right arrow -->
-    <button
-      v-if="productImages.length > 1"
-      class="zoom-nav zoom-nav--right"
-      @click.stop="nextImage"
-    >
-      ›
-    </button>
-  </div>
-</transition>
-        <!-- LEFT: SINGLE IMAGE -->
+        <!-- LEFT: IMAGE -->
         <div class="pd-image-card">
-          <!-- MAIN SLIDE -->
           <div class="pd-image-main">
             <div class="pd-image-label" v-if="product.label">
               <span class="pd-label-dot"></span>
               <span>{{ product.label }}</span>
             </div>
+
             <img :src="currentImage" :alt="product.name" class="pd-image" />
 
-            <!-- arrows -->
             <button
               v-if="productImages.length > 1"
               type="button"
@@ -67,6 +60,7 @@
             >
               ‹
             </button>
+
             <button
               v-if="productImages.length > 1"
               type="button"
@@ -92,66 +86,46 @@
             </button>
           </div>
 
-          <button
-  type="button"
-  class="pd-zoom-btn"
-  aria-label="View larger"
-  @click="openZoom"
->
-  ⤢
-</button>
-          <!-- <button type="button" class="pd-zoom-btn" aria-label="View larger">⤢</button> -->
+          <button type="button" class="pd-zoom-btn" aria-label="View larger" @click="openZoom">
+            ⤢
+          </button>
         </div>
 
         <!-- RIGHT: INFO -->
         <div class="pd-info-card">
           <header class="pd-header">
             <div class="pd-title-row">
-              <h1 class="pd-title">{{ product?.name }}</h1>
-              <!-- <div class="pd-price-pill">฿{{ displayPrice }}</div> -->
-              <div class="pd-price-pill">฿{{ finalTotalPrice.toFixed(2) }}</div>
+              <h1 class="pd-title">{{ product.name }}</h1>
+              <div class="pd-price-pill">฿{{ money(finalTotalPrice) }}</div>
             </div>
 
-            <!-- summary -->
+            <!-- rating summary -->
             <div class="pd-rating-row">
               <span class="pd-stars">
                 <span
-                    v-for="n in 5"
-                    :key="'avg-' + n"
-                    :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]"
-                  >
-                    ★
-                  </span>
+                  v-for="n in 5"
+                  :key="'avg-' + n"
+                  :class="['pd-star', { 'pd-star--muted': n > Math.round(averageRating) }]"
+                >
+                  ★
+                </span>
               </span>
+
               <span class="pd-rating-text">
-                ({{ reviewStore.items.length }})
-                  rating{{ reviewStore.items.length === 1 ? '' : 's' }}
+                ({{ reviewStore.items.length }}) rating{{
+                  reviewStore.items.length === 1 ? '' : 's'
+                }}
               </span>
             </div>
 
             <div class="pd-reviews-summary">
-              <div>
-                <p class="pd-reviews-summary-text">
-                  {{ averageRating.toFixed(1) }} out of 5
-                </p>
-              </div>
+              <p class="pd-reviews-summary-text">{{ money(averageRating, 1) }} out of 5</p>
             </div>
 
             <p class="pd-short-desc">
               {{ product.description }}
             </p>
           </header>
-
-          <!-- STEPS ROW -->
-          <!-- <section class="pd-steps">
-            <article v-for="step in steps" :key="step.number" class="pd-step">
-              <div class="pd-step-number">{{ step.number }}</div>
-              <div class="pd-step-body">
-                <p class="pd-step-title">{{ step.title }}</p>
-                <p class="pd-step-text">{{ step.text }}</p>
-              </div>
-            </article>
-          </section> -->
 
           <!-- SIZE SELECTOR -->
           <div v-if="menuItemsStore.currentItem?.sizes?.length" class="pd-size-section">
@@ -171,7 +145,7 @@
             </div>
           </div>
 
-          <!-- ACTIONS: QTY + ADD TO CART -->
+          <!-- ACTIONS -->
           <footer class="pd-actions">
             <div class="pd-qty-control">
               <button type="button" class="pd-qty-btn" @click="decreaseQty">−</button>
@@ -185,15 +159,14 @@
               :class="{ 'pd-add-btn--added': isInCart }"
               @click="toggleCart"
             >
-              <span> {{ isInCart ? 'Added to cart' : 'Add to cart' }} </span>
+              <span>{{ isInCart ? 'Added to cart' : 'Add to cart' }}</span>
             </button>
           </footer>
         </div>
       </section>
 
-      <!-- TABS + DETAILS -->
+      <!-- TABS -->
       <section class="cs-container pd-tabs-section">
-        <!-- tab buttons -->
         <div class="pd-tabs">
           <button
             v-for="tab in tabList"
@@ -207,11 +180,9 @@
           </button>
         </div>
 
-        <!-- tab content -->
         <div class="pd-tab-panel">
-          <!-- INGREDIENTS TABLE -->
+          <!-- INGREDIENTS -->
           <div v-if="activeTab === 'ingredients'" class="pd-ingredients-table">
-            <!-- header -->
             <div class="pd-ingredients-header">
               <span></span>
               <span>Name</span>
@@ -219,49 +190,30 @@
               <span>Price</span>
             </div>
 
-            <!-- rows -->
             <div
-              v-for="ingredient in menuItemsStore.currentItem?.ingredients?.filter(i => i.active)"
+              v-for="ingredient in activeIngredients"
               :key="ingredient.id"
               class="pd-ingredients-row"
             >
-              <!-- checkbox -->
               <input
                 type="checkbox"
-
                 :checked="selectedIngredientIds.includes(ingredient.id)"
                 @change="toggleIngredient(ingredient.id)"
               />
 
-              <!-- name + note -->
               <div class="pd-ing-name">
                 {{ ingredient.name }}
                 <small v-if="ingredient.note" class="pd-ing-note"> ({{ ingredient.note }}) </small>
               </div>
 
-              <!-- amount -->
-              <span>{{ ingredient.amount }}</span>
+              <span>{{ ingredient.amount ?? '-' }}</span>
 
-              <!-- price -->
-              <span class="pd-ing-price">฿{{ ingredient.price.toFixed(2) }}</span>
+              <span class="pd-ing-price">฿{{ money(ingredient.price) }}</span>
             </div>
           </div>
 
-          <!-- PRODUCT DETAILS -->
-          <!-- <div v-else-if="activeTab === 'details'" class="pd-text-panel">
-            <p>
-              Freshly prepared at CafeShop with carefully selected ingredients. Perfect as a light
-              lunch or cozy dinner in your room.
-            </p>
-            <p>
-              If you have specific dietary requirements (gluten-free, dairy-free, etc.), please add
-              it in the order notes and our team will try to accommodate.
-            </p>
-          </div> -->
-
           <!-- REVIEWS -->
           <div v-else class="pd-reviews">
-            <!-- list -->
             <div v-if="reviewStore.items.length" class="pd-reviews-list">
               <article v-for="review in reviewStore.items" :key="review.id" class="pd-review-card">
                 <div class="pd-review-header">
@@ -273,17 +225,16 @@
                   <span
                     v-for="n in 5"
                     :key="review.id + '-' + n"
-                    :class="['pd-star', { 'pd-star--muted': n > review.rating }]"
+                    :class="['pd-star', { 'pd-star--muted': n > (review.rating ?? 0) }]"
                   >
                     ★
                   </span>
                 </div>
 
-                <p class="pd-review-comment">
-                  {{ review.comment }}
-                </p>
+                <p class="pd-review-comment">{{ review.comment }}</p>
               </article>
             </div>
+
             <p v-else class="pd-reviews-empty">
               No reviews yet. Be the first to try this menu item and share your feedback!
             </p>
@@ -316,7 +267,7 @@
                   >
                     ★
                   </button>
-                  <span class="pd-review-rating-hint"> {{ newReviewRating }} / 5 </span>
+                  <span class="pd-review-rating-hint">{{ newReviewRating }} / 5</span>
                 </div>
               </div>
 
@@ -340,119 +291,151 @@
           </div>
         </div>
       </section>
-
-      <!-- BOUGHT TOGETHER -->
-      <!-- <section class="cs-container pd-bought-section">
-        <header class="pd-bought-header">
-          <h2 class="pd-bought-title">It is usually bought together with this product</h2>
-          <p class="pd-bought-text">
-            Guests often pair this dish with a drink or dessert. Add one more to complete your meal.
-          </p>
-        </header>
-
-        <div class="pd-bought-row">
-          <article v-for="item in boughtTogether" :key="item.id" class="pd-bought-card">
-            <div class="pd-bought-media" @click="goToDetails(item.id)">
-              <img :src="item.imageUrl" :alt="item.name" />
-            </div>
-
-            <div class="pd-bought-body">
-              <p class="pd-bought-name">{{ item.name }}</p>
-              <p class="pd-bought-desc">
-                {{ item.description }}
-              </p>
-            </div>
-
-            <div class="pd-bought-footer">
-              <span class="pd-bought-price">฿{{ item.price }}</span>
-              <button type="button" class="pd-bought-btn">Add to cart</button>
-            </div>
-          </article>
-        </div>
-      </section> -->
     </main>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useMenuItemsStore } from '../stores/useMenuItemStore'
 import { useCartStore } from '../stores/useCartStore'
 import { useReviewStore } from '@/stores/useReviewStore'
 
+/* =======================
+   Helpers (fix toFixed crash)
+======================= */
+function toNum(v: unknown, fallback = 0) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function money(v: unknown, digits = 2) {
+  return toNum(v, 0).toFixed(digits)
+}
+
+/* =======================
+   Stores
+======================= */
 const reviewStore = useReviewStore()
-// const router = useRouter()
 const menuItemsStore = useMenuItemsStore()
 const cartStore = useCartStore()
+
+/* =======================
+   Route + init
+======================= */
+const route = useRoute()
+const productId = toNum(route.params.id, 1)
+
+/* =======================
+   UI state
+======================= */
 const cartSuccessMessage = ref('')
-
-// type Product = {
-//   id: number
-//   name: string
-//   price: number
-//   description: string
-//   imageUrl: string
-//   images?: string[]
-//   label?: string
-//   rating: number
-//   ratingCount: number
-// }
-
 const isZoomOpen = ref(false)
+const quantity = ref(1)
+const isInCart = ref(false)
 
+const selectedSizeId = ref<number | null>(null)
+const selectedIngredientIds = ref<number[]>([])
+
+const activeTab = ref<'ingredients' | 'reviews'>('ingredients')
+const tabList = [
+  { value: 'ingredients', label: 'Ingredients' },
+  { value: 'reviews', label: 'Reviews' },
+]
+
+/* =======================
+   Zoom / ESC
+======================= */
 function openZoom() {
   isZoomOpen.value = true
 }
-
 function closeZoom() {
   isZoomOpen.value = false
 }
-
 function handleEsc(e: KeyboardEvent) {
-  if (e.key === 'Escape') {
-    closeZoom()
-  }
+  if (e.key === 'Escape') closeZoom()
 }
+
+onMounted(async () => {
+  await menuItemsStore.fetchById(productId)
+  await reviewStore.fetchByMenuItem(productId)
+  window.addEventListener('keydown', handleEsc)
+  restoreFromQuery()
+})
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleEsc)
 })
 
-const route = useRoute()
-const productId = Number(route.params.id || 1)
-
-// function goToDetails(id: number) {
-//   router.push({ name: 'product-details', params: { id } })
-// }
-
-onMounted(() => {
-  menuItemsStore.fetchById(productId)
-  reviewStore.fetchByMenuItem(productId)
- window.addEventListener('keydown', handleEsc)
-  restoreFromQuery()
-})
-
+/* =======================
+   Restore state from query
+======================= */
 function restoreFromQuery() {
-  const sizeId = Number(route.query.sizeId)
-  const qty = Number(route.query.qty)
+  const sizeId = toNum(route.query.sizeId, 0)
+  const qty = toNum(route.query.qty, 0)
   const ingredients = route.query.ingredients as string | undefined
 
-  if (sizeId) {
-    selectedSizeId.value = sizeId
-  }
-
-  if (qty && qty > 0) {
-    quantity.value = qty
-  }
-
-  if (ingredients) {
-    selectedIngredientIds.value = ingredients.split(',').map((id) => Number(id))
-  }
+  if (sizeId) selectedSizeId.value = sizeId
+  if (qty > 0) quantity.value = qty
+  if (ingredients) selectedIngredientIds.value = ingredients.split(',').map((id) => toNum(id, 0))
 }
 
-const selectedSizeId = ref<number | null>(null)
-const selectedIngredientIds = ref<number[]>([])
+/* =======================
+   Product mapping
+======================= */
+const product = computed(() => {
+  const item: any = menuItemsStore.currentItem
+  if (!item) return null
+
+  const activeImages =
+    item.images
+      ?.filter((img: any) => img?.active)
+      .map((img: any) => img?.url)
+      .filter(Boolean) ?? []
+
+  const primaryImage =
+    item.images?.find((img: any) => img?.primary && img?.active)?.url || activeImages[0] || ''
+
+  return {
+    id: item.id,
+    name: item.name ?? '',
+    description: item.shortDesc ?? item.description ?? '',
+    label: item.tags?.[0]?.name ?? item.status ?? '',
+    imageUrl: primaryImage,
+    images: activeImages.length ? activeImages : primaryImage ? [primaryImage] : [],
+  }
+})
+
+/* =======================
+   Sizes / Ingredients
+======================= */
+const activeIngredients = computed(() => {
+  const item: any = menuItemsStore.currentItem
+  return (item?.ingredients ?? []).filter((i: any) => i?.active)
+})
+
+const cheapestSize = computed(() => {
+  const item: any = menuItemsStore.currentItem
+  if (!item?.sizes?.length) return null
+  return item.sizes.reduce((min: any, s: any) =>
+    toNum(s?.sellPrice, 0) < toNum(min?.sellPrice, 0) ? s : min,
+  )
+})
+
+watch(
+  cheapestSize,
+  (size) => {
+    if (size && !selectedSizeId.value) selectedSizeId.value = size.id
+  },
+  { immediate: true },
+)
+
+const selectedSize = computed(() => {
+  const item: any = menuItemsStore.currentItem
+  if (!item?.sizes?.length || !selectedSizeId.value) return null
+  return item.sizes.find((s: any) => s.id === selectedSizeId.value) ?? null
+})
 
 function toggleIngredient(id: number) {
   if (selectedIngredientIds.value.includes(id)) {
@@ -462,103 +445,39 @@ function toggleIngredient(id: number) {
   }
 }
 
-const cheapestSize = computed(() => {
-  const item = menuItemsStore.currentItem
-  if (!item?.sizes?.length) return null
-
-  return item.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
-})
-
-watch(
-  cheapestSize,
-  (size) => {
-    if (size) {
-      selectedSizeId.value = size.id
-    }
-  },
-  { immediate: true },
-)
-
-const selectedSize = computed(() => {
-  const item = menuItemsStore.currentItem
-  if (!item || !selectedSizeId.value) return null
-
-  return item.sizes.find((s) => s.id === selectedSizeId.value) ?? null
-})
-
+/* =======================
+   Price calculations (always number)
+======================= */
 const totalIngredientPrice = computed(() => {
-  const item = menuItemsStore.currentItem
-  if (!item?.ingredients?.length) return 0
-
-  return item.ingredients
-    .filter((i) => selectedIngredientIds.value.includes(i.id))
-    .reduce((sum, i) => sum + (i.price ?? 0), 0)
+  const item: any = menuItemsStore.currentItem
+  const ingredients = item?.ingredients ?? []
+  return ingredients
+    .filter((i: any) => selectedIngredientIds.value.includes(i.id))
+    .reduce((sum: number, i: any) => sum + toNum(i?.price, 0), 0)
 })
 
 const displayPrice = computed(() => {
-  const base = selectedSize.value?.sellPrice ?? 0
-  return base + totalIngredientPrice.value
+  const base = toNum(selectedSize.value?.sellPrice, 0)
+  return base + toNum(totalIngredientPrice.value, 0)
 })
 
 const finalTotalPrice = computed(() => {
-  return displayPrice.value * quantity.value
+  return toNum(displayPrice.value, 0) * toNum(quantity.value, 1)
 })
 
-
-const product = computed(() => {
-  const item = menuItemsStore.currentItem
-  if (!item) return null
-
-  // extract active images
-  const activeImages =
-    item.images?.filter((img: any) => img.active).map((img: any) => img.url) ?? []
-
-  // find primary image
-  const primaryImage =
-    item.images?.find((img: any) => img.primary && img.active)?.url ||
-    activeImages[0] ||
-    ''
-
-  return {
-    id: item.id,
-    name: item.name,
-    description: item.shortDesc,
-    label: item.tags?.[0]?.name ?? item.status,
-
-    price: item.price,
-    rating: item.averageRating ?? 0,
-    ratingCount: item.reviewCount ?? 0,
-
-    imageUrl: primaryImage,
-    images: activeImages.length ? activeImages : [primaryImage],
-  }
+/* =======================
+   Rating
+======================= */
+const averageRating = computed(() => {
+  return toNum(menuItemsStore.currentItem?.averageRating, 0)
 })
 
-// const steps = [
-//   {
-//     number: '01',
-//     title: 'Add to the cart and place an order',
-//     text: 'Choose your quantity and confirm your room or table number at checkout.',
-//   },
-//   {
-//     number: '02',
-//     title: 'Enter your phone number and address',
-//     text: 'We’ll contact you only if we need clarification about your order.',
-//   },
-//   {
-//     number: '03',
-//     title: 'Enjoy your favorite food at home!',
-//     text: 'Sit back while we prepare and deliver everything fresh to you.',
-//   },
-// ]
-
-const quantity = ref(1)
-const isInCart = ref(false)
-
+/* =======================
+   Cart actions
+======================= */
 function increaseQty() {
   quantity.value++
 }
-
 function decreaseQty() {
   if (quantity.value > 1) quantity.value--
 }
@@ -566,23 +485,23 @@ function decreaseQty() {
 function toggleCart() {
   if (!selectedSize.value || !product.value) return
 
+  const current: any = menuItemsStore.currentItem
+
   const selectedIngredients =
-    menuItemsStore.currentItem?.ingredients
-      ?.filter((i) => selectedIngredientIds.value.includes(i.id))
-      .map((i) => ({
+    (current?.ingredients ?? [])
+      .filter((i: any) => selectedIngredientIds.value.includes(i.id))
+      .map((i: any) => ({
         id: i.id,
         name: i.name,
-        price: i.price,
+        price: toNum(i.price, 0),
         amount: i.amount,
       })) ?? []
 
-  const totalIngredientPrice = selectedIngredients.reduce((sum, i) => sum + i.price, 0)
-
-  const unitPrice = selectedSize.value.sellPrice + totalIngredientPrice
+  const ingTotal = selectedIngredients.reduce((sum: number, i: any) => sum + toNum(i.price, 0), 0)
+  const unitPrice = toNum(selectedSize.value.sellPrice, 0) + ingTotal
 
   cartStore.addItem({
     productId: product.value.id,
-
     name: product.value.name,
     description: product.value.description,
     imageUrl: product.value.imageUrl,
@@ -591,36 +510,24 @@ function toggleCart() {
     sizeName: selectedSize.value.shortName,
 
     ingredients: selectedIngredients,
-
     quantity: quantity.value,
     unitPrice,
 
-    totalPrice: 0, // not used anymore but required by type
-    totalIngredientPrice,
+    totalPrice: 0,
+    totalIngredientPrice: ingTotal,
   })
-  // ✅ SHOW SUCCESS MESSAGE
-  cartSuccessMessage.value = 'Added to cart successfully!'
 
-  setTimeout(() => {
-    cartSuccessMessage.value = ''
-  }, 2500)
+  cartSuccessMessage.value = 'Added to cart successfully!'
+  setTimeout(() => (cartSuccessMessage.value = ''), 2500)
 }
 
-// Tabs
-const activeTab = ref<'ingredients' | 'reviews'>('ingredients')
-const tabList = [
-  { value: 'ingredients', label: 'Ingredients' },
-  // { value: 'details', label: 'Product details' },
-  { value: 'reviews', label: 'Reviews' },
-]
-
+/* =======================
+   Reviews
+======================= */
 const newReviewName = ref('')
 const newReviewRating = ref(5)
 const newReviewComment = ref('')
 const reviewSubmitted = ref(false)
-const averageRating = computed(() => {
-  return menuItemsStore.currentItem?.averageRating ?? 0
-})
 
 async function submitReview() {
   if (!newReviewName.value.trim() || !newReviewComment.value.trim()) return
@@ -631,6 +538,7 @@ async function submitReview() {
       comment: newReviewComment.value.trim(),
       reviewerName: newReviewName.value.trim(),
     })
+
     await reviewStore.fetchByMenuItem(productId)
     await menuItemsStore.fetchById(productId)
 
@@ -639,43 +547,40 @@ async function submitReview() {
     newReviewComment.value = ''
     reviewSubmitted.value = true
 
-    setTimeout(() => {
-      reviewSubmitted.value = false
-    }, 3000)
-
-    // refresh product rating summary
-    await menuItemsStore.fetchById(productId)
+    setTimeout(() => (reviewSubmitted.value = false), 3000)
   } catch (err) {
     console.error(err)
   }
 }
 
-// --- IMAGE SLIDER ---
+/* =======================
+   Image slider
+======================= */
 const currentImageIndex = ref(0)
 
 const productImages = computed<string[]>(() => {
   const p = product.value
   if (!p) return []
   if (p.images && p.images.length > 0) return p.images
-  return [p.imageUrl]
+  return p.imageUrl ? [p.imageUrl] : []
 })
 
 const currentImage = computed(() => {
   const imgs = productImages.value
   if (!imgs.length) return ''
   const idx = Math.min(currentImageIndex.value, imgs.length - 1)
-  return imgs[idx]
+  return imgs[idx] ?? ''
 })
 
 function nextImage() {
   const total = productImages.value.length
-  if (total === 0) return
+  if (!total) return
   currentImageIndex.value = (currentImageIndex.value + 1) % total
 }
 
 function prevImage() {
   const total = productImages.value.length
-  if (total === 0) return
+  if (!total) return
   currentImageIndex.value = (currentImageIndex.value - 1 + total) % total
 }
 

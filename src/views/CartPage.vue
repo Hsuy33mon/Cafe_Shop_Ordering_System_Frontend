@@ -74,7 +74,7 @@
             <div class="totals">
               <div class="totals-row">
                 <span>Subtotal</span>
-                <span>{{ formatMoney(subtotal) }}</span>
+                <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
               </div>
 
               <div class="totals-row">
@@ -87,7 +87,7 @@
               <div class="totals-row totals-row--strong">
                 <span>Total</span>
                 <span class="total-highlight">
-                  {{ formatMoney(total) }}
+                 {{ formatMoney((subtotal - totalIngredientPrice) + totalIngredientPrice) }}
                 </span>
               </div>
             </div>
