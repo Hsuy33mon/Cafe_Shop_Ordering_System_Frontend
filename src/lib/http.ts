@@ -32,20 +32,23 @@ http.interceptors.response.use(
     const status = error?.response?.status
     const message = error?.response?.data?.message || ''
     const isExpired = String(message).toLowerCase().includes('expired')
-
     const originalRequest = error?.config
 
-    if (status === 401 && !originalRequest?.skipAuth) {
+    const currentPath = router.currentRoute.value.path
+    const isAdminRoute = currentPath.startsWith('/admin')
+
+    if (status === 401 && !originalRequest?.skipAuth && isAdminRoute) {
       const auth = useAuthStore()
       auth.logout()
 
-      if (router.currentRoute.value.path !== '/login') {
+      if (currentPath !== '/login') {
         router.replace({
           path: '/login',
           query: { reason: isExpired ? 'expired' : 'unauthorized' },
         })
       }
     }
+
     return Promise.reject(error)
   },
 )
