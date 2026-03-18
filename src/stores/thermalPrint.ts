@@ -12,7 +12,7 @@ export async function printInvoiceThermal(invoice: any) {
     }
 
     const printer = await qz.printers.getDefault()
-    const config = qz.configs.create(printer, { copies: 1, encoding: 'UTF-8' })
+    const config = qz.configs.create(printer, { copies: 1, encoding: 'CP874' })
 
     const lines: string[] = [
       '\x1B\x40',

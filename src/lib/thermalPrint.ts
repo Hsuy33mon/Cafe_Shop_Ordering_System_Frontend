@@ -227,7 +227,7 @@ export async function printDirectThermalReceipt(printerName: string, data: Recei
 
   const config = qz.configs.create(printerName.trim(), {
     copies: 1,
-    encoding: 'GBK',
+    encoding: 'UTF-8',
   })
 
   const receipt = buildEscPosReceipt(data)
