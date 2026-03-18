@@ -291,7 +291,7 @@ const filteredOrders = computed(() => {
 })
 
 function getSelectedPrinterName() {
-  return localStorage.getItem('selectedPrinter') || 'POS58_9209'
+  return localStorage.getItem('selectedPrinter') || 'ZN- ZN58U'
 }
 
 function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
