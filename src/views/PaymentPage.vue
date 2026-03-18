@@ -58,7 +58,7 @@
                   </div>
                   <div class="item-text">
                     <p class="item-name">{{ item.name }} ({{ item.sizeName }})</p>
-                    <p class="item-desc">{{ item.description }}</p>
+                    <!-- <p class="item-desc">{{ item.description }}</p> -->
                   </div>
                 </div>
 

@@ -46,27 +46,11 @@
       <!-- PRODUCTS GRID -->
       <section class="cs-container">
         <div class="items-grid">
-          <article
-            v-for="(item, index) in paginatedItems"
-            :key="item.id"
-            class="item-card"
-            :style="{ '--stagger': index }"
-          >
-            <div
-              class="item-media"
-              :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
-              @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)"
-            >
-              <img
-                :src="item.imageUrl || '/images/default.png'"
-                :alt="item.name"
-                class="item-image"
-              />
-              <!-- <img
-:src="item.imageUrl || '/images/default-product.png'"
-  :alt="item.name"
-  class="cart-thumb"
-/> -->
+          <article v-for="(item, index) in paginatedItems" :key="item.id" class="item-card"
+            :style="{ '--stagger': index }">
+            <div class="item-media" :class="{ 'item-media--disabled': item.status === 'OUT_OF_STOCK' }"
+              @click="item.status !== 'OUT_OF_STOCK' && goToDetails(item.id)">
+              <img :src="item.imageUrl || '/images/default.png'" :alt="item.name" class="item-image" />
 
               <!-- TAG BADGE (Season, Winter, etc.) -->
               <div v-if="item.badge && item.status !== 'OUT_OF_STOCK'" class="item-badge">
@@ -102,10 +86,19 @@
 
               <p class="item-description">{{ item.description }}</p>
 
-              <div class="item-meta">
+              <div class="item-tags">
+  <span
+    v-for="tag in item.tags"
+    :key="tag"
+    class="item-tag"
+  >
+    {{ tag }}
+  </span>
+</div>
+              <!-- <div class="item-meta">
                 <span class="item-type">{{ item.category }}</span>
                 <span class="item-size" v-if="item.size">{{ item.size }}</span>
-              </div>
+              </div> -->
 
               <div class="item-footer">
                 <div class="item-price">
@@ -184,7 +177,7 @@ const { items: cartItems } = storeToRefs(cartStore)
 type ShopItem = {
   id: number
   name: string
-  category: string
+  tags: string[]
   price: number
   description: string
   size?: string
@@ -217,8 +210,9 @@ const items = computed<ShopItem[]>(() =>
       const cheapestSize = i.sizes?.length
         ? i.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
         : null
-      const firstTag = i.tags?.[0]
-      const activeImages = i.images?.filter((img: any) => img.active) ?? []
+      const tagNames = i.tags?.map((t: any) => t.name) ?? []
+      const activeImages =
+        i.images?.filter((img: any) => img.active) ?? []
 
       const primaryImage =
         activeImages.find((img: any) => img.primary)?.url || activeImages[0]?.url || ''
@@ -226,10 +220,10 @@ const items = computed<ShopItem[]>(() =>
       return {
         id: i.id,
         name: i.name,
-        category: i.category.toLowerCase(),
+        tags: tagNames,
         price: cheapestSize?.sellPrice ?? i.price,
         description: i.shortDesc || 'CafeShop special',
-        badge: firstTag?.name,
+        badge: i.category.toLowerCase(),
 
         sizes: i.sizes ?? [],
         defaultSize: cheapestSize ?? null,
@@ -249,6 +243,10 @@ const allCategories = computed(() => [
     label: c.name,
   })),
 ])
+
+watch(categories, (val) => {
+  console.log("Categories loaded:", val)
+})
 
 function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
