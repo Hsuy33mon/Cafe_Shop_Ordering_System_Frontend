@@ -607,10 +607,10 @@
   .qty-control span {
     font-size: 0.75rem;
   }
-    .item-footer {
+  .item-footer {
     gap: 0.4rem;
   }
-.amount {
+  .amount {
     font-size: 0.85rem;
   }
 

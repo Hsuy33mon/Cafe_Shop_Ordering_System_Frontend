@@ -258,36 +258,37 @@ const filteredOrders = computed(() => {
   const end = endDateFilter.value
   const latestSet = wsStore.newOrderIdSet
 
-  return orders.value.filter((o) => {
-    if (showLatestOnly.value && !latestSet.has(o.id)) return false
+  return orders.value
+    .filter((o) => {
+      if (showLatestOnly.value && !latestSet.has(o.id)) return false
 
-    const matchesSearch =
-      !s ||
-      String(o.id).includes(s) ||
-      o.customerName.toLowerCase().includes(s) ||
-      o.orderPlaceNo.toLowerCase().includes(s) ||
-      o.itemsSummary.toLowerCase().includes(s)
+      const matchesSearch =
+        !s ||
+        String(o.id).includes(s) ||
+        o.customerName.toLowerCase().includes(s) ||
+        o.orderPlaceNo.toLowerCase().includes(s) ||
+        o.itemsSummary.toLowerCase().includes(s)
 
-    const matchesStatus = !statusFilter.value || o.status === statusFilter.value
-    const matchesChannel = !channelFilter.value || o.channel === channelFilter.value
-    const matchesPayment = !paymentFilter.value || o.invoicePaymentStatus === paymentFilter.value
-    const matchesTable = !tableNoFilter.value || o.tableNo === tableNoFilter.value
+      const matchesStatus = !statusFilter.value || o.status === statusFilter.value
+      const matchesChannel = !channelFilter.value || o.channel === channelFilter.value
+      const matchesPayment = !paymentFilter.value || o.invoicePaymentStatus === paymentFilter.value
+      const matchesTable = !tableNoFilter.value || o.tableNo === tableNoFilter.value
 
-    let matchesDate = true
-    if (start && end) matchesDate = o.date >= start && o.date <= end
-    else if (start) matchesDate = o.date >= start
-    else if (end) matchesDate = o.date <= end
+      let matchesDate = true
+      if (start && end) matchesDate = o.date >= start && o.date <= end
+      else if (start) matchesDate = o.date >= start
+      else if (end) matchesDate = o.date <= end
 
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesChannel &&
-      matchesPayment &&
-      matchesTable &&
-      matchesDate
-    )
-  })
-  .sort((a, b) => {
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesChannel &&
+        matchesPayment &&
+        matchesTable &&
+        matchesDate
+      )
+    })
+    .sort((a, b) => {
       const dateA = new Date(`${a.date} ${a.time}`).getTime()
       const dateB = new Date(`${b.date} ${b.time}`).getTime()
 

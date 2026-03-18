@@ -159,7 +159,6 @@ function goToDetails(id: number) {
   router.push({ name: 'product-details', params: { id } })
 }
 
-
 const featuredCategories = ref([
   {
     id: 1,
@@ -244,7 +243,7 @@ const specials = computed(() => {
 })
 
 watch(specials, (val) => {
-  console.log("Categories loaded:", val)
+  console.log('Categories loaded:', val)
 })
 
 function goToProducts() {

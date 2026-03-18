@@ -65,8 +65,13 @@
             </div>
 
             <div class="map-placeholder">
-              <iframe class="map-frame" src="https://www.google.com/maps?q=13.740169,100.5807218&z=17&output=embed"
-                loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+              <iframe
+                class="map-frame"
+                src="https://www.google.com/maps?q=13.740169,100.5807218&z=17&output=embed"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
               <!-- <iframe
                 class="map-frame"
                 src="https://www.google.com/maps/place/D+Varee+Residence+Montara+Thonglor+25/@13.7398661,100.5805632,19.94z/data=!4m9!3m8!1s0x30e29e50b7d4b54f:0xf6c4223a8ddee63a!5m2!4m1!1i2!8m2!3d13.740169!4d100.5807218!16s%2Fg%2F12hnjprgv?hl=en&entry=ttu&g_ep=EgoyMDI2MDMxNS4wIKXMDSoASAFQAw%3D%3D"
@@ -86,6 +91,5 @@
     </main>
   </div>
 </template>
-
 
 <style scoped src="@/styles/customer/contact-page.css"></style>

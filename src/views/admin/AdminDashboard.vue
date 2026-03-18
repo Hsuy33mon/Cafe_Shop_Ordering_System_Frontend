@@ -2,33 +2,33 @@
   <main class="content">
     <div class="revenue-filter">
       <div class="filter-row">
-          <button
-            v-for="t in ['DAILY', 'MONTHLY']"
-            :key="t"
-            :class="{ active: currentType === t }"
-            @click="changeType(t)"
-          >
-            {{ t }}
-          </button>
+        <button
+          v-for="t in ['DAILY', 'MONTHLY']"
+          :key="t"
+          :class="{ active: currentType === t }"
+          @click="changeType(t)"
+        >
+          {{ t }}
+        </button>
 
-          <!-- DAILY date picker -->
-          <input
-            v-if="currentType === 'DAILY'"
-            type="date"
-            v-model="selectedDate"
-            @change="fetchWithSelectedPeriod"
-            class="date-input"
-          />
+        <!-- DAILY date picker -->
+        <input
+          v-if="currentType === 'DAILY'"
+          type="date"
+          v-model="selectedDate"
+          @change="fetchWithSelectedPeriod"
+          class="date-input"
+        />
 
-          <!-- MONTHLY month picker -->
-          <input
-            v-if="currentType === 'MONTHLY'"
-            type="month"
-            v-model="selectedMonth"
-            @change="fetchWithSelectedPeriod"
-            class="date-input"
-          />
-        </div>
+        <!-- MONTHLY month picker -->
+        <input
+          v-if="currentType === 'MONTHLY'"
+          type="month"
+          v-model="selectedMonth"
+          @change="fetchWithSelectedPeriod"
+          class="date-input"
+        />
+      </div>
     </div>
 
     <!-- KPI CARDS -->
@@ -63,7 +63,6 @@
           <Bar :data="categoryChartData" :options="categoryChartOptions" />
         </div>
       </div>
-
     </section>
   </main>
 </template>
@@ -234,6 +233,5 @@ async function fetchWithSelectedPeriod() {
     await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
   }
 }
-
 </script>
 <style scoped src="@/styles/admin/dashboard.css"></style>

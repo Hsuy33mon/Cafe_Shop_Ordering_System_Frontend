@@ -5,16 +5,21 @@
       <button class="back-btn" @click="goBack">← Back to Invoices</button>
     </div>
 
-    <!-- HEADER -->
     <section class="invoice-header">
       <div>
         <h1 class="invoice-title">Invoice #{{ invoice.id }}</h1>
         <div class="invoice-subtitle">{{ invoice.customerName }}</div>
       </div>
 
-      <span class="status-pill status-pill--pending">
-        {{ invoice.status }}
-      </span>
+      <div class="header-actions">
+        <button class="btn-secondary" :disabled="printing.invoice" @click="printInvoice">
+          {{ printing.invoice ? 'Printing...' : 'Print Invoice' }}
+        </button>
+
+        <span class="status-pill status-pill--pending">
+          {{ invoice.status }}
+        </span>
+      </div>
     </section>
 
     <!-- INVOICE INFO -->
@@ -99,13 +104,32 @@
           <tbody>
             <tr v-for="(item, index) in invoice.orders" :key="item.id">
               <td>{{ index + 1 }}</td>
+
               <td>
                 <div class="item-name">{{ item.menuItemName }} ({{ item.sizeName }})</div>
+
+                <div v-if="item.ingredientResponses?.length" class="ingredient-list">
+                  <div
+                    v-for="ingredient in item.ingredientResponses"
+                    :key="ingredient.id"
+                    class="ingredient-row"
+                  >
+                    • {{ ingredient.name }}
+                    <span v-if="ingredient.qty"> x{{ ingredient.qty }}</span>
+                    <span v-if="ingredient.price != null">
+                      — ฿{{ (Number(ingredient.price) * Number(ingredient.qty || 1)).toFixed(2) }}
+                    </span>
+                    <span v-if="ingredient.note"> ({{ ingredient.note }}) </span>
+                  </div>
+                </div>
+
+                <div v-else class="ingredient-empty">-</div>
               </td>
+
               <td>{{ item.qty }}</td>
-              <td>฿{{ item.unitPrice.toFixed(2) }}</td>
-              <td>฿{{ item.lineTotal.toFixed(2) }}</td>
-              <td>{{ item.note }}</td>
+              <td>฿{{ Number(item.unitPrice).toFixed(2) }}</td>
+              <td>฿{{ getOrderDisplayTotal(item).toFixed(2) }}</td>
+              <td>{{ item.note || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -171,14 +195,14 @@
     </section>
   </main>
 </template>
-
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed, reactive, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useInvoiceStore } from '@/stores/useInvoiceStore'
 import { usePaymentStore } from '@/stores/usePaymentStore'
-import { reactive, watchEffect } from 'vue'
+import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
+
 const router = useRouter()
 const route = useRoute()
 
@@ -199,21 +223,92 @@ function formatDate(date: string | null) {
   return new Date(date).toLocaleString()
 }
 
-function statusClass(status: string) {
+function num(v: unknown): number {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+function getIngredientTotal(item: any): number {
+  if (!item?.ingredientResponses?.length) return 0
+
+  return item.ingredientResponses.reduce((sum: number, ing: any) => {
+    return sum + num(ing.price) * num(ing.qty || 1)
+  }, 0)
+}
+
+function getOrderDisplayTotal(item: any): number {
+  return num(item.lineTotal) + getIngredientTotal(item)
+}
+
+const computedSubTotal = computed(() => {
+  if (!invoice.value?.orders?.length) return 0
+
+  return invoice.value.orders.reduce((sum: number, item: any) => {
+    return sum + getOrderDisplayTotal(item)
+  }, 0)
+})
+
+const computedGrandTotal = computed(() => {
+  return computedSubTotal.value + num(invoice.value?.tax) + num(invoice.value?.deliveryFee)
+})
+
+function buildReceiptData(invoice: any): ReceiptData {
+  const items: ReceiptItem[] = (invoice?.orders || []).map((item: any) => {
+    const ingredients = (item.ingredientResponses || []).map((ing: any) => ({
+      name: ing.name,
+      qty: num(ing.qty || 1),
+      price: num(ing.price),
+    }))
+
+    const ingredientPrice = ingredients.reduce((sum: number, ing: any) => {
+      return sum + num(ing.price) * num(ing.qty)
+    }, 0)
+
+    const qty = num(item.qty || 1)
+    const lineTotal = num(item.lineTotal)
+    const unitBasePrice = qty > 0 ? lineTotal / qty : num(item.unitPrice)
+    const totalUnitPrice = qty > 0 ? (lineTotal + ingredientPrice) / qty : num(item.unitPrice)
+
+    return {
+      name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
+      qty,
+      basePrice: unitBasePrice,
+      ingredientPrice,
+      price: totalUnitPrice,
+      ingredients,
+    }
+  })
+
+  const subtotal = items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0)
+  const ingredientTotal = items.reduce((sum, item) => sum + num(item.ingredientPrice), 0)
+  const total = subtotal + ingredientTotal + num(invoice?.tax) + num(invoice?.deliveryFee)
+
   return {
-    'status-pill--new': status === 'PAID',
-    'status-pill--prep': status === 'PENDING',
-    'status-pill--ready': status === 'CANCELED',
-    'status-pill--cancel': status === 'REFUNDED',
+    shopName: 'CafeShop',
+    address: 'Your shop address',
+    phone: 'Your shop phone',
+    orderNo: invoice?.invoiceNo || invoice?.id,
+    customerName: invoice?.customerName || '-',
+    orderType: invoice?.type || '',
+    place: invoice?.orderPlaceName || invoice?.no || '',
+    method: invoice?.payments?.[0]?.method || '',
+    status: invoice?.status || '',
+    items,
+    subtotal,
+    ingredientTotal,
+    total,
   }
 }
+
+const printing = reactive<{ invoice: boolean }>({
+  invoice: false,
+})
 
 // per-payment edit status map
 const editStatus = reactive<Record<number, string>>({})
 const saving = reactive<Record<number, boolean>>({})
 const errorMsg = reactive<Record<number, string>>({})
 
-// when invoice loaded, init dropdown values
 watchEffect(() => {
   if (!invoice.value?.payments) return
   for (const p of invoice.value.payments) {
@@ -234,6 +329,32 @@ async function updatePaymentStatus(paymentId: number) {
       e?.response?.data?.message || e?.message || 'Failed to update payment status'
   } finally {
     saving[paymentId] = false
+  }
+}
+
+async function printInvoice() {
+  try {
+    if (!invoice.value) {
+      alert('Invoice data not found')
+      return
+    }
+
+    const printerName = localStorage.getItem('printerName') || 'ZN- ZN58U'
+
+    if (!printerName) {
+      alert('Printer is not selected')
+      return
+    }
+
+    printing.invoice = true
+
+    const receiptData = buildReceiptData(invoice.value)
+    await printDirectThermalReceipt(printerName, receiptData)
+  } catch (e: any) {
+    console.error('Print invoice failed:', e)
+    alert(e?.message || 'Failed to print invoice')
+  } finally {
+    printing.invoice = false
   }
 }
 </script>
