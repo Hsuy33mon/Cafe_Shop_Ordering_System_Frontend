@@ -287,6 +287,12 @@ const filteredOrders = computed(() => {
       matchesDate
     )
   })
+  .sort((a, b) => {
+      const dateA = new Date(`${a.date} ${a.time}`).getTime()
+      const dateB = new Date(`${b.date} ${b.time}`).getTime()
+
+      return dateB - dateA // ✅ newest first
+    })
 })
 
 function getSelectedPrinterName() {

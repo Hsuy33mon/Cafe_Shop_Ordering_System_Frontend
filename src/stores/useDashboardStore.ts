@@ -39,17 +39,32 @@ export const useDashboardStore = defineStore('dashboard', {
   }),
 
   actions: {
-    async fetchDashboard() {
-      try {
-        this.loading = true
-        const res = await http.get('/api/admin/dashboard')
-        this.dashboard = res.data
-      } catch (err) {
-        console.error('Failed to fetch dashboard', err)
-      } finally {
-        this.loading = false
-      }
-    },
+    // async fetchDashboard() {
+    //   try {
+    //     this.loading = true
+    //     const res = await http.get('/api/admin/dashboard')
+    //     this.dashboard = res.data
+    //   } catch (err) {
+    //     console.error('Failed to fetch dashboard', err)
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
+    async fetchDashboard(type: 'DAILY' | 'MONTHLY', period?: string) {
+  try {
+    this.loading = true
+
+    const res = await http.get('/api/admin/dashboard', {
+      params: { type, period },
+    })
+
+    this.dashboard = res.data
+  } catch (err) {
+    console.error('Failed to fetch dashboard', err)
+  } finally {
+    this.loading = false
+  }
+},
     async fetchRevenue(type: 'DAILY' | 'MONTHLY', period?: string) {
       const res = await http.get('/api/admin/dashboard/revenue', {
         params: { type, period },
