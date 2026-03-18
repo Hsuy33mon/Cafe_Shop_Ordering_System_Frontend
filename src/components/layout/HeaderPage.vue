@@ -42,10 +42,6 @@ function isActive(basePath: string, exact = true) {
     <div class="cs-container navbar-inner">
       <!-- LEFT: LOGO -->
       <div class="navbar-logo">
-        <!-- <div class="logo-icon">☕</div> -->
-        <!-- <div class="logo-icon">
-  <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
-</div> -->
         <div class="logo-text">Five Two One Cafe & Bakery</div>
       </div>
 
@@ -53,19 +49,9 @@ function isActive(basePath: string, exact = true) {
         <RouterLink to="/" class="nav-link" :class="{ 'nav-link--active': isActive('/') }"
           >Home</RouterLink
         >
-
-        <!-- <RouterLink
-          to="/about"
-          class="nav-link"
-          :class="{ 'nav-link--active': isActive('/about') }"
-        >
-          About
-        </RouterLink> -->
-
         <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
           Menu
         </RouterLink>
-
         <RouterLink
           to="/contact"
           class="nav-link"
@@ -79,24 +65,6 @@ function isActive(basePath: string, exact = true) {
       <div class="navbar-actions">
         <button type="button" class="purchase-btn" @click="goToCart">
           <ShoppingCartIcon class="cart-icon" />
-          <!-- <span class="purchase-icon">🛒</span> -->
-          <!-- <span class="purchase-icon">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <circle cx="9" cy="21" r="1"></circle>
-    <circle cx="20" cy="21" r="1"></circle>
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-  </svg>
-</span> -->
           <span class="purchase-label">Cart</span>
           <span v-if="cartCount > 0" class="purchase-count">{{ cartCount }}</span>
         </button>

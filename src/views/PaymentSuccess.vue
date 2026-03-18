@@ -42,7 +42,6 @@
         </div>
 
         <div class="ps-actions">
-          <button class="btn btn-primary" @click="goOrders">Track order</button>
           <button class="btn btn-ghost" @click="goShop">Back to shop</button>
         </div>
 

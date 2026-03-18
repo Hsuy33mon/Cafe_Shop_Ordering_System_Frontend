@@ -109,15 +109,6 @@
                 </div>
               </label>
 
-              <label class="method-option" :class="{ active: selectedMethod === 'card' }">
-                <input type="radio" name="payment" value="card" v-model="selectedMethod" />
-                <span class="method-icon">💳</span>
-                <div class="method-text">
-                  <div class="method-title">Visa / MasterCard</div>
-                  <div class="method-desc">Enter card details in the next step</div>
-                </div>
-              </label>
-
               <label class="method-option" :class="{ active: selectedMethod === 'cash' }">
                 <input type="radio" name="payment" value="cash" v-model="selectedMethod" />
                 <span class="method-icon">💵</span>
