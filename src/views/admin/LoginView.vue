@@ -4,10 +4,10 @@
       <h1>Admin Login</h1>
 
       <label>Email</label>
-      <input v-model.trim="form.email" type="email" placeholder="john@example.com" required />
+      <input v-model.trim="form.email" type="email" placeholder="example.com" required />
 
       <label>Password</label>
-      <input v-model="form.password" type="password" placeholder="Secret123" required />
+      <input v-model="form.password" type="password" placeholder="Secr123" required />
 
       <p v-if="error" class="error">{{ error }}</p>
 
@@ -27,8 +27,8 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const form = reactive({
-  email: 'john@example.com',
-  password: 'Secret123',
+  email: '',
+  password: '',
 })
 
 const loading = computed(() => auth.loading)
