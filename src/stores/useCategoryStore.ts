@@ -40,7 +40,7 @@ export const useCategoryStore = defineStore('categories', {
       this.error = null
 
       try {
-        const res = await http.get('/api/admin/categories')
+       const res = await http.get('/api/admin/categories', { skipAuth: true })
 
         const data = res.data
         const list = Array.isArray(data)
