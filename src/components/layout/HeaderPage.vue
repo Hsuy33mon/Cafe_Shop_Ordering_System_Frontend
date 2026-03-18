@@ -92,13 +92,13 @@ function isActive(basePath: string, exact = true) {
           @click="closeMobile"
           >Home</RouterLink
         >
-        <RouterLink
+        <!-- <RouterLink
           to="/about"
           class="mobile-link"
           :class="{ 'mobile-link--active': isActive('/about') }"
           @click="closeMobile"
           >About</RouterLink
-        >
+        > -->
         <RouterLink
           to="/shop"
           class="mobile-link"
@@ -118,7 +118,7 @@ function isActive(basePath: string, exact = true) {
           class="mobile-link"
           :class="{ 'mobile-link--active': isActive('/cart') }"
           @click="closeMobile"
-          >Purchase</RouterLink
+          >Cart</RouterLink
         >
       </nav>
     </transition>

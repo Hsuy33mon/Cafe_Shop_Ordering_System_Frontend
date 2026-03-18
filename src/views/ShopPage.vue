@@ -20,23 +20,13 @@
         <div class="hero-filters">
           <div class="input-wrapper">
             <span class="input-icon">🔍</span>
-            <input
-              v-model="searchText"
-              type="text"
-              class="search-input"
-              placeholder="Search shop items…"
-            />
+            <input v-model="searchText" type="text" class="search-input" placeholder="Search shop items…" />
           </div>
 
           <div class="category-tabs">
-            <button
-              v-for="category in allCategories"
-              :key="category.value"
-              type="button"
-              class="tab-btn"
+            <button v-for="category in allCategories" :key="category.value" type="button" class="tab-btn"
               :class="{ 'tab-btn--active': selectedCategory === category.value }"
-              @click="selectedCategory = category.value"
-            >
+              @click="selectedCategory = category.value">
               {{ category.label }}
             </button>
           </div>
@@ -67,12 +57,7 @@
               <h3 class="item-name">{{ item.name }}</h3>
               <div class="item-rating" v-if="item.rating != null">
                 <span class="stars">
-                  <span
-                    v-for="s in 5"
-                    :key="s"
-                    class="star"
-                    :class="`star--${starType(item.rating ?? 0, s)}`"
-                  >
+                  <span v-for="s in 5" :key="s" class="star" :class="`star--${starType(item.rating ?? 0, s)}`">
                     ★
                   </span>
                 </span>
@@ -87,18 +72,10 @@
               <p class="item-description">{{ item.description }}</p>
 
               <div class="item-tags">
-  <span
-    v-for="tag in item.tags"
-    :key="tag"
-    class="item-tag"
-  >
-    {{ tag }}
-  </span>
-</div>
-              <!-- <div class="item-meta">
-                <span class="item-type">{{ item.category }}</span>
-                <span class="item-size" v-if="item.size">{{ item.size }}</span>
-              </div> -->
+                <span v-for="tag in item.tags" :key="tag" class="item-tag">
+                  {{ tag }}
+                </span>
+              </div>
 
               <div class="item-footer">
                 <div class="item-price">
@@ -136,12 +113,7 @@
             <span class="page-total">· {{ showingCount }} of {{ totalItems }} items</span>
           </div>
 
-          <button
-            type="button"
-            class="page-btn"
-            :disabled="currentPage === totalPages"
-            @click="nextPage"
-          >
+          <button type="button" class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
             Next
           </button>
         </div>
@@ -151,9 +123,7 @@
       <transition name="fade-up">
         <div v-if="cartCount > 0" class="cart-summary">
           <div class="cart-summary-info">
-            <span class="cart-summary-count"
-              >{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span
-            >
+            <span class="cart-summary-count">{{ cartCount }} item{{ cartCount > 1 ? 's' : '' }}</span>
             <span class="cart-summary-text">in your bag</span>
           </div>
           <button type="button" class="cart-summary-btn" @click="goToCart">View bag</button>
@@ -164,12 +134,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMenuItemsStore } from '../stores/useMenuItemStore'
-import { useCategoryStore } from '../stores/useCategoryStore'
 import { useCartStore } from '../stores/useCartStore'
+import { useCategoryStore } from '../stores/useCategoryStore'
+import { useMenuItemsStore } from '../stores/useMenuItemStore'
 
 const cartStore = useCartStore()
 const { items: cartItems } = storeToRefs(cartStore)
@@ -210,9 +180,8 @@ const items = computed<ShopItem[]>(() =>
       const cheapestSize = i.sizes?.length
         ? i.sizes.reduce((min, s) => (s.sellPrice < min.sellPrice ? s : min))
         : null
-      const tagNames = i.tags?.map((t: any) => t.name) ?? []
-      const activeImages =
-        i.images?.filter((img: any) => img.active) ?? []
+
+      const activeImages = i.images?.filter((img: any) => img.active) ?? []
 
       const primaryImage =
         activeImages.find((img: any) => img.primary)?.url || activeImages[0]?.url || ''
@@ -220,7 +189,7 @@ const items = computed<ShopItem[]>(() =>
       return {
         id: i.id,
         name: i.name,
-        tags: tagNames,
+        tags: (i.tags ?? []).map((t: any) => t.name),
         price: cheapestSize?.sellPrice ?? i.price,
         description: i.shortDesc || 'CafeShop special',
         badge: i.category.toLowerCase(),
@@ -264,7 +233,7 @@ const filteredItems = computed(() => {
   const cat = selectedCategory.value
 
   return items.value.filter((item) => {
-    const byCategory = cat === 'all' || item.category === cat
+    const byCategory = cat === 'all' || item.badge === cat
     const byText =
       !text ||
       item.name.toLowerCase().includes(text) ||

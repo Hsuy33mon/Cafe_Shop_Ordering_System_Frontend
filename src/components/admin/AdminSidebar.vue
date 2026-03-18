@@ -4,7 +4,7 @@
     <div class="sidebar-logo">
       <div class="logo-icon">☕</div>
       <div class="logo-text">
-        <span class="logo-main">CafeShop</span>
+        <span class="logo-main">5:1 Cafe</span>
         <span class="logo-sub">Admin</span>
       </div>
     </div>
@@ -30,8 +30,11 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useDashboardStore } from '../../stores/useDashboardStore'
 
+const dashboardStore = useDashboardStore()
 type SidebarItem = {
   key: string
   label: string
@@ -40,8 +43,15 @@ type SidebarItem = {
 
 defineProps<{
   sidebarItems: SidebarItem[]
-  todaySummary: string
 }>()
+
+const todaySummary = computed(() => {
+  const d = dashboardStore.dashboard
+
+  if (!d) return 'Loading...'
+
+  return `${d.todayOrders} orders · ฿${d.todayProfitBaht.toLocaleString()} revenue`
+})
 </script>
 
 <style scoped src="@/styles/admin/sidebar.css"></style>

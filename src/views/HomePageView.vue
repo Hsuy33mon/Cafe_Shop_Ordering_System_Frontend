@@ -22,13 +22,9 @@
               <span class="stat-label">Various Menu</span>
             </div>
             <div class="stat">
-              <span class="stat-number">{{overallRating.toFixed(2)}}★</span>
+              <span class="stat-number">{{ overallRating }}★</span>
               <span class="stat-label">Guest rating</span>
             </div>
-            <!-- <div class="stat">
-              <span class="stat-number">15 min</span>
-              <span class="stat-label">Avg. prep time</span>
-            </div> -->
           </div>
         </div>
 
@@ -36,41 +32,15 @@
           <div class="hero-plate">
             <img src="@/assets/logo.jpeg" alt="CafeShop Logo" class="logo-img" />
           </div>
-          <!-- <div class="floating-card floating-card--top"> -->
           <div class="floating-card floating-card--bottom">
-            <!-- <span class="dot dot--green" /> -->
             <div>
               <p class="floating-label">Served with warmth &amp;</p>
               <p class="floating-text">Brewed with love 🤎</p>
             </div>
           </div>
-          <!-- <div class="floating-card floating-card--bottom">
-            <p class="floating-text">Served with warmth &amp; Brewed with love 💛</p>
-          </div> -->
         </div>
       </div>
     </section>
-
-    <!-- CATEGORIES -->
-    <!-- <section class="section categories">
-      <div class="cs-container">
-        <header class="section-header">
-          <p class="eyebrow">Explore</p>
-          <h2 class="section-title">For every kind of craving</h2>
-          <p class="section-subtitle">
-            Cozy coffee or sweet desserts – pick your favourite mood.
-          </p>
-        </header>
-
-        <div class="category-grid">
-          <article v-for="cat in featuredCategories" :key="cat.id" class="category-card">
-            <div class="category-icon">{{ cat.icon }}</div>
-            <h3 class="category-name">{{ cat.name }}</h3>
-            <p class="category-desc">{{ cat.description }}</p>
-          </article>
-        </div>
-      </div>
-    </section> -->
 
     <!-- SPECIALS / HIGHLIGHTED ITEMS -->
     <section class="section specials" id="menu">
@@ -258,18 +228,19 @@ const specials = computed(() => {
       const primaryImage =
         activeImages.find((img: any) => img.primary)?.url || activeImages[0]?.url || ''
 
-    return {
-      id: fullItem.id,
-      name: fullItem.name,
-      category: fullItem.category,
-      price: cheapestSize?.sellPrice ?? 0,
-      description: fullItem.shortDesc,
-      imageUrl: primaryImage,
-      badge: index === 0 ? '🔥 Most ordered' : 'Popular',
-      rating: fullItem.averageRating ?? 0,
-      ratingCount: fullItem.ratingCount ?? 0,
-    }
-  }).filter(Boolean)
+      return {
+        id: fullItem.id,
+        name: fullItem.name,
+        category: fullItem.categoryName,
+        price: cheapestSize?.sellPrice ?? 0,
+        description: fullItem.shortDesc,
+        imageUrl: primaryImage,
+        badge: index === 0 ? '🔥 Most ordered' : 'Popular',
+        rating: fullItem.averageRating ?? 0,
+        ratingCount: fullItem.reviewCount ?? 0,
+      }
+    })
+    .filter(Boolean)
 })
 
 watch(specials, (val) => {

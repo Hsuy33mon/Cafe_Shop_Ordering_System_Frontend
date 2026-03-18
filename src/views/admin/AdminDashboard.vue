@@ -1,20 +1,7 @@
 <template>
   <main class="content">
-    <!-- KPI CARDS -->
-    <section class="kpi-grid">
-      <article v-for="card in kpiCards" :key="card.label" class="kpi-card">
-        <div class="kpi-header">
-          <span class="kpi-label">{{ card.label }}</span>
-        </div>
-        <p class="kpi-value">{{ card.value }}</p>
-        <p class="kpi-sub">{{ card.subtext }}</p>
-      </article>
-    </section>
-
-    <!-- MIDDLE ROW: ORDERS + STATS -->
-    <section class="middle-grid">
-      <div class="revenue-filter">
-        <div class="filter-row">
+    <div class="revenue-filter">
+      <div class="filter-row">
           <button
             v-for="t in ['DAILY', 'MONTHLY']"
             :key="t"
@@ -42,7 +29,22 @@
             class="date-input"
           />
         </div>
+    </div>
 
+    <!-- KPI CARDS -->
+    <section class="kpi-grid">
+      <article v-for="card in kpiCards" :key="card.label" class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">{{ card.label }}</span>
+        </div>
+        <p class="kpi-value">{{ card.value }}</p>
+        <p class="kpi-sub">{{ card.subtext }}</p>
+      </article>
+    </section>
+
+    <!-- MIDDLE ROW: ORDERS + STATS -->
+    <section class="middle-grid">
+      <div class="revenue-filter">
         <div class="chart-wrapper">
           <Line :data="chartData" :options="chartOptions" />
         </div>
@@ -62,79 +64,6 @@
         </div>
       </div>
 
-      <!-- RECENT ORDERS -->
-      <!-- <article class="panel panel--orders">
-        <div class="panel-header">
-          <h2 class="panel-title">Recent orders</h2>
-          <span class="panel-caption">Last 10 tickets</span>
-        </div>
-
-        <div class="table-wrapper">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Time</th>
-                <th>Customer</th>
-                <th>Type</th>
-                <th>Total (฿)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="order in filteredOrders" :key="order.id">
-                <td>{{ order.id }}</td>
-                <td>{{ order.time }}</td>
-                <td>
-                  <div class="cell-main">{{ order.customer }}</div>
-                  <div class="cell-sub" v-if="order.meta">{{ order.meta }}</div>
-                </td>
-                <td>{{ order.channel }}</td>
-                <td>{{ order.total }}</td>
-                <td>
-                  <span class="status-pill" :class="statusClass(order.status)">
-                    {{ order.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </article> -->
-
-      <!-- QUICK STATS -->
-      <!-- <article class="panel panel--stats">
-        <div class="panel-header">
-          <h2 class="panel-title">Today at a glance</h2>
-          <span class="panel-caption">Updated every minute</span>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-block">
-            <p class="stat-label">Orders per channel</p>
-            <ul class="stat-list">
-              <li v-for="channel in channelStats" :key="channel.label">
-                <span class="stat-name">{{ channel.label }}</span>
-                <span class="stat-bar">
-                  <span class="stat-fill" :style="{ width: channel.percent + '%' }"></span>
-                </span>
-                <span class="stat-value">{{ channel.count }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <div class="stat-block">
-            <p class="stat-label">Top categories</p>
-            <ul class="stat-tags">
-              <li v-for="cat in topCategories" :key="cat.name" class="stat-tag">
-                <span class="dot"></span>
-                <span>{{ cat.name }}</span>
-                <span class="stat-tag-count">{{ cat.orders }} orders</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </article> -->
     </section>
   </main>
 </template>
@@ -161,7 +90,7 @@ ChartJS.register(LineElement, BarElement, CategoryScale, LinearScale, PointEleme
 const dashboardStore = useDashboardStore()
 
 onMounted(async () => {
-  await dashboardStore.fetchDashboard()
+  // await dashboardStore.fetchDashboard()
   await fetchWithSelectedPeriod()
 })
 
@@ -296,12 +225,15 @@ const categoryChartOptions = {
 
 async function fetchWithSelectedPeriod() {
   if (currentType.value === 'DAILY') {
+    await dashboardStore.fetchDashboard('DAILY', selectedDate.value)
     await dashboardStore.fetchRevenue('DAILY', selectedDate.value)
     await dashboardStore.fetchCategoryOrders('DAILY', selectedDate.value)
   } else {
+    await dashboardStore.fetchDashboard('MONTHLY', selectedMonth.value)
     await dashboardStore.fetchRevenue('MONTHLY', selectedMonth.value)
     await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
   }
 }
+
 </script>
 <style scoped src="@/styles/admin/dashboard.css"></style>
