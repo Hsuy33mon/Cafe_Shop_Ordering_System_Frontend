@@ -12,13 +12,13 @@ import ProductDetailsView from '@/views/ProductDetailsView.vue'
 import ProductsPage from '@/views/ProductsPage.vue'
 import ShopPage from '@/views/ShopPage.vue'
 import StartOrderView from '@/views/StartOrderView.vue'
+import StartOrderQuickPage from '@/views/StartOrderQuickPage.vue'
 
 import AuthLayout from '@/components/layout/AuthLayout.vue'
 import LoginView from '@/views/admin/LoginView.vue'
 
 // Admin
 import AdminLayout from '@/components/admin/AdminLayout.vue'
-import AdminCustomers from '@/views/admin/AdminCustomers.vue'
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import AdminMenu from '@/views/admin/AdminMenu.vue'
 import AdminOrderDetails from '@/views/admin/AdminOrderDetails.vue'
@@ -50,7 +50,24 @@ const routes = [
     component: UserLayout,
     children: [
       { path: '', name: 'home', component: HomePage },
-      { path: 'start', name: 'start-order', component: StartOrderView },
+      {
+        path: 'start',
+        name: 'start-order',
+        component: StartOrderView,
+        meta: { publicOrderEntry: true },
+      },
+      {
+        path: 'start/:orderType/:placeNumber',
+        name: 'start-quick',
+        component: StartOrderQuickPage,
+        meta: { publicOrderEntry: true },
+      },
+      {
+        path: 'scan/:orderType/:placeNumber',
+        name: 'scan-order',
+        component: StartOrderQuickPage,
+        meta: { publicOrderEntry: true },
+      },
       {
         path: 'orders',
         name: 'orders',
@@ -80,13 +97,12 @@ const routes = [
         name: 'paymentSuccess',
         component: () => import('@/views/PaymentSuccess.vue'),
       },
-
-     {
-  path: '/shop',
-  name: 'shop',
-  component: ShopPage,
-  meta: { requiresAuth: false }
-},
+      {
+        path: '/shop',
+        name: 'shop',
+        component: ShopPage,
+        meta: { requiresAuth: false },
+      },
       { path: 'contact', name: 'contact', component: ContactPage },
       { path: 'about', name: 'about', component: aboutPage },
       { path: 'products', name: 'products', component: ProductsPage },
@@ -140,10 +156,17 @@ router.beforeEach((to) => {
     const session = useOrderSessionStore()
     session.hydrate()
 
-    if (to.name === 'start-order') return true
+    const isPublicEntryRoute = to.matched.some((r) => r.meta.publicOrderEntry)
+
+    if (isPublicEntryRoute) {
+      return true
+    }
 
     if (!session.isReady) {
-      return { name: 'start-order', query: { redirect: to.fullPath } }
+      return {
+        name: 'start-order',
+        query: { redirect: to.fullPath },
+      }
     }
   }
 
