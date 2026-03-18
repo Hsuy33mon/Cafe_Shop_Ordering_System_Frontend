@@ -68,7 +68,7 @@
               </div>
               <div class="totals-row totals-row--strong">
                 <span>Total</span>
-                <span class="total-highlight">{{ formatMoney(total) }}</span>
+                <span class="total-highlight">{{ formatMoney((subtotal - totalIngredientPrice) + totalIngredientPrice) }}</span>
               </div>
             </div>
           </div>
@@ -98,7 +98,7 @@
 
                   <p class="scan-text">
                     Use your banking app to scan this QR code. Amount:
-                    <strong>{{ formatMoney(payment?.amount ?? total) }}</strong>
+                    <strong>{{ formatMoney((subtotal - totalIngredientPrice) + totalIngredientPrice) }}</strong>
                   </p>
 
                   <div class="scan-meta">
