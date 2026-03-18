@@ -122,8 +122,8 @@ const paymentStore = usePaymentStore()
 const errorText = ref('')
 
 const items = computed(() => cartStore.items)
-const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
+const subtotal = computed(() => cartStore.cartSubtotal - totalIngredientPrice.value)
 const total = computed(() => subtotal.value + totalIngredientPrice.value)
 
 const customerName = computed(() => session.customerName || 'Customer')
@@ -176,7 +176,6 @@ async function confirm() {
     // optional: clear cart
     cartStore.clearCart?.()
 
-    // ✅ go success page directly (pending cash)
     router.replace({
       name: 'paymentSuccess',
       query: {
