@@ -176,7 +176,7 @@ export const usePaymentStore = defineStore('payment', () => {
     error.value = ''
     try {
       const body = buildRequestBody(payload)
-      const res = await http.post<PaymentResponse>('api/payments', body)
+      const res = await http.post<PaymentResponse>('api/payments', body, { skipAuth: true })
 
       payment.value = res.data
       setNewExpiry(DEFAULT_QR_TTL_SEC)
