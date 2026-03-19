@@ -260,16 +260,15 @@ function buildReceiptData(invoice: any): ReceiptData {
       price: num(ing.price),
     }))
 
-    const ingredientPrice = ingredients.reduce((sum: number, ing: any) => {
-      return sum + num(ing.price) * num(ing.qty)
-    }, 0)
-
     const qty = num(item.qty || 1)
+
+    const ingredientPrice = ingredients.reduce((sum: number, ing: any) => {
+    return sum + num(ing.price) * qty
+    }, 0)
+    
     const lineTotal = num(item.lineTotal)
-    const unitBasePrice =
-      qty > 0 ? (lineTotal - ingredientPrice) / qty : num(item.unitPrice - ingredientPrice)
-    const totalUnitPrice =
-      qty > 0 ? (lineTotal - ingredientPrice) / qty  : num(item.unitPrice - ingredientPrice)
+    const unitBasePrice =num(item.unitPrice - ingredientPrice)
+    const totalUnitPrice =num(item.unitPrice - ingredientPrice)*qty
 
     return {
       name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
