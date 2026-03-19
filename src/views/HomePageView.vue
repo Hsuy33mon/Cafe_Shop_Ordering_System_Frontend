@@ -230,13 +230,13 @@ const specials = computed(() => {
       return {
         id: fullItem.id,
         name: fullItem.name,
-        category: fullItem.categoryName,
+        category: fullItem.category,
         price: cheapestSize?.sellPrice ?? 0,
         description: fullItem.shortDesc,
         imageUrl: primaryImage,
         badge: index === 0 ? '🔥 Most ordered' : 'Popular',
         rating: fullItem.averageRating ?? 0,
-        ratingCount: fullItem.reviewCount ?? 0,
+        ratingCount: fullItem.ratingCount ?? 0,
       }
     })
     .filter(Boolean)
