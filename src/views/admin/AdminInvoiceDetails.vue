@@ -127,7 +127,7 @@
               </td>
 
               <td>{{ item.qty }}</td>
-              <td>฿{{ Number(item.unitPrice).toFixed(2) }}</td>
+              <td>฿{{ (Number(item.unitPrice) - Number(getIngredientTotal(item))).toFixed(2) }}</td>
               <td>฿{{ getOrderDisplayTotal(item).toFixed(2) }}</td>
               <td>{{ item.note || '-' }}</td>
             </tr>
@@ -266,8 +266,10 @@ function buildReceiptData(invoice: any): ReceiptData {
 
     const qty = num(item.qty || 1)
     const lineTotal = num(item.lineTotal)
-    const unitBasePrice = qty > 0 ? lineTotal / qty : num(item.unitPrice)
-    const totalUnitPrice = qty > 0 ? (lineTotal + ingredientPrice) / qty : num(item.unitPrice)
+    const unitBasePrice =
+      qty > 0 ? (lineTotal - ingredientPrice) / qty : num(item.unitPrice - ingredientPrice)
+    const totalUnitPrice =
+      qty > 0 ? (lineTotal - ingredientPrice) / qty : num(item.unitPrice - ingredientPrice)
 
     return {
       name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
@@ -278,9 +280,9 @@ function buildReceiptData(invoice: any): ReceiptData {
       ingredients,
     }
   })
-
-  const subtotal = items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0)
   const ingredientTotal = items.reduce((sum, item) => sum + num(item.ingredientPrice), 0)
+  const subtotal =
+    items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0) - ingredientTotal
   const total = subtotal + ingredientTotal + num(invoice?.tax) + num(invoice?.deliveryFee)
 
   return {
