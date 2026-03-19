@@ -38,6 +38,7 @@ import SizeTable from '@/views/admin/SizeTable.vue'
 import { useOrderSessionStore } from '@/stores/orderSession'
 import AdminInvoices from '@/views/admin/AdminInvoices.vue'
 import AdminInvoiceDetails from '@/views/admin/AdminInvoiceDetails.vue'
+import AdminVats from '@/views/admin/AdminVats.vue'
 
 const routes = [
   {
@@ -129,6 +130,8 @@ const routes = [
       { path: 'category/table', name: 'category-table', component: CategoryTable },
       { path: 'tags/table', name: 'tags-table', component: TagsTable },
       { path: 'sizes/table', name: 'size-table', component: SizeTable },
+      { path: 'vats',name: 'admin-vat-list', component: AdminVats },
+
     ],
   },
 ]

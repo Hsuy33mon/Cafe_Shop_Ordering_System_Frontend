@@ -26,6 +26,8 @@ export interface Invoice {
   customerName: string
   subTotal: number
   tax: number
+  vatName: string
+  vatRate: number
   deliveryFee: number
   grandTotal: number
   status: string
