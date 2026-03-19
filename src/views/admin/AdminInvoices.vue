@@ -6,8 +6,6 @@
         <h1 class="menu-title">Invoices</h1>
         <p class="menu-subtitle">Manage all invoices generated in CafeShop.</p>
       </div>
-
-      <button class="menu-btn-primary" @click="goToCreateInvoice">+ Create invoice</button>
     </section>
 
     <!-- FILTER BAR -->
