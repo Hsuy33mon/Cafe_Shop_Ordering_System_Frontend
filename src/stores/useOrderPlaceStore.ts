@@ -4,13 +4,16 @@ import type { Order } from './useOrderStore'
 
 export type OrderPlaceStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED'
 
-export type UpdateOrderPlacePayload = {
+export type OrderPlacePayload = {
   no: string
   type: string
   seat?: number
   status: OrderPlaceStatus
   description?: string
 }
+
+export type UpdateOrderPlacePayload = OrderPlacePayload
+export type CreateOrderPlacePayload = OrderPlacePayload
 
 export type OrderPlace = {
   id: number
@@ -28,7 +31,7 @@ function mapFromApi(x: any): OrderPlace {
     no: x.no,
     type: x.type,
     description: x.description,
-    seat: x.seat,
+    seat: x.seat != null ? Number(x.seat) : undefined,
     status: x.status,
     activeOrders: Array.isArray(x.activeOrders) ? x.activeOrders : [],
   }
@@ -57,6 +60,7 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
     async fetchAll() {
       this.loading = true
       this.error = null
+
       try {
         const res = await http.get('/api/admin/order-places')
         this.items = Array.isArray(res.data) ? res.data.map(mapFromApi) : []
@@ -70,6 +74,7 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
     async fetchWithCurrentOrders() {
       this.loading = true
       this.error = null
+
       try {
         const res = await http.get('/api/admin/order-places/with-current-order')
         this.items = Array.isArray(res.data) ? res.data.map(mapFromApi) : []
@@ -79,6 +84,25 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
         this.loading = false
       }
     },
+
+    async createOrderPlace(payload: CreateOrderPlacePayload) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const res = await http.post('/api/admin/order-places', payload)
+        const created = mapFromApi(res.data)
+
+        this.items.unshift(created)
+        return created
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
     async updateOrderPlace(id: number, payload: UpdateOrderPlacePayload) {
       this.loading = true
       this.error = null
@@ -90,11 +114,28 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
         const index = this.items.findIndex((i) => i.id === id)
         if (index !== -1) {
           this.items[index] = {
-            ...this.items[index], // 👈 keep activeOrders
-            ...updated, // 👈 override editable fields
+            ...this.items[index],
+            ...updated,
             activeOrders: this.items[index].activeOrders,
           }
         }
+
+        return updated
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        throw e
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteOrderPlace(id: number) {
+      this.loading = true
+      this.error = null
+
+      try {
+        await http.delete(`/api/admin/order-places/${id}`)
+        this.items = this.items.filter((i) => i.id !== id)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
         throw e

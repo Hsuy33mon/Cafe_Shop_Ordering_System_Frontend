@@ -8,8 +8,9 @@
       </div>
 
       <div class="tables-header-right">
-        <span class="tables-pill tables-pill--free"> {{ availableCount }} available </span>
-        <span class="tables-pill tables-pill--occupied"> {{ occupiedCount }} occupied </span>
+        <span class="tables-pill tables-pill--free">{{ activeCount }} active</span>
+        <span class="tables-pill tables-pill--occupied">{{ inactiveCount }} inactive</span>
+        <button class="menu-btn-primary" @click="openCreateDialog">Add new table</button>
       </div>
     </section>
 
@@ -54,14 +55,12 @@
       :page-size="20"
       @page-change="onPageChange"
     >
-      <!-- Status column pill -->
       <template #cell-status="{ value }">
         <span class="status-pill" :class="statusClass(value)">
           {{ value }}
         </span>
       </template>
 
-      <!-- Actions -->
       <template #cell-actions="{ row }">
         <div class="table-actions">
           <button class="btn-link btn-link--primary" @click="openEditDialog(row)">Update</button>
@@ -72,29 +71,35 @@
       </template>
     </AdminTable>
 
-    <!-- EDIT TABLE DIALOG -->
-    <div v-if="editDialogVisible" class="modal-backdrop">
+    <!-- CREATE TABLE DIALOG -->
+    <div v-if="createDialogVisible" class="modal-backdrop">
       <div class="modal modal--wide">
-        <h3 class="modal-title">Update table</h3>
+        <h3 class="modal-title">Add new table</h3>
 
         <label class="modal-label">
           Table number
-          <input v-model="editForm.name" class="modal-input" />
+          <input v-model="createForm.name" class="modal-input" placeholder="Eg. T1" />
         </label>
 
         <label class="modal-label">
           Area / zone
-          <input v-model="editForm.area" class="modal-input" />
+          <input v-model="createForm.area" class="modal-input" placeholder="Eg. Garden" />
         </label>
 
         <label class="modal-label">
           Seats
-          <input v-model.number="editForm.capacity" type="number" min="1" class="modal-input" />
+          <input
+            v-model.number="createForm.capacity"
+            type="number"
+            min="1"
+            class="modal-input"
+            placeholder="Eg. 4"
+          />
         </label>
 
         <label class="modal-label">
           Status
-          <select v-model="editForm.status" class="modal-select">
+          <select v-model="createForm.status" class="modal-select">
             <option v-for="opt in statusOptions" :key="opt" :value="opt">
               {{ opt }}
             </option>
@@ -104,7 +109,58 @@
         <label class="modal-label">
           Note
           <textarea
-            v-model="editForm.note"
+            v-model="createForm.note"
+            rows="3"
+            class="modal-textarea"
+            placeholder="Optional note for staff"
+          />
+        </label>
+
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn--primary" @click="confirmCreate">Create</button>
+          <button class="modal-btn" @click="closeCreateDialog">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT TABLE DIALOG -->
+    <div v-if="editDialogVisible" class="modal-backdrop">
+      <div class="modal modal--wide">
+        <h3 class="modal-title">Update table</h3>
+
+        <label class="modal-label">
+          Table number
+          <input v-model="editForm!.name" class="modal-input" />
+        </label>
+
+        <label class="modal-label">
+          Area / zone
+          <input v-model="editForm!.area" class="modal-input" />
+        </label>
+
+        <label class="modal-label">
+          Seats
+          <input
+            v-model.number="editForm!.capacity"
+            type="number"
+            min="1"
+            class="modal-input"
+          />
+        </label>
+
+        <label class="modal-label">
+          Status
+          <select v-model="editForm!.status" class="modal-select">
+            <option v-for="opt in statusOptions" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </label>
+
+        <label class="modal-label">
+          Note
+          <textarea
+            v-model="editForm!.note"
             rows="3"
             class="modal-textarea"
             placeholder="Optional note for staff"
@@ -124,7 +180,7 @@
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
+import { useOrderPlacesStore, type OrderPlaceStatus } from '@/stores/useOrderPlaceStore'
 
 type TableStatus = 'Active' | 'Inactive'
 const statusOptions: TableStatus[] = ['Active', 'Inactive']
@@ -138,8 +194,13 @@ type TableEditForm = {
   note?: string
 }
 
-const editDialogVisible = ref(false)
-const editForm = ref<TableEditForm | null>(null)
+type TableCreateForm = {
+  name: string
+  area: string
+  capacity: number
+  status: TableStatus
+  note?: string
+}
 
 type TableRow = {
   id: number
@@ -151,6 +212,75 @@ type TableRow = {
   since: string
   note?: string
 }
+
+/* =======================
+   Router & Store
+======================= */
+const router = useRouter()
+const orderPlacesStore = useOrderPlacesStore()
+
+onMounted(() => {
+  orderPlacesStore.fetchWithCurrentOrders()
+})
+
+/* =======================
+   Create dialog
+======================= */
+const createDialogVisible = ref(false)
+
+const createForm = ref<TableCreateForm>({
+  name: '',
+  area: '',
+  capacity: 1,
+  status: 'Active',
+  note: '',
+})
+
+function resetCreateForm() {
+  createForm.value = {
+    name: '',
+    area: '',
+    capacity: 1,
+    status: 'Active',
+    note: '',
+  }
+}
+
+function openCreateDialog() {
+  resetCreateForm()
+  createDialogVisible.value = true
+}
+
+function closeCreateDialog() {
+  createDialogVisible.value = false
+}
+
+function toApiStatus(status: TableStatus): OrderPlaceStatus {
+  return status === 'Active' ? 'ACTIVE' : 'INACTIVE'
+}
+
+async function confirmCreate() {
+  try {
+    await orderPlacesStore.createOrderPlace({
+      no: createForm.value.name,
+      type: createForm.value.area,
+      seat: createForm.value.capacity,
+      status: toApiStatus(createForm.value.status),
+      description: createForm.value.note,
+    })
+
+    createDialogVisible.value = false
+    await orderPlacesStore.fetchWithCurrentOrders()
+  } catch (e) {
+    alert(orderPlacesStore.error || 'Create failed')
+  }
+}
+
+/* =======================
+   Edit dialog
+======================= */
+const editDialogVisible = ref(false)
+const editForm = ref<TableEditForm | null>(null)
 
 function openEditDialog(row: TableRow) {
   editForm.value = {
@@ -169,10 +299,6 @@ function closeEditDialog() {
   editForm.value = null
 }
 
-function toApiStatus(status: TableStatus): OrderPlaceStatus {
-  return status === 'Active' ? 'ACTIVE' : 'INACTIVE'
-}
-
 async function confirmEdit() {
   if (!editForm.value) return
 
@@ -186,20 +312,11 @@ async function confirmEdit() {
     })
 
     editDialogVisible.value = false
+    await orderPlacesStore.fetchWithCurrentOrders()
   } catch (e) {
     alert(orderPlacesStore.error || 'Update failed')
   }
 }
-
-/* =======================
-   Router & Store
-======================= */
-const router = useRouter()
-const orderPlacesStore = useOrderPlacesStore()
-
-onMounted(() => {
-  orderPlacesStore.fetchWithCurrentOrders()
-})
 
 /* =======================
    Columns
@@ -270,39 +387,14 @@ const filteredTables = computed(() => {
 /* =======================
    Header counts
 ======================= */
-const availableCount = computed(() => tables.value.filter((t) => t.status === 'Available').length)
-const occupiedCount = computed(() => tables.value.filter((t) => t.status === 'Occupied').length)
+const activeCount = computed(() => tables.value.filter((t) => t.status === 'Active').length)
+const inactiveCount = computed(() => tables.value.filter((t) => t.status === 'Inactive').length)
 
 /* =======================
    Pagination hook
 ======================= */
 function onPageChange(page: number) {
   console.log('Tables page →', page)
-}
-
-/* =======================
-   Status Dialog (UI only)
-======================= */
-const statusDialogVisible = ref(false)
-const statusTarget = ref<TableRow | null>(null)
-const statusToUpdate = ref<TableStatus>('Available')
-
-function openStatusDialog(row: TableRow) {
-  statusTarget.value = row
-  statusToUpdate.value = row.status
-  statusDialogVisible.value = true
-}
-
-function closeStatusDialog() {
-  statusDialogVisible.value = false
-  statusTarget.value = null
-}
-
-function confirmStatusUpdate() {
-  if (!statusTarget.value) return
-  statusTarget.value.status = statusToUpdate.value
-  statusDialogVisible.value = false
-  // TODO: hook to backend when OrderPlace status update API exists
 }
 
 /* =======================
@@ -328,7 +420,4 @@ function goToOrder(row: TableRow) {
 }
 </script>
 
-<!-- shared filters/status/button styles: same file used by Orders + Menu items -->
-<!-- <style src="@/styles/admin/orders-menu-common.css"></style> -->
-<!-- page-specific tweaks -->
 <style scoped src="@/styles/admin/tables.css"></style>

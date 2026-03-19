@@ -81,3 +81,11 @@
   background-color: #dbeafe;
   border-color: #93c5fd;
 }
+
+.add-table-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 10px;
+  cursor: pointer;
+  font-weight: 600;
+}

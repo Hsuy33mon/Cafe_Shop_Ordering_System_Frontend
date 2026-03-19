@@ -168,7 +168,7 @@ export const useOrdersStore = defineStore('orders', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.put(`/api/admin/orders/${id}`, payload,{ skipAuth: true })
+        const res = await http.put(`/api/admin/orders/${id}`, payload)
 
         const updated = mapFromApi(res.data)
 
