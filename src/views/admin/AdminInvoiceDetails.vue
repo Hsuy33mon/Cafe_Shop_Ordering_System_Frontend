@@ -269,7 +269,7 @@ function buildReceiptData(invoice: any): ReceiptData {
     const unitBasePrice =
       qty > 0 ? (lineTotal - ingredientPrice) / qty : num(item.unitPrice - ingredientPrice)
     const totalUnitPrice =
-      qty > 0 ? (lineTotal - ingredientPrice) * qty  : num(item.unitPrice - ingredientPrice)
+      qty > 0 ? (lineTotal - ingredientPrice) / qty  : num(item.unitPrice - ingredientPrice)
 
     return {
       name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
