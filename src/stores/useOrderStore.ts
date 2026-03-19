@@ -129,7 +129,7 @@ export const useOrdersStore = defineStore('orders', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get('/api/admin/orders')
+        const res = await http.get('/api/admin/orders',{ skipAuth: true })
         this.items = Array.isArray(res.data) ? res.data.map(mapFromApi) : []
         this.lastLoadedAt = new Date().toISOString()
       } catch (e: any) {
@@ -143,7 +143,7 @@ export const useOrdersStore = defineStore('orders', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get(`/api/admin/orders/${id}`)
+        const res = await http.get(`/api/admin/orders/${id}`,{ skipAuth: true })
         this.currentOrder = mapFromApi(res.data)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
@@ -168,7 +168,7 @@ export const useOrdersStore = defineStore('orders', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.put(`/api/admin/orders/${id}`, payload)
+        const res = await http.put(`/api/admin/orders/${id}`, payload,{ skipAuth: true })
 
         const updated = mapFromApi(res.data)
 
