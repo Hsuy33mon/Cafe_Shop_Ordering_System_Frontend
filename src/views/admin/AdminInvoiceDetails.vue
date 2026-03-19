@@ -237,7 +237,7 @@ function getIngredientTotal(item: any): number {
 }
 
 function getOrderDisplayTotal(item: any): number {
-  return num(item.lineTotal) + getIngredientTotal(item)
+  return num(item.lineTotal)
 }
 
 const computedSubTotal = computed(() => {
@@ -284,9 +284,9 @@ function buildReceiptData(invoice: any): ReceiptData {
   const total = subtotal + ingredientTotal + num(invoice?.tax) + num(invoice?.deliveryFee)
 
   return {
-    shopName: 'CafeShop',
-    address: 'Your shop address',
-    phone: 'Your shop phone',
+    shopName: '5:1',
+    address: '25, D Varee Residence Montara',
+    phone: '+66 08 319 36982',
     orderNo: invoice?.invoiceNo || invoice?.id,
     customerName: invoice?.customerName || '-',
     orderType: invoice?.type || '',

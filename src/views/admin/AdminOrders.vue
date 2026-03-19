@@ -346,9 +346,9 @@ function buildReceiptFromInvoiceOrders(invoiceId: number): ReceiptData | null {
   const total = subtotal + ingredientTotal
 
   return {
-    shopName: '512',
-    address: 'BKK',
-    phone: '0924662568',
+    shopName: '5:1',
+    address: '25, D Varee Residence Montara',
+    phone: '+66 08 319 36982',
     orderNo: invoiceId,
     customerName: first.customerName ?? '-',
     orderType: first.channel ?? '-',
