@@ -22,7 +22,7 @@
               <span class="stat-label">Various Menu</span>
             </div>
             <div class="stat">
-              <span class="stat-number">{{ overallRating }}★</span>
+              <span class="stat-number">{{ overallRating.toFixed(2) }}★</span>
               <span class="stat-label">Guest rating</span>
             </div>
           </div>
