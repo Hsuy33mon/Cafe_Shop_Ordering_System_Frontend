@@ -75,7 +75,7 @@
                 {{ 'VAT' }} ({{ invoice.vatRate || 0 }}%)
               </td>
               <td class="value">
-                ฿{{ computedVat.toFixed(2) }}
+                ฿{{ invoice.tax }}
               </td>
             </tr>
 

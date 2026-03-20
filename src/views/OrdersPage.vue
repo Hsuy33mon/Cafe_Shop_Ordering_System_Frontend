@@ -72,7 +72,6 @@
                   v-for="order in filteredOrders"
                   :key="order.id"
                   class="orders-row"
-                  @click="goToOrder(order)"
                 >
                   <td class="cell-id">#{{ order.id }}</td>
                   <td>
@@ -145,10 +144,84 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { onMounted, computed, ref,onUnmounted } from 'vue'
+import { useOrdersStore } from '../stores/useOrderStore'
 
-type OrderStatus = 'in_progress' | 'completed'
+let interval: any = null
+const ordersStore = useOrdersStore()
+
+onMounted(async () => {
+  const invoiceIds = JSON.parse(localStorage.getItem('invoiceIds') || '[]')
+
+  if (!invoiceIds.length) return
+
+  // 🔥 clear old data first
+  ordersStore.items = []
+
+  for (const id of invoiceIds) {
+    await ordersStore.fetchByInvoice(id)
+  }
+
+  interval = setInterval(async () => {
+    ordersStore.items = []
+
+    for (const id of invoiceIds) {
+      await ordersStore.fetchByInvoice(id)
+    }
+  }, 5000)
+})
+
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval)
+})
+
+const orders = computed(() => ordersStore.items)
+
+const mappedOrders = computed(() => {
+  return orders.value.map((o) => ({
+    id: o.id,
+    date: o.date,
+    time: o.time,
+    roomOrTable: o.tableNo || '-',
+    type: mapType(o.channel),
+    items: o.items.map((i) => `${i.quantity} × ${i.name}`),
+    total: o.total,
+    // status: mapStatus(o.status),
+    status: o.status,
+  }))
+})
+
+function mapStatus(status: string): OrderStatus {
+  return status as OrderStatus
+}
+function displayStatus(status: string): string {
+  const map = {
+    PENDING: 'Pending',
+    CONFIRMED: 'Confirmed',
+    PREPARING: 'Preparing',
+    READY: 'Ready',
+    COMPLETED: 'Completed',
+    CANCELLED: 'Cancelled',
+  }
+
+  return map[status] || status
+}
+
+function mapType(type: string): OrderType {
+  if (type === 'ROOM') return 'room'
+  if (type === 'TABLE') return 'table'
+  return 'table'
+}
+
+type OrderStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'READY'
+  | 'COMPLETED'
+  | 'CANCELLED'
 type OrderType = 'room' | 'table' | 'pickup'
 
 type OrderOverview = {
@@ -162,66 +235,37 @@ type OrderOverview = {
   status: OrderStatus
 }
 
-// mock orders (replace with real API later)
-const orders = ref<OrderOverview[]>([
-  {
-    id: 1042,
-    date: 'Today',
-    time: '10:12',
-    roomOrTable: 'Room 1205',
-    type: 'room',
-    items: ['2 × Iced Caramel Latte', '1 × Chocolate Cake'],
-    total: 320,
-    status: 'in_progress',
-  },
-  {
-    id: 1041,
-    date: 'Today',
-    time: '09:58',
-    roomOrTable: 'Table A3',
-    type: 'table',
-    items: ['Gourmet Burger set'],
-    total: 240,
-    status: 'completed',
-  },
-  {
-    id: 1038,
-    date: 'Yesterday',
-    time: '18:45',
-    roomOrTable: 'Pick-up #09',
-    type: 'pickup',
-    items: ['House Blend Beans 250g'],
-    total: 320,
-    status: 'completed',
-  },
-  {
-    id: 1035,
-    date: 'Yesterday',
-    time: '11:30',
-    roomOrTable: 'Room 810',
-    type: 'room',
-    items: ['Breakfast set', 'Orange juice'],
-    total: 420,
-    status: 'completed',
-  },
-])
 
 const router = useRouter()
 
 const searchText = ref('')
-const selectedStatus = ref<'all' | OrderStatus>('all')
+
+const selectedStatus = ref<
+  'all' |
+  'PENDING' |
+  'CONFIRMED' |
+  'PREPARING' |
+  'READY' |
+  'COMPLETED' |
+  'CANCELLED'
+>('all')
 
 const statusTabs = [
   { value: 'all', label: 'All' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'completed', label: 'Completed' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'CONFIRMED', label: 'Confirmed' },
+  { value: 'PREPARING', label: 'Preparing' },
+  { value: 'READY', label: 'Ready' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
 ]
+
 
 const filteredOrders = computed(() => {
   const text = searchText.value.trim().toLowerCase()
   const status = selectedStatus.value
 
-  return orders.value.filter((o) => {
+  return mappedOrders.value.filter((o) => {
     const byStatus = status === 'all' || o.status === status
     const byText =
       !text ||
@@ -233,23 +277,18 @@ const filteredOrders = computed(() => {
   })
 })
 
-function displayStatus(status: OrderStatus): string {
-  if (status === 'in_progress') return 'In progress'
-  if (status === 'completed') return 'Completed'
-  return status
-}
-
 function displayType(type: OrderType): string {
   if (type === 'room') return 'Room service'
   if (type === 'table') return 'Table'
-  if (type === 'pickup') return 'Pick-up'
   return type
 }
 
 function statusClass(status: OrderStatus) {
   return {
-    'status-pill--progress': status === 'in_progress',
-    'status-pill--completed': status === 'completed',
+    'status-pill--pending': status === 'PENDING',
+    'status-pill--preparing': status === 'PREPARING',
+    'status-pill--ready': status === 'READY',
+    'status-pill--completed': status === 'COMPLETED',
   }
 }
 
