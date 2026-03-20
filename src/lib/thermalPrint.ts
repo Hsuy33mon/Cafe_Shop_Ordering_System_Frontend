@@ -35,7 +35,7 @@ let qzInitialized = false
 const RECEIPT_WIDTH = 32
 
 function money(v: number) {
-  return `${Number(v || 0).toFixed(0)}`
+  return `${Number(v || 0).toFixed(2)}`
 }
 
 function safeText(value: string, max = RECEIPT_WIDTH) {
