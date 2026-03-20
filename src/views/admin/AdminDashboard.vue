@@ -63,7 +63,7 @@
   <!-- Category -->
   <div class="card chart-card ">
     <div class="card-header">
-      <h3>Order Count by Category</h3>
+      <h3>Number of items sold by category</h3>
     </div>
 
     <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
@@ -158,7 +158,7 @@ const categoryChartData = computed(() => {
     labels: sorted.map((p) => p.categoryName),
     datasets: [
       {
-        label: 'Orders',
+        label: 'Number of items',
         data: sorted.map((p) => p.orderCount),
         backgroundColor: '#3b82f6',
         borderRadius: 6,
