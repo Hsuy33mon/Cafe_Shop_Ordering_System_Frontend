@@ -1,5 +1,6 @@
 <template>
-  <div class="status-page">
+  <div v-if="!order">Loading...</div>
+  <div v-else class="status-page">
     <!-- soft background -->
     <div class="bg-shape bg-shape--one"></div>
     <div class="bg-shape bg-shape--two"></div>
@@ -21,22 +22,22 @@
           <div class="summary-main">
             <div>
               <p class="summary-label">Order ID</p>
-              <p class="summary-value">#{{ order.id }}</p>
+              <p class="summary-value">#{{ mappedOrder.id }}</p>
             </div>
             <div>
               <p class="summary-label">Room / Table</p>
               <p class="summary-value">
-                {{ order.roomOrTable }} <span v-if="order.type">· {{ order.type }}</span>
+                {{ mappedOrder.roomOrTable }} <span v-if="mappedOrder.type">· {{ mappedOrder.type }}</span>
               </p>
             </div>
             <div>
               <p class="summary-label">Placed</p>
-              <p class="summary-value">{{ order.placedAt }}</p>
+              <p class="summary-value">{{ mappedOrder.placedAt }}</p>
             </div>
             <div>
               <p class="summary-label">Estimated</p>
               <p class="summary-value">
-                {{ order.estimatedReady }}<span v-if="etaNote"> · {{ etaNote }}</span>
+                {{ mappedOrder.estimatedReady }}<span v-if="etaNote"> · {{ etaNote }}</span>
               </p>
             </div>
           </div>
@@ -44,7 +45,7 @@
           <div class="summary-footer">
             <div class="summary-total">
               <span class="summary-total-label">Total</span>
-              <span class="summary-total-value">฿{{ order.total }}</span>
+              <span class="summary-total-value">฿{{ mappedOrder.total }}</span>
             </div>
             <div class="summary-items">
               <span class="summary-items-label">Items</span>
@@ -137,82 +138,53 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useOrdersStore } from '../stores/useOrderStore'
+import { useRoute } from 'vue-router'
 
-type OrderStatusKey = 'approved' | 'cooking' | 'finished' | 'delivering' | 'picked'
+const ordersStore = useOrdersStore()
+const route = useRoute()
 
-type OrderInfo = {
-  id: number
-  roomOrTable: string
-  type: 'Room service' | 'Table' | 'Pick-up'
-  placedAt: string
-  estimatedReady: string
-  total: number
-  items: string[]
-}
+const order = computed(() => ordersStore.currentOrder)
 
-// mock current order info (replace with real API later)
-const order = ref<OrderInfo>({
-  id: 1042,
-  roomOrTable: 'Room 1205',
-  type: 'Room service',
-  placedAt: 'Today · 10:12',
-  estimatedReady: '10:35 – 10:45',
-  total: 320,
-  items: ['2 × Iced Caramel Latte', '1 × Chocolate Cake'],
+onMounted(async () => {
+  const id = Number(route.params.id)
+  console.log('Fetching order ID:', id)
+
+  await ordersStore.fetchById(id)
+
+  console.log('STORE ORDER:', ordersStore.currentOrder)
 })
 
-// current status (in real app set from backend)
-const currentStatus = ref<OrderStatusKey>('cooking')
+const currentStatus = computed(() => {
+  const s = order.value?.status
 
-const steps = computed(() => {
-  const orderOfSteps: {
-    key: OrderStatusKey
-    label: string
-    description: string
-    extra?: string
-  }[] = [
-    {
-      key: 'approved',
-      label: 'Payment approved',
-      description: 'Your order and payment have been received successfully.',
-      extra: 'If you made a mistake, please contact us as soon as possible.',
-    },
-    {
-      key: 'cooking',
-      label: 'Start cooking',
-      description: 'Our kitchen is preparing your food and drinks fresh to order.',
-      extra: 'Typical prep time is 10–20 minutes depending on the queue.',
-    },
-    {
-      key: 'finished',
-      label: 'Finished & packed',
-      description: 'Your order is ready and being checked before leaving the counter.',
-      extra: 'Hot and cold items are packed separately to keep everything fresh.',
-    },
-    {
-      key: 'delivering',
-      label: 'Delivering to your room',
-      description: 'Our staff is on the way to the room number you provided.',
-      extra: 'Please keep your phone nearby in case we need to contact you.',
-    },
-    {
-      key: 'picked',
-      label: 'Picked at room',
-      description: 'Order has been delivered and picked up at your room.',
-      extra: 'Enjoy your meal and feel free to tag @cafeshop if you share a photo!',
-    },
-  ]
+  if (s === 'PENDING') return 'approved'
+  if (s === 'CONFIRMED') return 'approved'
+  if (s === 'PREPARING') return 'cooking'
+  if (s === 'READY') return 'finished'
+  if (s === 'COMPLETED') return 'picked'
 
-  const currentIndex = orderOfSteps.findIndex((s) => s.key === currentStatus.value)
-
-  return orderOfSteps.map((step, index) => {
-    let state: 'done' | 'current' | 'upcoming' = 'upcoming'
-    if (index < currentIndex) state = 'done'
-    if (index === currentIndex) state = 'current'
-    return { ...step, state }
-  })
+  return 'approved'
 })
+
+
+const mappedOrder = computed(() => {
+  if (!order.value) return null
+
+  return {
+    id: order.value.id,
+    roomOrTable: order.value.tableNo || '-',
+    type: order.value.channel,
+    placedAt: `${order.value.date} ${order.value.time}`,
+    estimatedReady: '20–25 min',
+    total: order.value.total,
+    items: order.value.items.map(
+      (i) => `${i.quantity} × ${i.name}`
+    ),
+  }
+})
+
 
 const progressPercent = computed(() => {
   const list = steps.value
@@ -225,18 +197,18 @@ const progressPercent = computed(() => {
 })
 
 const shortItems = computed(() => {
-  const items = order.value.items
+  const items = mappedOrder.value?.items || []
   if (items.length === 0) return 'No items'
   if (items.length === 1) return items[0]
   return `${items[0]} + ${items.length - 1} more`
 })
 
-const etaNote = computed(() => {
-  if (currentStatus.value === 'cooking') return 'Prep in progress'
-  if (currentStatus.value === 'delivering') return 'Almost there'
-  if (currentStatus.value === 'picked') return 'Completed'
-  return ''
-})
+// const etaNote = computed(() => {
+//   if (currentStatus.value === 'cooking') return 'Prep in progress'
+//   if (currentStatus.value === 'delivering') return 'Almost there'
+//   if (currentStatus.value === 'picked') return 'Completed'
+//   return ''
+// })
 </script>
 
 <style scoped src="@/styles/customer/order-status-page.css"></style>

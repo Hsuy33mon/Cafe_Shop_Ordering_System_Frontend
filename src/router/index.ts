@@ -70,8 +70,8 @@ const routes = [
         meta: { publicOrderEntry: true },
       },
       {
-        path: 'orders',
-        name: 'orders',
+        path: 'orders/:invoiceId',
+        name: 'orders-invoice',
         component: OrdersPage,
         meta: { requiresOrderSession: true },
       },
@@ -130,7 +130,7 @@ const routes = [
       { path: 'category/table', name: 'category-table', component: CategoryTable },
       { path: 'tags/table', name: 'tags-table', component: TagsTable },
       { path: 'sizes/table', name: 'size-table', component: SizeTable },
-      { path: 'vats',name: 'admin-vat-list', component: AdminVats },
+      { path: 'vats', name: 'admin-vat-list', component: AdminVats },
 
     ],
   },

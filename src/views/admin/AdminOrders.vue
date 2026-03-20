@@ -91,6 +91,8 @@
       </template>
 
       <template #cell-actions="{ row }">
+         <button class="btn-link" @click="openStatusDialog(row)">Update</button>
+
         <button class="btn-link btn-link--danger" @click="cancelOrder(row)">Cancel</button>
       </template>
     </AdminTable>
@@ -462,16 +464,34 @@ function closeStatusDialog() {
   statusTarget.value = null
 }
 
-async function confirmStatusUpdate() {
-  if (!statusTarget.value) return
-  await ordersStore.update(statusTarget.value.id, { status: statusToUpdate.value })
-  statusDialogVisible.value = false
-  statusTarget.value = null
-}
+// async function confirmStatusUpdate() {
+//   if (!statusTarget.value) return
+//   await ordersStore.update(statusTarget.value.id, { status: statusToUpdate.value })
+//   statusDialogVisible.value = false
+//   statusTarget.value = null
+// }
 
 async function cancelOrder(order: OrderRow) {
   if (order.status === 'CONFIRMED') return
   await ordersStore.update(order.id, { status: 'CANCELLED' })
+}
+
+function openStatusDialog(order: OrderRow) {
+  statusTarget.value = order
+  statusToUpdate.value = order.status // preload current status
+  statusDialogVisible.value = true
+}
+
+async function confirmStatusUpdate() {
+  if (!statusTarget.value) return
+
+  await ordersStore.update(statusTarget.value.id, {
+    status: statusToUpdate.value,
+  })
+
+  await ordersStore.fetchAll() // ✅ ADD THIS
+
+  closeStatusDialog()
 }
 </script>
 <style scoped src="@/styles/admin/orders.css"></style>

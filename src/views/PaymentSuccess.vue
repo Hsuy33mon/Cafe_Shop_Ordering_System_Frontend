@@ -43,6 +43,7 @@
 
         <div class="ps-actions">
           <button class="btn btn-ghost" @click="goShop">Back to shop</button>
+           <button class="btn btn-ghost" @click="goOrders">Track Orders</button>
         </div>
 
         <p class="ps-note">If you have any issue, please contact our staff and show this screen.</p>
@@ -52,10 +53,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
+const route = useRoute()
 const router = useRouter()
 const session = useOrderSessionStore()
 
@@ -66,8 +68,26 @@ const placeText = computed(() => {
   return session.orderType === 'ROOM' ? `${no}` : `T-${no}`
 })
 
+const invoiceId = Number(route.query.invoiceId)
+
+if (invoiceId) {
+  let invoiceIds = JSON.parse(localStorage.getItem('invoiceIds') || '[]')
+
+  if (!invoiceIds.includes(invoiceId)) {
+    invoiceIds.push(invoiceId)
+  }
+
+  localStorage.setItem('invoiceIds', JSON.stringify(invoiceIds))
+}
+
 function goOrders() {
-  router.push({ name: 'orders' })
+
+  const invoiceId = Number(route.query.invoiceId)
+
+  router.push({
+    name: 'orders-invoice',
+    params: { invoiceId },
+  })
 }
 
 function goShop() {

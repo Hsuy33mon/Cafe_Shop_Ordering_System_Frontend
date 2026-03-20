@@ -53,13 +53,13 @@ function mapFromApi(x: any): Order {
 
   const orderIngredients: OrderIngredient[] = Array.isArray(x.orderIngredients)
     ? x.orderIngredients.map((oi: any) => ({
-        id: Number(oi.id),
-        ingredientId: Number(oi.ingredientId),
-        ingredientName: oi.ingredientName ?? 'Unknown ingredient',
-        qty: Number(oi.qty ?? 0),
-        price: Number(oi.price ?? 0),
-        note: oi.note ?? null,
-      }))
+      id: Number(oi.id),
+      ingredientId: Number(oi.ingredientId),
+      ingredientName: oi.ingredientName ?? 'Unknown ingredient',
+      qty: Number(oi.qty ?? 0),
+      price: Number(oi.price ?? 0),
+      note: oi.note ?? null,
+    }))
     : []
 
   const baseUnitPrice = Number(x.menuItemSize?.sellPrice ?? x.unitPrice ?? 0)
@@ -81,7 +81,8 @@ function mapFromApi(x: any): Order {
     customerName: x.customerName ?? '-',
     channel: x.orderPlace?.type?.toUpperCase() ?? 'TABLE',
     status: x.status,
-    invoiceId: x.invoiceId != null ? Number(x.invoiceId) : null,
+    invoiceId: Number(x.invoiceId ?? 0),
+    // invoiceId: x.invoice.id != null ? Number(x.invoice.id) : null,
     invoicePaymentStatus: x.invoicePaymentStatus ?? '--',
     customerNote: x.note,
     items: [
@@ -100,6 +101,43 @@ function mapFromApi(x: any): Order {
     serviceCharge: 0,
     tax: 0,
     total: lineTotal,
+  }
+}
+
+function mapCustomerOrder(x: any): Order {
+  const created = new Date(x.createdAt)
+
+  return {
+    id: Number(x.orderId),
+
+    orderPlaceId: null,
+    tableNo: x.tableNo ?? null,
+    channel: x.orderType ?? 'TABLE',
+
+    date: created.toISOString().slice(0, 10),
+    time: created.toTimeString().slice(0, 5),
+
+    customerName: '-',
+
+    status: x.status,
+
+    invoiceId: Number(x.invoiceId),
+    invoicePaymentStatus: '--',
+
+    items: [
+      {
+        name: x.menuItemName,
+        size: x.sizeName,
+        quantity: Number(x.qty),
+        unitPrice: Number(x.unitPrice),
+        total: Number(x.lineTotal),
+      },
+    ],
+
+    subtotal: Number(x.lineTotal),
+    serviceCharge: 0,
+    tax: 0,
+    total: Number(x.lineTotal),
   }
 }
 
@@ -129,7 +167,7 @@ export const useOrdersStore = defineStore('orders', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get('/api/admin/orders',{ skipAuth: true })
+        const res = await http.get('/api/admin/orders', { skipAuth: true })
         this.items = Array.isArray(res.data) ? res.data.map(mapFromApi) : []
         this.lastLoadedAt = new Date().toISOString()
       } catch (e: any) {
@@ -138,12 +176,28 @@ export const useOrdersStore = defineStore('orders', {
         this.loading = false
       }
     },
+    async fetchByInvoice(invoiceId: number) {
+      try {
+        const res = await http.get(`/api/customer/orders/${invoiceId}`, {
+          skipAuth: true
+        })
 
+        // this.items = Array.isArray(res.data)
+        //   ? res.data.map(mapCustomerOrder)
+        //   : []
+
+          const newItems = res.data.map(mapCustomerOrder)
+
+          this.items.push(...newItems)
+      } catch (e) {
+        console.error('Fetch by invoice failed', e)
+      }
+    },
     async fetchById(id: number) {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get(`/api/admin/orders/${id}`,{ skipAuth: true })
+        const res = await http.get(`/api/admin/orders/${id}`, { skipAuth: true })
         this.currentOrder = mapFromApi(res.data)
       } catch (e: any) {
         this.error = axiosErrorMessage(e)
