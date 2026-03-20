@@ -60,19 +60,33 @@
           <div class="divider"></div>
 
           <div class="totals">
-            <div class="row">
-              <span>Subtotal</span>
-              <span>{{ money(subtotal) }}</span>
-            </div>
-            <div class="row">
-              <span>Ingredients</span>
-              <span>{{ money(totalIngredientPrice) }}</span>
-            </div>
-            <div class="row strong">
-              <span>Total</span>
-              <span class="total">{{ money(total) }}</span>
-            </div>
-          </div>
+  <div class="row">
+    <span>Subtotal</span>
+    <span>{{ money(subtotal - totalIngredientPrice) }}</span>
+  </div>
+
+  <div class="row">
+    <span>Ingredients</span>
+    <span>{{ money(totalIngredientPrice) }}</span>
+  </div>
+
+  <!-- ✅ ADD THIS -->
+  <div class="row">
+    <span>
+      VAT
+      <template v-if="vatType === 'PERCENTAGE'">
+        ({{ vatRate }}%)
+      </template>
+    </span>
+    <span>{{ money(vatAmount) }}</span>
+  </div>
+
+  <!-- ✅ CHANGE TOTAL -->
+  <div class="row strong">
+    <span>Total</span>
+    <span class="total">{{ money(grandTotal) }}</span>
+  </div>
+</div>
         </section>
 
         <!-- RIGHT: CONFIRM -->
@@ -94,7 +108,7 @@
             </button>
 
             <button class="btn primary" :disabled="loading || items.length === 0" @click="confirm">
-              <span v-if="!loading">Confirm order — {{ money(total) }}</span>
+              <span v-if="!loading">Confirm order — {{ money(grandTotal) }}</span>
               <span v-else>Placing order...</span>
             </button>
           </div>
@@ -113,6 +127,8 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/useCartStore'
 import { useOrderSessionStore } from '@/stores/orderSession'
 import { usePaymentStore } from '@/stores/usePaymentStore'
+import { useVat } from '@/composables/useVat'
+
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -123,8 +139,11 @@ const errorText = ref('')
 
 const items = computed(() => cartStore.items)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-const subtotal = computed(() => cartStore.cartSubtotal - totalIngredientPrice.value)
-const total = computed(() => subtotal.value + totalIngredientPrice.value)
+const subtotal = computed(() => cartStore.cartSubtotal)
+
+const total = computed(() => subtotal.value)
+
+const { vatRate, vatType, vatAmount, grandTotal } = useVat(total)
 
 const customerName = computed(() => session.customerName || 'Customer')
 const placeLabel = computed(() => (session.orderType === 'ROOM' ? 'Room' : 'Table'))
@@ -138,7 +157,7 @@ const orderPlaceId = computed(() => Number(session.orderPlaceId || session.place
 const loading = computed(() => paymentStore.loading)
 
 function money(v: number) {
-  return `฿${Number(v).toFixed(0)}`
+  return `฿${Number(v).toFixed(2)}`
 }
 
 function goHome() {
@@ -190,6 +209,7 @@ async function confirm() {
     errorText.value = paymentStore.error || e?.message || 'Cash confirm failed'
   }
 }
+
 </script>
 
 <style scoped src="@/styles/customer/cash-pay-page.css"></style>

@@ -130,21 +130,37 @@ export const useMenuItemsStore = defineStore('menuItems', {
       }
     },
 
-    async updateStatus(id: number, status: ProductStatus) {
-      this.loading = true
-      this.error = null
-      try {
-        await http.patch(`/api/admin/menu-items/${id}/status`, { status })
+    // async updateStatus(id: number, status: ProductStatus) {
+    //   this.loading = true
+    //   this.error = null
+    //   try {
+    //     await http.patch(`/api/admin/menu-items/${id}/status`, { status })
 
-        const idx = this.items.findIndex((x) => x.id === id)
-        if (idx !== -1) this.items[idx] = { ...this.items[idx], status }
-      } catch (e: any) {
-        this.error = axiosErrorMessage(e)
-        throw e
-      } finally {
-        this.loading = false
-      }
-    },
+    //     const idx = this.items.findIndex((x) => x.id === id)
+    //     if (idx !== -1) this.items[idx] = { ...this.items[idx], status }
+    //   } catch (e: any) {
+    //     this.error = axiosErrorMessage(e)
+    //     throw e
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
+    async updateStatus(id: number, status: ProductStatus) {
+  const res = await http.put(`/api/admin/menu-items/${id}/status`, {
+    status,
+  })
+
+  const index = this.items.findIndex(i => i.id === id)
+
+  if (index !== -1) {
+    this.items[index] = {
+      ...this.items[index],
+      status,
+    }
+  }
+
+  return res.data
+},
 
     async remove(id: number) {
       this.loading = true

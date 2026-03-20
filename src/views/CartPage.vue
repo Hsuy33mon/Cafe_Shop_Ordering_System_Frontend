@@ -82,14 +82,29 @@
                 <span>{{ formatMoney(totalIngredientPrice) }}</span>
               </div>
 
-              <div class="totals-divider"></div>
+              <div class="totals-row">
+                <span>
+                  VAT
+                  <template v-if="vatType === 'PERCENTAGE'">
+                    ({{ vatRate }}%)
+                  </template>
+                </span>
+                <span>{{ formatMoney(vatAmount) }}</span>
+              </div>
 
+              <div class="totals-divider"></div>
               <div class="totals-row totals-row--strong">
+                <span>Grand Total</span>
+                <span class="total-highlight">
+                  {{ formatMoney(grandTotal) }}
+                </span>
+              </div>
+              <!-- <div class="totals-row totals-row--strong">
                 <span>Total</span>
                 <span class="total-highlight">
                   {{ formatMoney(subtotal - totalIngredientPrice + totalIngredientPrice) }}
                 </span>
-              </div>
+              </div> -->
             </div>
 
             <div class="summary-actions">
@@ -110,17 +125,34 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/useCartStore'
+import { http } from '@/lib/http'
+import { useVat } from '@/composables/useVat'
 
 const router = useRouter()
 const cartStore = useCartStore()
 
 const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
-const total = computed(() => cartStore.totalPrice)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
+
+const total = computed(() => subtotal.value)
+
+const { vatRate, vatType, vatAmount, grandTotal } = useVat(total)
+
+// onMounted(async () => {
+//   try {
+//     const res = await http.get('/api/admin/vats/default')
+
+//     vatRate.value = res.data.vatRate
+//     vatType.value = res.data.taxType
+//   } catch (e) {
+//     console.error('Failed to load VAT', e)
+//   }
+// })
+
 
 function goToPayment() {
   router.push('/payment')
@@ -151,7 +183,7 @@ function decreaseQty(item: any) {
 }
 
 function formatMoney(value: number): string {
-  return `฿${value.toFixed(0)}`
+  return `฿${value.toFixed(2)}`
 }
 
 function goToMenu() {

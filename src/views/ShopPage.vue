@@ -109,13 +109,22 @@
                   <span class="amount">{{ item.price }}</span>
                 </div>
                 <!-- IF NOT IN CART -->
-                <button v-if="!getCartItem(item.id)" class="item-btn" @click="addToCart(item)">
+                <!-- <button v-if="!getCartItem(item.id)" class="item-btn" @click="addToCart(item)">
                   Add to bag
-                </button>
+                </button> -->
+                <button
+  v-if="!getCartItem(item.id)"
+  class="item-btn"
+  @click="addToCart(item)"
+  :disabled="item.status === 'OUT_OF_STOCK'"
+>
+  {{ item.status === 'OUT_OF_STOCK' ? 'Out of stock' : 'Add to bag' }}
+</button>
 
                 <!-- IF IN CART -->
                 <div v-else class="qty-control">
-                  <button @click="decreaseQty(item.id)">-</button>
+                  <!-- <button @click="decreaseQty(item.id)">-</button> -->
+                  <button @click="decreaseQty(getCartItem(item.id)?.cartId)">-</button>
                   <span>{{ getCartItem(item.id)?.quantity }}</span>
                   <button @click="increaseQty(getCartItem(item.id)?.cartId)">+</button>
                 </div>
@@ -307,9 +316,37 @@ function getCartItem(id: number) {
   return cartItems.value.find((i) => i.productId === id)
 }
 
-function addToCart(item: any) {
-  const size = item.defaultSize
+// function addToCart(item: any) {
+//   const size = item.defaultSize
 
+//   if (!size) return
+
+//   cartStore.addItem({
+//     productId: item.id,
+//     name: item.name,
+//     description: item.description,
+//     imageUrl: item.imageUrl,
+
+//     sizeId: size.id,
+//     sizeName: size.shortName,
+//     ingredients: [],
+
+//     quantity: 1,
+
+//     unitPrice: size.sellPrice,
+//     totalPrice: size.sellPrice,
+//     totalIngredientPrice: 0,
+//   })
+// }
+
+function addToCart(item: any) {
+  // 🚨 BLOCK OUT OF STOCK
+  if (item.status === 'OUT_OF_STOCK') {
+    console.warn('Item is out of stock')
+    return
+  }
+
+  const size = item.defaultSize
   if (!size) return
 
   cartStore.addItem({
@@ -329,6 +366,7 @@ function addToCart(item: any) {
     totalIngredientPrice: 0,
   })
 }
+
 function increaseQty(cartId?: number) {
   if (!cartId) return
   cartStore.increaseQty(cartId)

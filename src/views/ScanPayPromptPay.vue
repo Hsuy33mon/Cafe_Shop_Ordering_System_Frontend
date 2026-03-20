@@ -58,21 +58,35 @@
             <hr class="divider" />
 
             <div class="totals">
-              <div class="totals-row">
-                <span>Subtotal</span>
-                <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
-              </div>
-              <div class="totals-row">
-                <span>Ingredients</span>
-                <span>{{ formatMoney(totalIngredientPrice) }}</span>
-              </div>
-              <div class="totals-row totals-row--strong">
-                <span>Total</span>
-                <span class="total-highlight">{{
-                  formatMoney(subtotal - totalIngredientPrice + totalIngredientPrice)
-                }}</span>
-              </div>
-            </div>
+  <div class="totals-row">
+    <span>Subtotal</span>
+    <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
+  </div>
+
+  <div class="totals-row">
+    <span>Ingredients</span>
+    <span>{{ formatMoney(totalIngredientPrice) }}</span>
+  </div>
+
+  <!-- ✅ ADD VAT -->
+  <div class="totals-row">
+    <span>
+      VAT
+      <template v-if="vatType === 'PERCENTAGE'">
+        ({{ vatRate }}%)
+      </template>
+    </span>
+    <span>{{ formatMoney(vatAmount) }}</span>
+  </div>
+
+  <!-- ✅ FIX TOTAL -->
+  <div class="totals-row totals-row--strong">
+    <span>Total</span>
+    <span class="total-highlight">
+      {{ formatMoney(grandTotal) }}
+    </span>
+  </div>
+</div>
           </div>
         </section>
 
@@ -101,7 +115,7 @@
                   <p class="scan-text">
                     Use your banking app to scan this QR code. Amount:
                     <strong>{{
-                      formatMoney(subtotal - totalIngredientPrice + totalIngredientPrice)
+                      formatMoney(grandTotal)
                     }}</strong>
                   </p>
 
@@ -161,6 +175,7 @@ import { useCartStore } from '../stores/useCartStore'
 import { useOrderSessionStore } from '../stores/orderSession'
 import { usePaymentStore } from '../stores/usePaymentStore'
 import { useWsStore } from '@/stores/useWsStore'
+import { useVat } from '@/composables/useVat'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -171,7 +186,9 @@ const wsStore = useWsStore()
 const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
-const total = computed(() => subtotal.value + totalIngredientPrice.value)
+
+const baseTotal = computed(() => subtotal.value)
+const { vatRate, vatType, vatAmount, grandTotal } = useVat(baseTotal)
 
 const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
 const tableNumber = computed(() => session.placeNumber || '12')
@@ -187,7 +204,7 @@ const paidConfirmed = ref(false)
 const redirected = ref(false)
 
 function formatMoney(value: number): string {
-  return `฿${Number(value).toFixed(0)}`
+  return `฿${Number(value).toFixed(2)}`
 }
 
 async function refreshQr() {

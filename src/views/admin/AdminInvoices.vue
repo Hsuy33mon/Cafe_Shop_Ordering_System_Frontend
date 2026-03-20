@@ -65,7 +65,6 @@
       <!-- Actions -->
       <template #cell-actions="{ row }">
         <button class="btn-link" @click="viewInvoice(row)">View</button>
-        <button class="btn-link btn-link--danger" @click="cancelInvoice(row)">Cancel</button>
       </template>
     </AdminTable>
   </main>

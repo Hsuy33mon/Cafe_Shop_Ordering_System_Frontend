@@ -73,23 +73,37 @@
 
             <!-- totals -->
             <div class="totals">
-              <div class="totals-row">
-                <span>Subtotal</span>
-                <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
-              </div>
+  <div class="totals-row">
+    <span>Subtotal</span>
+    <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
+  </div>
 
-              <div class="totals-row">
-                <span>Ingredients</span>
-                <span>{{ formatMoney(totalIngredientPrice) }}</span>
-              </div>
+  <div class="totals-row">
+    <span>Ingredients</span>
+    <span>{{ formatMoney(totalIngredientPrice) }}</span>
+  </div>
 
-              <div class="totals-row totals-row--strong">
-                <span>Total</span>
-                <span class="total-highlight">
-                  {{ formatMoney(total) }}
-                </span>
-              </div>
-            </div>
+  <!-- VAT -->
+  <div class="totals-row">
+    <span>
+      VAT
+      <template v-if="vatType === 'PERCENTAGE'">
+        ({{ vatRate }}%)
+      </template>
+    </span>
+    <span>{{ formatMoney(vatAmount) }}</span>
+  </div>
+
+  <div class="totals-divider"></div>
+
+  <!-- GRAND TOTAL -->
+  <div class="totals-row totals-row--strong">
+    <span>Grand Total</span>
+    <span class="total-highlight">
+      {{ formatMoney(grandTotal) }}
+    </span>
+  </div>
+</div>
           </div>
         </section>
 
@@ -128,7 +142,7 @@
             <div class="actions">
               <button type="button" class="btn-secondary" @click="goToCheckout">Back</button>
               <button type="button" class="pay-btn" @click="goToPayStep">
-                Continue – {{ formatMoney(total) }}
+                Continue – {{ formatMoney(grandTotal) }}
               </button>
             </div>
           </div>
@@ -143,6 +157,7 @@ import { computed, ref } from 'vue'
 import { useCartStore } from '../stores/useCartStore'
 import { useRouter } from 'vue-router'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { useVat } from '@/composables/useVat'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -150,7 +165,10 @@ const cartStore = useCartStore()
 const items = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.cartSubtotal)
 const totalIngredientPrice = computed(() => cartStore.totalIngredientPrice)
+
 const total = computed(() => subtotal.value)
+
+const { vatRate, vatType, vatAmount, grandTotal } = useVat(total)
 
 const session = useOrderSessionStore()
 session.hydrate()
@@ -169,7 +187,7 @@ const placeNumber = computed(() => session.placeNumber || session.tableNumber ||
 const selectedMethod = ref<PaymentMethod>('promptpay')
 
 function formatMoney(value: number): string {
-  return `฿${value.toFixed(0)}`
+  return `฿${value.toFixed(2)}`
 }
 
 function goToCheckout() {

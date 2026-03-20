@@ -82,8 +82,11 @@
       <template #cell-actions="{ row }">
         <button class="btn-link" @click="editProduct(row)">Edit</button>
         <button class="btn-link btn-link--danger" @click="toggleActive(row)">
+    {{ row.status === 'ACTIVE' ? 'Disable' : 'Activate' }}
+  </button>
+        <!-- <button class="btn-link btn-link--danger" @click="toggleActive(row)">
           {{ row.status === 'Active' ? 'Disable' : 'Activate' }}
-        </button>
+        </button> -->
       </template>
     </AdminTable>
   </main>
@@ -154,10 +157,19 @@ async function toggleActive(row: MenuItem) {
 
   try {
     await menuItemsStore.updateStatus(row.id, next)
-  } catch {
-    // store.error already set
-  }
+  } catch {}
 }
+
+// async function toggleActive(row: MenuItem) {
+//   const next: ProductStatus = row.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+
+//   try {
+//     await menuItemsStore.updateStatus(row.id,{...row,status: next})
+//   } catch {
+//     // store.error already set
+//   }
+// }
+
 
 function statusClass(status: ProductStatus) {
   return {
