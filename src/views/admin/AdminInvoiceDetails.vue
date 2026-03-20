@@ -52,9 +52,6 @@
             <tr>
               <td class="label">Created at</td>
               <td class="value">{{ formatDate(invoice.createdAt) }}</td>
-
-              <td class="label">Tax</td>
-              <td class="value">฿{{ invoice.tax.toFixed(2) }}</td>
             </tr>
 
             <tr>
@@ -67,10 +64,41 @@
             <tr class="summary-row">
               <td></td>
               <td></td>
-
               <td class="label strong">Subtotal</td>
               <td class="value strong">฿{{ invoice.subTotal.toFixed(2) }}</td>
             </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td class="label">
+                {{ 'VAT' }} ({{ invoice.vatRate || 0 }}%)
+              </td>
+              <td class="value">
+                ฿{{ computedVat.toFixed(2) }}
+              </td>
+            </tr>
+
+            <!-- <tr>
+              <td></td>
+              <td></td>
+              <td class="label">Delivery Fee</td>
+              <td class="value">฿{{ invoice.deliveryFee.toFixed(2) }}</td>
+            </tr> -->
+
+            <tr class="grand-row">
+              <td></td>
+              <td></td>
+              <td class="label strong">Grand Total</td>
+              <td class="value strong">฿{{ invoice.grandTotal.toFixed(2) }}</td>
+            </tr>
+            <!-- <tr class="summary-row">
+              <td></td>
+              <td></td>
+
+              <td class="label strong">Subtotal</td>
+              <td class="value strong">฿{{ invoice.subTotal.toFixed(2) }}</td>
+            </tr> -->
 
             <tr class="grand-row">
               <td></td>
@@ -109,11 +137,7 @@
                 <div class="item-name">{{ item.menuItemName }} ({{ item.sizeName }})</div>
 
                 <div v-if="item.ingredientResponses?.length" class="ingredient-list">
-                  <div
-                    v-for="ingredient in item.ingredientResponses"
-                    :key="ingredient.id"
-                    class="ingredient-row"
-                  >
+                  <div v-for="ingredient in item.ingredientResponses" :key="ingredient.id" class="ingredient-row">
                     • {{ ingredient.name }}
                     <span v-if="ingredient.qty"> x{{ ingredient.qty }}</span>
                     <span v-if="ingredient.price != null">
@@ -169,11 +193,8 @@
                     <option value="REFUNDED">REFUNDED</option>
                   </select>
 
-                  <button
-                    class="btn-small"
-                    :disabled="saving[p.id] || editStatus[p.id] === p.status"
-                    @click="updatePaymentStatus(p.id)"
-                  >
+                  <button class="btn-small" :disabled="saving[p.id] || editStatus[p.id] === p.status"
+                    @click="updatePaymentStatus(p.id)">
                     {{ saving[p.id] ? 'Saving...' : 'Update' }}
                   </button>
                 </div>
@@ -196,12 +217,12 @@
   </main>
 </template>
 <script setup lang="ts">
-import { onMounted, computed, reactive, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
+import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
 import { useInvoiceStore } from '@/stores/useInvoiceStore'
 import { usePaymentStore } from '@/stores/usePaymentStore'
-import { printDirectThermalReceipt, type ReceiptData, type ReceiptItem } from '@/lib/thermalPrint'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted, reactive, watchEffect } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
@@ -240,6 +261,8 @@ function getOrderDisplayTotal(item: any): number {
   return num(item.lineTotal)
 }
 
+
+
 const computedSubTotal = computed(() => {
   if (!invoice.value?.orders?.length) return 0
 
@@ -248,10 +271,17 @@ const computedSubTotal = computed(() => {
   }, 0)
 })
 
-const computedGrandTotal = computed(() => {
-  return computedSubTotal.value + num(invoice.value?.tax) + num(invoice.value?.deliveryFee)
+const computedVat = computed(() => {
+  return (computedSubTotal.value * num(invoice.value?.vatRate)) / 100
 })
 
+// const computedGrandTotal = computed(() => {
+//   return (
+//     computedSubTotal.value +
+//     computedVat.value +
+//     num(invoice.value?.deliveryFee)
+//   )
+// })
 function buildReceiptData(invoice: any): ReceiptData {
   const items: ReceiptItem[] = (invoice?.orders || []).map((item: any) => {
     const ingredients = (item.ingredientResponses || []).map((ing: any) => ({
@@ -263,19 +293,19 @@ function buildReceiptData(invoice: any): ReceiptData {
     const qty = num(item.qty || 1)
 
     const ingredientPrice = ingredients.reduce((sum: number, ing: any) => {
-    return sum + num(ing.price) * qty
+      return sum + num(ing.price) * qty
     }, 0)
 
     const ingredientUnitPrice = ingredients.reduce((sum: number, ing: any) => {
-    return sum + num(ing.price) 
+      return sum + num(ing.price)
     }, 0)
-    
+
     const lineTotal = num(item.lineTotal)
-    const unitBasePrice =num(item.unitPrice - ingredientUnitPrice)
-    const totalUnitPrice =num(item.unitPrice - ingredientUnitPrice)*qty
-    console.log("unitBasePrice-->",unitBasePrice)
-    console.log("totalUnitPrice-->",totalUnitPrice)
-    console.log("lineTotal-->",lineTotal)
+    const unitBasePrice = num(item.unitPrice - ingredientUnitPrice)
+    const totalUnitPrice = num(item.unitPrice - ingredientUnitPrice) * qty
+    console.log("unitBasePrice-->", unitBasePrice)
+    console.log("totalUnitPrice-->", totalUnitPrice)
+    console.log("lineTotal-->", lineTotal)
 
     return {
       name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
@@ -288,8 +318,9 @@ function buildReceiptData(invoice: any): ReceiptData {
   })
   const ingredientTotal = items.reduce((sum, item) => sum + num(item.ingredientPrice), 0)
   const subtotal =
-    items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0) 
-  const total = subtotal + ingredientTotal + num(invoice?.tax) + num(invoice?.deliveryFee)
+    items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0)
+  const total = subtotal + ingredientTotal+ num(invoice?.deliveryFee) + computedVat.value
+  
 
   return {
     shopName: '5:1',
@@ -305,6 +336,7 @@ function buildReceiptData(invoice: any): ReceiptData {
     subtotal,
     ingredientTotal,
     total,
+    computedVat
   }
 }
 

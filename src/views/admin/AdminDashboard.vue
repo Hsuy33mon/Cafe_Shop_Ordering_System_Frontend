@@ -2,32 +2,18 @@
   <main class="content">
     <div class="revenue-filter">
       <div class="filter-row">
-        <button
-          v-for="t in ['DAILY', 'MONTHLY']"
-          :key="t"
-          :class="{ active: currentType === t }"
-          @click="changeType(t)"
-        >
+        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
+          @click="changeType(t)">
           {{ t }}
         </button>
 
         <!-- DAILY date picker -->
-        <input
-          v-if="currentType === 'DAILY'"
-          type="date"
-          v-model="selectedDate"
-          @change="fetchWithSelectedPeriod"
-          class="date-input"
-        />
+        <input v-if="currentType === 'DAILY'" type="date" v-model="selectedDate" @change="fetchWithSelectedPeriod"
+          class="date-input" />
 
         <!-- MONTHLY month picker -->
-        <input
-          v-if="currentType === 'MONTHLY'"
-          type="month"
-          v-model="selectedMonth"
-          @change="fetchWithSelectedPeriod"
-          class="date-input"
-        />
+        <input v-if="currentType === 'MONTHLY'" type="month" v-model="selectedMonth" @change="fetchWithSelectedPeriod"
+          class="date-input" />
       </div>
     </div>
 
@@ -43,27 +29,94 @@
     </section>
 
     <!-- MIDDLE ROW: ORDERS + STATS -->
-    <section class="middle-grid">
+     <section class="dashboard-grid">
+  <!-- Revenue -->
+  <div class="card chart-card ">
+    <div class="card-header">
+      <h3>Revenue Trend</h3>
+    </div>
+    <div class="chart-box">
+      <Line :data="chartData" :options="chartOptions" />
+    </div>
+  </div>
+
+  <!-- Profit -->
+  <div class="card chart-card ">
+    <div class="card-header">
+      <h3>Profit Trend</h3>
+    </div>
+    <div class="chart-box">
+      <Line :data="profitChartData" :options="profitChartOptions" />
+    </div>
+  </div>
+
+  <!-- Top Items -->
+  <div class="card chart-card ">
+    <div class="card-header">
+      <h3>Top 5 Best-Selling Items</h3>
+    </div>
+    <div class="chart-box">
+      <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
+    </div>
+  </div>
+
+  <!-- Category -->
+  <div class="card chart-card ">
+    <div class="card-header">
+      <h3>Order Count by Category</h3>
+    </div>
+
+    <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
+      No data
+    </div>
+
+    <div v-else class="chart-box">
+      <Bar :data="categoryChartData" :options="categoryChartOptions" />
+    </div>
+  </div>
+</section>
+    <!-- <section class="middle-grid">
       <div class="revenue-filter">
+        <div class="chart-header">
+          <h3>Revenue Trend</h3>
+        </div>
         <div class="chart-wrapper">
           <Line :data="chartData" :options="chartOptions" />
         </div>
       </div>
 
-      <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
-        No orders count for this period
-      </div>
-      <div v-else class="revenue-filter">
+      <div class="revenue-filter">
         <div class="chart-header">
-          <div>
-            <h3>Order Count by Category</h3>
-          </div>
+          <h3>Profit Trend</h3>
         </div>
         <div class="chart-wrapper">
-          <Bar :data="categoryChartData" :options="categoryChartOptions" />
+          <Line :data="profitChartData" :options="profitChartOptions" />
         </div>
       </div>
-    </section>
+
+      <div class="revenue-filter">
+        <div class="chart-header">
+          <h3>Top 5 Best-Selling Items</h3>
+        </div>
+        <div class="chart-wrapper">
+          <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
+        </div>
+      </div>
+
+        <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
+          No orders count for this period
+        </div>
+        <div v-else class="revenue-filter">
+          <div class="chart-header">
+            <div>
+              <h3>Order Count by Category</h3>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <Bar :data="categoryChartData" :options="categoryChartOptions" />
+          </div>
+        </div>
+    </section> -->
   </main>
 </template>
 
@@ -91,6 +144,7 @@ const dashboardStore = useDashboardStore()
 onMounted(async () => {
   // await dashboardStore.fetchDashboard()
   await fetchWithSelectedPeriod()
+  await dashboardStore.fetchTopItems(currentType.value, currentType.value === 'DAILY' ? selectedDate.value : selectedMonth.value)
 })
 
 const dashboard = computed(() => dashboardStore.dashboard)
@@ -128,15 +182,19 @@ const kpiCards = computed(() => {
       subtext: 'Today gross profit',
     },
     {
+      label: 'Total Sales (฿)',
+      value: `฿${dashboard.value.totalSales?.toLocaleString() || 0}`,
+      subtext:
+        currentType.value === 'DAILY'
+          ? 'Total sales today'
+          : 'Total sales this period',
+    },
+    {
       label: 'Active tables',
       value: dashboard.value.activeTables,
       subtext: `Out of ${dashboard.value.totalTables} tables`,
     },
-    {
-      label: 'Popular item',
-      value: dashboard.value.popularItemName,
-      subtext: `${dashboard.value.todayOrders} orders today`,
-    },
+
   ]
 })
 
@@ -145,6 +203,28 @@ const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
 function changeType(type: 'DAILY' | 'MONTHLY') {
   currentType.value = type
   fetchWithSelectedPeriod()
+}
+
+const topItemsChartData = computed(() => {
+  return {
+    labels: dashboardStore.topItems.map(i => i.name),
+    datasets: [
+      {
+        label: 'Top Items',
+        data: dashboardStore.topItems.map(i => i.quantity),
+        backgroundColor: '#f97316',
+        borderRadius: 8,
+      },
+    ],
+  }
+})
+
+const topItemsChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+  },
 }
 
 const chartData = computed(() => ({
@@ -177,6 +257,48 @@ const chartOptions = computed(() => ({
       title: {
         display: true,
         text: 'Revenue (฿)',
+      },
+      beginAtZero: true,
+    },
+    x: {
+      title: {
+        display: true,
+        text: currentType.value === 'DAILY' ? 'Date' : 'Month',
+      },
+    },
+  },
+}))
+
+const profitChartData = computed(() => ({
+  labels: dashboardStore.profitChart.map((p) =>
+    new Date(p.date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+    }),
+  ),
+  datasets: [
+    {
+      label: 'Profit (฿)',
+      data: dashboardStore.profitChart.map((p) => p.revenue),
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16,185,129,0.2)',
+      tension: 0.4,
+      fill: true,
+    },
+  ],
+}))
+
+const profitChartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: true },
+  },
+  scales: {
+    y: {
+      title: {
+        display: true,
+        text: 'Profit (฿)',
       },
       beginAtZero: true,
     },
@@ -226,11 +348,15 @@ async function fetchWithSelectedPeriod() {
   if (currentType.value === 'DAILY') {
     await dashboardStore.fetchDashboard('DAILY', selectedDate.value)
     await dashboardStore.fetchRevenue('DAILY', selectedDate.value)
+    await dashboardStore.fetchProfit('DAILY', selectedDate.value)
     await dashboardStore.fetchCategoryOrders('DAILY', selectedDate.value)
+    await dashboardStore.fetchTopItems('DAILY', selectedDate.value)
   } else {
     await dashboardStore.fetchDashboard('MONTHLY', selectedMonth.value)
     await dashboardStore.fetchRevenue('MONTHLY', selectedMonth.value)
+    await dashboardStore.fetchProfit('MONTHLY', selectedMonth.value)
     await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
+    await dashboardStore.fetchTopItems('MONTHLY', selectedMonth.value)
   }
 }
 </script>
