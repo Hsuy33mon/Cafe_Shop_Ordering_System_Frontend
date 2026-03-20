@@ -233,6 +233,7 @@ export async function printDirectThermalReceipt(printerName: string, data: Recei
   })
 
   const receipt = buildEscPosReceipt(data)
+  console.log(receipt)
 
   await qz.print(config, [
     {
