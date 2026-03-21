@@ -65,11 +65,12 @@ const orderPlacesStore = useOrderPlacesStore()
 
 const customerName = ref('')
 const errorMsg = ref('')
+const checkingPlace = ref(true)
 
 const orderType = ref<OrderType>('TABLE')
 const placeNumber = ref('')
 
-onMounted(() => {
+onMounted(async () => {
   session.clear()
   session.hydrate?.()
 
@@ -78,21 +79,43 @@ onMounted(() => {
 
   if (routeOrderType !== 'TABLE' && routeOrderType !== 'ROOM') {
     errorMsg.value = 'Invalid order type.'
+    checkingPlace.value = false
     return
   }
 
   if (!routePlaceNumber) {
     errorMsg.value = 'Invalid table or room number.'
+    checkingPlace.value = false
     return
   }
 
   orderType.value = routeOrderType as OrderType
   placeNumber.value = routePlaceNumber
-  customerName.value = session.customerName || ''
+
+  try {
+    const place = await orderPlacesStore.fetchByNo(placeNumber.value)
+
+    if (!place || !place.id) {
+      errorMsg.value = 'Table or room not found.'
+      return
+    }
+
+    if (place.status === 'INACTIVE') {
+      alert('This place is not available. Please choose another space.')
+      router.replace('/')
+      return
+    }
+
+    customerName.value = session.customerName || ''
+  } catch (e) {
+    errorMsg.value = orderPlacesStore.error || 'Failed to load place.'
+  } finally {
+    checkingPlace.value = false
+  }
 })
 
 const canContinue = computed(() => {
-  return customerName.value.trim().length >= 2 && !!placeNumber.value
+  return customerName.value.trim().length >= 2 && !!placeNumber.value && !checkingPlace.value
 })
 
 async function onContinue() {
@@ -110,8 +133,10 @@ async function onContinue() {
       errorMsg.value = 'Table or room not found.'
       return
     }
+
     if (place.status === 'INACTIVE') {
-      errorMsg.value = 'This place is not available.'
+      alert('This place is not available. Please choose another space.')
+      router.replace('/')
       return
     }
 
