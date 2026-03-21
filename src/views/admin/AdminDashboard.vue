@@ -24,7 +24,14 @@
         <!-- WEEKLY date picker -->
         <div v-if="currentType === 'WEEKLY'" class="week-picker">
           <input type="date" v-model="selectedWeek" @change="onWeekChange" class="date-input" />
+        <!-- WEEKLY date picker -->
+        <div v-if="currentType === 'WEEKLY'" class="week-picker">
+          <input type="date" v-model="selectedWeek" @change="onWeekChange" class="date-input" />
 
+          <span class="week-label">
+            {{ weeklyRangeLabel }}
+          </span>
+        </div>
           <span class="week-label">
             {{ weeklyRangeLabel }}
           </span>
@@ -80,6 +87,9 @@
             Top 5 Best-Selling Items
             <span class="period-label">({{ periodLabel }})</span>
           </h3>
+            Top 5 Best-Selling Items
+            <span class="period-label">({{ periodLabel }})</span>
+          </h3>
         </div>
         <div class="chart-box">
           <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
@@ -90,6 +100,9 @@
       <div class="card chart-card">
         <div class="card-header">
           <h3>
+            Number of items sold by category
+            <span class="period-label">({{ periodLabel }})</span>
+          </h3>
             Number of items sold by category
             <span class="period-label">({{ periodLabel }})</span>
           </h3>
@@ -250,17 +263,15 @@ const kpiCards = computed(() => {
 
   return [
     {
-      label: isDaily
-        ? "Today's orders"
-        : isWeekly
-        ? "This week's orders"
-        : "This month's orders",
+      label: isDaily ? "Today's orders" : isWeekly ? "This week's orders" : "This month's orders",
 
       value: dashboard.value.todayOrders,
 
       subtext: isDaily
         ? `vs. ${dashboard.value.yesterdayOrders} yesterday`
         : isWeekly
+          ? `vs. ${dashboard.value.yesterdayOrders} last week`
+          : `vs. ${dashboard.value.yesterdayOrders} last month`,
           ? `vs. ${dashboard.value.yesterdayOrders} last week`
           : `vs. ${dashboard.value.yesterdayOrders} last month`,
     },
@@ -322,13 +333,13 @@ function formatWeekRange(dateStr: string) {
 
 const chartData = computed(() => ({
   labels: dashboardStore.revenueChart.map((p) =>
-  currentType.value === 'WEEKLY'
-    ? formatWeekRange(p.date)
-    : new Date(p.date).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-      })
-),
+    currentType.value === 'WEEKLY'
+      ? formatWeekRange(p.date)
+      : new Date(p.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
+  ),
   datasets: [
     {
       label: 'Revenue (฿)',
@@ -364,6 +375,11 @@ const chartOptions = computed(() => ({
             : currentType.value === 'WEEKLY'
               ? 'Week'
               : 'Month',
+          currentType.value === 'DAILY'
+            ? 'Date'
+            : currentType.value === 'WEEKLY'
+              ? 'Week'
+              : 'Month',
         // text: currentType.value === 'DAILY' ? 'Date' : 'Month',
       },
     },
@@ -372,13 +388,13 @@ const chartOptions = computed(() => ({
 
 const profitChartData = computed(() => ({
   labels: dashboardStore.profitChart.map((p) =>
-  currentType.value === 'WEEKLY'
-    ? formatWeekRange(p.date)
-    : new Date(p.date).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-      })
-),
+    currentType.value === 'WEEKLY'
+      ? formatWeekRange(p.date)
+      : new Date(p.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+        }),
+  ),
   datasets: [
     {
       label: 'Profit (฿)',
@@ -409,6 +425,11 @@ const profitChartOptions = computed(() => ({
       title: {
         display: true,
         text:
+          currentType.value === 'DAILY'
+            ? 'Date'
+            : currentType.value === 'WEEKLY'
+              ? 'Week'
+              : 'Month',
           currentType.value === 'DAILY'
             ? 'Date'
             : currentType.value === 'WEEKLY'
