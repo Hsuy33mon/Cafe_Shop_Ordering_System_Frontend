@@ -70,6 +70,7 @@ const orderType = ref<OrderType>('TABLE')
 const placeNumber = ref('')
 
 onMounted(() => {
+  session.clear()
   session.hydrate?.()
 
   const routeOrderType = String(route.params.orderType || '').toUpperCase()
