@@ -23,19 +23,12 @@
         <!-- WEEKLY date picker -->
         <!-- WEEKLY date picker -->
         <div v-if="currentType === 'WEEKLY'" class="week-picker">
-          <input type="date" v-model="selectedWeek" @change="onWeekChange" class="date-input" />
-        <!-- WEEKLY date picker -->
-        <div v-if="currentType === 'WEEKLY'" class="week-picker">
-          <input type="date" v-model="selectedWeek" @change="onWeekChange" class="date-input" />
+  <input type="date" v-model="selectedWeek" @change="onWeekChange" class="date-input" />
 
-          <span class="week-label">
-            {{ weeklyRangeLabel }}
-          </span>
-        </div>
-          <span class="week-label">
-            {{ weeklyRangeLabel }}
-          </span>
-        </div>
+  <span class="week-label">
+    {{ weeklyRangeLabel }}
+  </span>
+</div>
         <!-- MONTHLY month picker -->
         <input
           v-if="currentType === 'MONTHLY'"
@@ -87,9 +80,6 @@
             Top 5 Best-Selling Items
             <span class="period-label">({{ periodLabel }})</span>
           </h3>
-            Top 5 Best-Selling Items
-            <span class="period-label">({{ periodLabel }})</span>
-          </h3>
         </div>
         <div class="chart-box">
           <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
@@ -103,9 +93,7 @@
             Number of items sold by category
             <span class="period-label">({{ periodLabel }})</span>
           </h3>
-            Number of items sold by category
-            <span class="period-label">({{ periodLabel }})</span>
-          </h3>
+
         </div>
 
         <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">No data</div>
@@ -272,8 +260,6 @@ const kpiCards = computed(() => {
         : isWeekly
           ? `vs. ${dashboard.value.yesterdayOrders} last week`
           : `vs. ${dashboard.value.yesterdayOrders} last month`,
-          ? `vs. ${dashboard.value.yesterdayOrders} last week`
-          : `vs. ${dashboard.value.yesterdayOrders} last month`,
     },
     {
       label: 'Profit (฿)',
@@ -375,11 +361,6 @@ const chartOptions = computed(() => ({
             : currentType.value === 'WEEKLY'
               ? 'Week'
               : 'Month',
-          currentType.value === 'DAILY'
-            ? 'Date'
-            : currentType.value === 'WEEKLY'
-              ? 'Week'
-              : 'Month',
         // text: currentType.value === 'DAILY' ? 'Date' : 'Month',
       },
     },
@@ -430,11 +411,7 @@ const profitChartOptions = computed(() => ({
             : currentType.value === 'WEEKLY'
               ? 'Week'
               : 'Month',
-          currentType.value === 'DAILY'
-            ? 'Date'
-            : currentType.value === 'WEEKLY'
-              ? 'Week'
-              : 'Month',
+          
         // text: currentType.value === 'DAILY' ? 'Date' : 'Month',
       },
     },

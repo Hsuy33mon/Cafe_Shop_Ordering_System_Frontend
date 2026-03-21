@@ -22,10 +22,10 @@
       </RouterLink>
     </nav>
 
-    <div class="sidebar-footer">
+    <!-- <div class="sidebar-footer">
       <p class="sidebar-status-label">Today</p>
       <p class="sidebar-status-value">{{ todaySummary }}</p>
-    </div>
+    </div> -->
   </aside>
 </template>
 
