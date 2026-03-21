@@ -14,7 +14,7 @@
     </div>
 
     <div class="topbar-right">
-      <div class="topbar-search">
+      <!-- <div class="topbar-search">
         <span class="search-icon">🔍</span>
         <input
           :value="search"
@@ -23,20 +23,20 @@
           placeholder="Search orders, customers…"
           @input="onInput"
         />
-      </div>
+      </div> -->
 
       <!-- ✅ LOGOUT MENU BUTTON (no dropdown) -->
       <button class="topbar-action-btn" type="button" @click="logout" aria-label="Logout">
         Logout
       </button>
-
+<!-- 
       <div class="topbar-user">
         <div class="user-initial">M</div>
         <div class="user-meta">
           <span class="user-name">Manager</span>
           <span class="user-role">Cafe admin</span>
         </div>
-      </div>
+      </div> -->
     </div>
   </header>
 </template>

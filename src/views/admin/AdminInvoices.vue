@@ -11,12 +11,7 @@
     <!-- FILTER BAR -->
     <section class="panel panel--filters">
       <div class="filters-row">
-        <input
-          v-model="search"
-          type="text"
-          class="search-input"
-          placeholder="Search by invoice no, customer…"
-        />
+        <input v-model="search" type="text" class="search-input" placeholder="Search by invoice no, customer…" />
 
         <select v-model="statusFilter" class="filter-select">
           <option value="">All statuses</option>
@@ -28,20 +23,22 @@
 
         <select v-model="placeFilter" class="filter-select">
           <option value="">All places</option>
+
+          <option v-for="p in places" :key="p.id" :value="p.no">
+            {{ p.no }} ({{ p.type }})
+          </option>
+        </select>
+        <!-- <select v-model="placeFilter" class="filter-select">
+          <option value="">All places</option>
           <option value="TABLE">Table</option>
           <option value="DELIVERY">Delivery</option>
-        </select>
+        </select> -->
       </div>
     </section>
 
     <!-- INVOICES TABLE -->
-    <AdminTable
-      :columns="invoiceColumns"
-      :rows="filteredInvoices"
-      title="All invoices"
-      :page-size="20"
-      @page-change="onPageChange"
-    >
+    <AdminTable :columns="invoiceColumns" :rows="filteredInvoices" title="All invoices" :page-size="20"
+      @page-change="onPageChange">
       <!-- Total -->
       <template #cell-grandTotal="{ value }"> ฿{{ value.toFixed(2) }} </template>
 
@@ -76,6 +73,9 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import AdminTable, { type TableColumn } from '@/components/admin/AdminTable.vue'
 import { useInvoiceStore } from '@/stores/useInvoiceStore'
+import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
+
+const placeStore = useOrderPlacesStore()
 
 const router = useRouter()
 const store = useInvoiceStore()
@@ -83,8 +83,10 @@ const { invoices } = storeToRefs(store)
 
 onMounted(() => {
   store.fetchAll()
+  placeStore.fetchAll()
 })
 
+const places = computed(() => placeStore.items)
 const invoiceColumns: TableColumn[] = [
   { key: 'invoiceNo', label: 'Invoice No', width: '160px' },
   { key: 'customerName', label: 'Customer' },

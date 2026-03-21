@@ -4,12 +4,8 @@
     <section class="panel panel--filters">
       <div class="filters-row">
         <!-- SEARCH -->
-        <input
-          v-model="search"
-          type="text"
-          class="search-input"
-          placeholder="Search by order #, customer, room, items…"
-        />
+        <input v-model="search" type="text" class="search-input"
+          placeholder="Search by order #, customer, room, items…" />
 
         <!-- DATE RANGE -->
         <div class="date-range">
@@ -277,9 +273,28 @@ const filteredOrders = computed(() => {
       const matchesTable = !tableNoFilter.value || o.tableNo === tableNoFilter.value
 
       let matchesDate = true
-      if (start && end) matchesDate = o.date >= start && o.date <= end
-      else if (start) matchesDate = o.date >= start
-      else if (end) matchesDate = o.date <= end
+
+      if (start || end) {
+        const orderDate = new Date(o.date)
+
+        if (start) {
+          const startDate = new Date(start)
+          startDate.setHours(0, 0, 0, 0)
+
+          if (orderDate < startDate) return false
+        }
+
+        if (end) {
+          const endDate = new Date(end)
+          endDate.setHours(23, 59, 59, 999)
+
+          if (orderDate > endDate) return false
+        }
+      }
+      // let matchesDate = true
+      // if (start && end) matchesDate = o.date >= start && o.date <= end
+      // else if (start) matchesDate = o.date >= start
+      // else if (end) matchesDate = o.date <= end
 
       return (
         matchesSearch &&
