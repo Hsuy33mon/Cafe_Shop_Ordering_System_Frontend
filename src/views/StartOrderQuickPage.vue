@@ -110,6 +110,10 @@ async function onContinue() {
       errorMsg.value = 'Table or room not found.'
       return
     }
+    if (place.status === 'INACTIVE') {
+      errorMsg.value = 'This place is not available.'
+      return
+    }
 
     session.setSession({
       customerName: customerName.value.trim(),
