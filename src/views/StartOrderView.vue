@@ -153,17 +153,15 @@ import { computed, onBeforeUnmount, onMounted, ref, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
 
 type OrderType = 'TABLE' | 'ROOM'
 
 const router = useRouter()
 const route = useRoute()
 const session = useOrderSessionStore()
+const orderPlacesStore = useOrderPlacesStore()
 
-/**
- * ✅ Keep local inputs separate from store,
- * ✅ but DON'T clear store automatically on mount.
- */
 const customerName = ref(session.customerName || '')
 const orderType = ref<OrderType>((session.orderType as OrderType) || 'TABLE')
 const placeNumber = ref(session.placeNumber || session.tableNumber || '')
@@ -176,10 +174,8 @@ const videoEl = ref<HTMLVideoElement | null>(null)
 
 let reader: BrowserMultiFormatReader | null = null
 let activeStream: MediaStream | null = null
-
 let handledScan = false
 
-// responsive
 const isMobile = ref(false)
 function updateIsMobile() {
   isMobile.value = window.matchMedia('(max-width: 768px)').matches
@@ -189,8 +185,6 @@ onMounted(() => {
   updateIsMobile()
   window.addEventListener('resize', updateIsMobile)
   session.hydrate?.()
-
-  session.clear()
 
   customerName.value = session.customerName || ''
   orderType.value = (session.orderType as OrderType) || 'TABLE'
@@ -223,15 +217,6 @@ function toggleManual() {
   manualMode.value = !manualMode.value
 }
 
-/**
- * Supports QR formats like:
- *  - "TABLE:12"
- *  - "ROOM:305"
- *  - "?type=TABLE&no=12"
- *  - "?table=12"
- *  - "?room=305"
- *  - "12" (fallback -> uses current selected orderType)
- */
 function parseOrderFromQr(text: string): { orderType?: OrderType; placeNumber?: string } | null {
   const t = text.trim()
 
@@ -284,7 +269,6 @@ async function openScanner() {
     await videoEl.value.play()
 
     await reader.decodeFromStream(activeStream, videoEl.value, (result) => {
-      // ✅ prevent multiple triggers
       if (!result || handledScan) return
       handledScan = true
 
@@ -293,7 +277,7 @@ async function openScanner() {
 
       if (!parsed?.placeNumber) {
         errorMsg.value = 'QR detected, but format is not supported.'
-        handledScan = false // allow rescan
+        handledScan = false
         return
       }
 
@@ -302,7 +286,6 @@ async function openScanner() {
 
       closeScanner()
 
-      // If name already filled, continue immediately
       if (customerName.value.trim().length >= 2) onContinue()
       else errorMsg.value = `${placeLabel.value} detected. Please enter your name to continue.`
     })
@@ -334,7 +317,7 @@ function stopScanner() {
   } catch {}
 }
 
-function onContinue() {
+async function onContinue() {
   errorMsg.value = ''
 
   if (customerName.value.trim().length < 2) {
@@ -352,16 +335,26 @@ function onContinue() {
     return
   }
 
-  // ✅ save into store (should persist to localStorage inside store)
-  session.setSession({
-    customerName: customerName.value.trim(),
-    orderType: orderType.value,
-    placeNumber: placeNumber.value.trim(),
-  })
+  try {
+    const place = await orderPlacesStore.fetchByNo(placeNumber.value.trim())
 
-  const redirect = (route.query.redirect as string) || '/shop'
-  router.replace(redirect)
+    if (!place || !place.id) {
+      errorMsg.value = 'Table or room not found.'
+      return
+    }
+
+    session.setSession({
+      customerName: customerName.value.trim(),
+      orderType: orderType.value,
+      placeNumber: placeNumber.value.trim(),
+      orderPlaceId: place.id,
+    })
+
+    const redirect = (route.query.redirect as string) || '/shop'
+    router.replace(redirect)
+  } catch (e) {
+    errorMsg.value = orderPlacesStore.error || 'Failed to continue.'
+  }
 }
 </script>
-
 <style scoped src="@/styles/customer/start-order.css"></style>
