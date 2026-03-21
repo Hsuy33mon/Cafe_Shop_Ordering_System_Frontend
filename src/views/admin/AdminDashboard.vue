@@ -250,7 +250,11 @@ const kpiCards = computed(() => {
 
   return [
     {
-      label: isDaily ? "Today's orders" : isWeekly ? "This week's orders" : "This month's orders",
+      label: isDaily
+        ? "Today's orders"
+        : isWeekly
+        ? "This week's orders"
+        : "This month's orders",
 
       value: dashboard.value.todayOrders,
 
@@ -318,13 +322,13 @@ function formatWeekRange(dateStr: string) {
 
 const chartData = computed(() => ({
   labels: dashboardStore.revenueChart.map((p) =>
-    currentType.value === 'WEEKLY'
-      ? formatWeekRange(p.date)
-      : new Date(p.date).toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-        }),
-  ),
+  currentType.value === 'WEEKLY'
+    ? formatWeekRange(p.date)
+    : new Date(p.date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      })
+),
   datasets: [
     {
       label: 'Revenue (฿)',
@@ -368,13 +372,13 @@ const chartOptions = computed(() => ({
 
 const profitChartData = computed(() => ({
   labels: dashboardStore.profitChart.map((p) =>
-    currentType.value === 'WEEKLY'
-      ? formatWeekRange(p.date)
-      : new Date(p.date).toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-        }),
-  ),
+  currentType.value === 'WEEKLY'
+    ? formatWeekRange(p.date)
+    : new Date(p.date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      })
+),
   datasets: [
     {
       label: 'Profit (฿)',
