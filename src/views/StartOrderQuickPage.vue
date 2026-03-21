@@ -102,7 +102,6 @@ onMounted(async () => {
 
     if (place.status === 'INACTIVE') {
       alert('This place is not available. Please choose another space.')
-      router.replace('/')
       return
     }
 
