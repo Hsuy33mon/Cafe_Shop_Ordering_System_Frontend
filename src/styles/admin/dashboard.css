@@ -350,3 +350,20 @@
   color: #9ca3af;
 }
 
+.week-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.week-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.period-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 400;
+  margin-left: 6px;
+}

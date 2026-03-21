@@ -2,7 +2,7 @@
   <main class="content">
     <div class="revenue-filter">
       <div class="filter-row">
-        <button v-for="t in ['DAILY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
+        <button v-for="t in ['DAILY', 'WEEKLY', 'MONTHLY']" :key="t" :class="{ active: currentType === t }"
           @click="changeType(t)">
           {{ t }}
         </button>
@@ -11,6 +11,20 @@
         <input v-if="currentType === 'DAILY'" type="date" v-model="selectedDate" @change="fetchWithSelectedPeriod"
           class="date-input" />
 
+        <!-- WEEKLY date picker -->
+      <!-- WEEKLY date picker -->
+<div v-if="currentType === 'WEEKLY'" class="week-picker">
+  <input
+    type="date"
+    v-model="selectedWeek"
+    @change="onWeekChange"
+    class="date-input"
+  />
+
+  <span class="week-label">
+    {{ weeklyRangeLabel }}
+  </span>
+</div>
         <!-- MONTHLY month picker -->
         <input v-if="currentType === 'MONTHLY'" type="month" v-model="selectedMonth" @change="fetchWithSelectedPeriod"
           class="date-input" />
@@ -29,52 +43,58 @@
     </section>
 
     <!-- MIDDLE ROW: ORDERS + STATS -->
-     <section class="dashboard-grid">
-  <!-- Revenue -->
-  <div class="card chart-card ">
-    <div class="card-header">
-      <h3>Revenue Trend</h3>
-    </div>
-    <div class="chart-box">
-      <Line :data="chartData" :options="chartOptions" />
-    </div>
-  </div>
+    <section class="dashboard-grid">
+      <!-- Revenue -->
+      <div class="card chart-card ">
+        <div class="card-header">
+          <h3>Revenue Trend</h3>
+        </div>
+        <div class="chart-box">
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
+      </div>
 
-  <!-- Profit -->
-  <div class="card chart-card ">
-    <div class="card-header">
-      <h3>Profit Trend</h3>
-    </div>
-    <div class="chart-box">
-      <Line :data="profitChartData" :options="profitChartOptions" />
-    </div>
-  </div>
+      <!-- Profit -->
+      <div class="card chart-card ">
+        <div class="card-header">
+          <h3>Profit Trend</h3>
+        </div>
+        <div class="chart-box">
+          <Line :data="profitChartData" :options="profitChartOptions" />
+        </div>
+      </div>
 
-  <!-- Top Items -->
-  <div class="card chart-card ">
-    <div class="card-header">
-      <h3>Top 5 Best-Selling Items</h3>
-    </div>
-    <div class="chart-box">
-      <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
-    </div>
-  </div>
+      <!-- Top Items -->
+      <div class="card chart-card ">
+        <div class="card-header">
+          <h3>
+  Top 5 Best-Selling Items
+  <span class="period-label">({{ periodLabel }})</span>
+</h3>
+        </div>
+        <div class="chart-box">
+          <Bar :data="topItemsChartData" :options="topItemsChartOptions" />
+        </div>
+      </div>
 
-  <!-- Category -->
-  <div class="card chart-card ">
-    <div class="card-header">
-      <h3>Number of items sold by category</h3>
-    </div>
+      <!-- Category -->
+      <div class="card chart-card ">
+        <div class="card-header">
+          <h3>
+  Number of items sold by category
+  <span class="period-label">({{ periodLabel }})</span>
+</h3>
+        </div>
 
-    <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
-      No data
-    </div>
+        <div v-if="dashboardStore.categoryChart.length === 0" class="empty-chart">
+          No data
+        </div>
 
-    <div v-else class="chart-box">
-      <Bar :data="categoryChartData" :options="categoryChartOptions" />
-    </div>
-  </div>
-</section>
+        <div v-else class="chart-box">
+          <Bar :data="categoryChartData" :options="categoryChartOptions" />
+        </div>
+      </div>
+    </section>
     <!-- <section class="middle-grid">
       <div class="revenue-filter">
         <div class="chart-header">
@@ -150,6 +170,7 @@ onMounted(async () => {
 const dashboard = computed(() => dashboardStore.dashboard)
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const selectedMonth = ref(new Date().toISOString().slice(0, 7))
+const selectedWeek = ref(new Date().toISOString().split('T')[0])
 
 const categoryChartData = computed(() => {
   const sorted = [...dashboardStore.categoryChart].sort((a, b) => b.orderCount - a.orderCount)
@@ -167,14 +188,73 @@ const categoryChartData = computed(() => {
   }
 })
 
+
+const currentType = ref<'DAILY' | 'WEEKLY' | 'MONTHLY'>('DAILY')
+
+function changeType(type: 'DAILY' | 'WEEKLY' | 'MONTHLY') {
+  currentType.value = type
+  fetchWithSelectedPeriod()
+}
+
+
+function getMonday(date: Date) {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = (day === 0 ? -6 : 1 - day)
+  d.setDate(d.getDate() + diff)
+  return d
+}
+
+function onWeekChange() {
+  if (!selectedWeek.value) return
+
+  const date = new Date(selectedWeek.value)
+
+  const monday = getMonday(date)
+
+  // 🔥 force input to always be Monday
+  selectedWeek.value = monday.toISOString().split('T')[0]
+
+  fetchWithSelectedPeriod()
+}
+const weeklyRangeLabel = computed(() => {
+  if (currentType.value !== 'WEEKLY') return ''
+
+  const monday = getMonday(new Date(selectedWeek.value))
+
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+
+  const format = (d: Date) =>
+    d.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+    })
+
+  return `${format(monday)} – ${format(sunday)}`
+})
+
 const kpiCards = computed(() => {
   if (!dashboard.value) return []
 
+  const isDaily = currentType.value === 'DAILY'
+  const isWeekly = currentType.value === 'WEEKLY'
+
   return [
     {
-      label: "Today's orders",
+      label: isDaily
+        ? "Today's orders"
+        : isWeekly
+        ? "This week's orders"
+        : "This month's orders",
+
       value: dashboard.value.todayOrders,
-      subtext: `vs. ${dashboard.value.yesterdayOrders} yesterday`,
+
+      subtext: isDaily
+        ? `vs. ${dashboard.value.yesterdayOrders} yesterday`
+        : isWeekly
+        ? `vs. ${dashboard.value.yesterdayOrders} last week`
+        : `vs. ${dashboard.value.yesterdayOrders} last month`,
     },
     {
       label: 'Profit (฿)',
@@ -194,16 +274,8 @@ const kpiCards = computed(() => {
       value: dashboard.value.activeTables,
       subtext: `Out of ${dashboard.value.totalTables} tables`,
     },
-
   ]
 })
-
-const currentType = ref<'DAILY' | 'MONTHLY'>('DAILY')
-
-function changeType(type: 'DAILY' | 'MONTHLY') {
-  currentType.value = type
-  fetchWithSelectedPeriod()
-}
 
 const topItemsChartData = computed(() => {
   return {
@@ -227,13 +299,31 @@ const topItemsChartOptions = {
   },
 }
 
-const chartData = computed(() => ({
-  labels: dashboardStore.revenueChart.map((p) =>
-    new Date(p.date).toLocaleDateString('en-GB', {
+function formatWeekRange(dateStr: string) {
+  const date = new Date(dateStr)
+
+  const monday = new Date(date)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+
+  const format = (d: Date) =>
+    d.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
-    }),
-  ),
+    })
+
+  return `${format(monday)}–${format(sunday)}`
+}
+
+const chartData = computed(() => ({
+  labels: dashboardStore.revenueChart.map((p) =>
+  currentType.value === 'WEEKLY'
+    ? formatWeekRange(p.date)
+    : new Date(p.date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      })
+),
   datasets: [
     {
       label: 'Revenue (฿)',
@@ -263,7 +353,13 @@ const chartOptions = computed(() => ({
     x: {
       title: {
         display: true,
-        text: currentType.value === 'DAILY' ? 'Date' : 'Month',
+        text:
+  currentType.value === 'DAILY'
+    ? 'Date'
+    : currentType.value === 'WEEKLY'
+    ? 'Week'
+    : 'Month',
+        // text: currentType.value === 'DAILY' ? 'Date' : 'Month',
       },
     },
   },
@@ -271,11 +367,13 @@ const chartOptions = computed(() => ({
 
 const profitChartData = computed(() => ({
   labels: dashboardStore.profitChart.map((p) =>
-    new Date(p.date).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-    }),
-  ),
+  currentType.value === 'WEEKLY'
+    ? formatWeekRange(p.date)
+    : new Date(p.date).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      })
+),
   datasets: [
     {
       label: 'Profit (฿)',
@@ -305,7 +403,13 @@ const profitChartOptions = computed(() => ({
     x: {
       title: {
         display: true,
-        text: currentType.value === 'DAILY' ? 'Date' : 'Month',
+        text:
+  currentType.value === 'DAILY'
+    ? 'Date'
+    : currentType.value === 'WEEKLY'
+    ? 'Week'
+    : 'Month',
+        // text: currentType.value === 'DAILY' ? 'Date' : 'Month',
       },
     },
   },
@@ -345,19 +449,80 @@ const categoryChartOptions = {
 }
 
 async function fetchWithSelectedPeriod() {
+  let period = ''
+
   if (currentType.value === 'DAILY') {
-    await dashboardStore.fetchDashboard('DAILY', selectedDate.value)
-    await dashboardStore.fetchRevenue('DAILY', selectedDate.value)
-    await dashboardStore.fetchProfit('DAILY', selectedDate.value)
-    await dashboardStore.fetchCategoryOrders('DAILY', selectedDate.value)
-    await dashboardStore.fetchTopItems('DAILY', selectedDate.value)
+    period = selectedDate.value
+  } else if (currentType.value === 'WEEKLY') {
+    period = selectedWeek.value
+    // period = selectedWeek.value.toISOString().split('T')[0]
+    // period = weekStart.value
   } else {
-    await dashboardStore.fetchDashboard('MONTHLY', selectedMonth.value)
-    await dashboardStore.fetchRevenue('MONTHLY', selectedMonth.value)
-    await dashboardStore.fetchProfit('MONTHLY', selectedMonth.value)
-    await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
-    await dashboardStore.fetchTopItems('MONTHLY', selectedMonth.value)
+    period = selectedMonth.value
   }
+
+  await dashboardStore.fetchDashboard(currentType.value, period)
+  await dashboardStore.fetchRevenue(currentType.value, period)
+  await dashboardStore.fetchProfit(currentType.value, period)
+  await dashboardStore.fetchCategoryOrders(currentType.value, period)
+  await dashboardStore.fetchTopItems(currentType.value, period)
 }
+
+const periodLabel = computed(() => {
+  if (currentType.value === 'DAILY') {
+    const d = new Date(selectedDate.value)
+    return d.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+
+  if (currentType.value === 'WEEKLY') {
+    const date = new Date(selectedWeek.value)
+
+    const day = date.getDay()
+    const diff = (day === 0 ? -6 : 1 - day)
+
+    const monday = new Date(date)
+    monday.setDate(date.getDate() + diff)
+
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+
+    const format = (d: Date) =>
+      d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      })
+
+    return `${format(monday)} – ${format(sunday)}`
+  }
+
+  // MONTHLY
+  const [year, month] = selectedMonth.value.split('-')
+  const d = new Date(Number(year), Number(month) - 1)
+
+  return d.toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  })
+})
+
+// async function fetchWithSelectedPeriod() {
+//   if (currentType.value === 'DAILY') {
+//     await dashboardStore.fetchDashboard('DAILY', selectedDate.value)
+//     await dashboardStore.fetchRevenue('DAILY', selectedDate.value)
+//     await dashboardStore.fetchProfit('DAILY', selectedDate.value)
+//     await dashboardStore.fetchCategoryOrders('DAILY', selectedDate.value)
+//     await dashboardStore.fetchTopItems('DAILY', selectedDate.value)
+//   } else {
+//     await dashboardStore.fetchDashboard('MONTHLY', selectedMonth.value)
+//     await dashboardStore.fetchRevenue('MONTHLY', selectedMonth.value)
+//     await dashboardStore.fetchProfit('MONTHLY', selectedMonth.value)
+//     await dashboardStore.fetchCategoryOrders('MONTHLY', selectedMonth.value)
+//     await dashboardStore.fetchTopItems('MONTHLY', selectedMonth.value)
+//   }
+// }
 </script>
 <style scoped src="@/styles/admin/dashboard.css"></style>

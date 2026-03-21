@@ -51,7 +51,7 @@ export const useDashboardStore = defineStore('dashboard', {
   }),
 
   actions: {
-    async fetchDashboard(type: 'DAILY' | 'MONTHLY', period?: string) {
+    async fetchDashboard(type: 'DAILY' | 'WEEKLY'| 'MONTHLY', period?: string) {
       try {
         this.loading = true
 
@@ -66,25 +66,25 @@ export const useDashboardStore = defineStore('dashboard', {
         this.loading = false
       }
     },
-    async fetchRevenue(type: 'DAILY' | 'MONTHLY', period?: string) {
+    async fetchRevenue(type: 'DAILY' | 'WEEKLY'| 'MONTHLY', period?: string) {
       const res = await http.get('/api/admin/dashboard/revenue', {
         params: { type, period },
       })
       this.revenueChart = res.data
     },
-    async fetchProfit(type: 'DAILY' | 'MONTHLY', period?: string) {
+    async fetchProfit(type: 'DAILY' | 'WEEKLY'| 'MONTHLY', period?: string) {
       const res = await http.get('/api/admin/dashboard/profit', {
         params: { type, period },
       })
       this.profitChart = res.data
     },
-    async fetchTopItems(type: 'DAILY' | 'MONTHLY', period?: string) {
+    async fetchTopItems(type: 'DAILY' | 'WEEKLY'| 'MONTHLY', period?: string) {
   const res = await http.get('/api/admin/dashboard/top-items', {
     params: { type, period },
   })
   this.topItems = res.data
 },
-    async fetchCategoryOrders(type: 'DAILY' | 'MONTHLY', period ?: string) {
+    async fetchCategoryOrders(type: 'DAILY' | 'WEEKLY'| 'MONTHLY', period ?: string) {
       const res = await http.get('/api/admin/dashboard/category-orders', {
         params: { type, period },
       })
