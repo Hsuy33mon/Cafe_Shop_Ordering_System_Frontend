@@ -27,7 +27,8 @@
             <div>
               <p class="summary-label">Room / Table</p>
               <p class="summary-value">
-                {{ mappedOrder.roomOrTable }} <span v-if="mappedOrder.type">· {{ mappedOrder.type }}</span>
+                {{ mappedOrder.roomOrTable }}
+                <span v-if="mappedOrder.type">· {{ mappedOrder.type }}</span>
               </p>
             </div>
             <div>
@@ -168,7 +169,6 @@ const currentStatus = computed(() => {
   return 'approved'
 })
 
-
 const mappedOrder = computed(() => {
   if (!order.value) return null
 
@@ -179,12 +179,9 @@ const mappedOrder = computed(() => {
     placedAt: `${order.value.date} ${order.value.time}`,
     estimatedReady: '20–25 min',
     total: order.value.total,
-    items: order.value.items.map(
-      (i) => `${i.quantity} × ${i.name}`
-    ),
+    items: order.value.items.map((i) => `${i.quantity} × ${i.name}`),
   }
 })
-
 
 const progressPercent = computed(() => {
   const list = steps.value

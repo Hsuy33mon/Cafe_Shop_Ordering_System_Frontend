@@ -53,13 +53,13 @@ function mapFromApi(x: any): Order {
 
   const orderIngredients: OrderIngredient[] = Array.isArray(x.orderIngredients)
     ? x.orderIngredients.map((oi: any) => ({
-      id: Number(oi.id),
-      ingredientId: Number(oi.ingredientId),
-      ingredientName: oi.ingredientName ?? 'Unknown ingredient',
-      qty: Number(oi.qty ?? 0),
-      price: Number(oi.price ?? 0),
-      note: oi.note ?? null,
-    }))
+        id: Number(oi.id),
+        ingredientId: Number(oi.ingredientId),
+        ingredientName: oi.ingredientName ?? 'Unknown ingredient',
+        qty: Number(oi.qty ?? 0),
+        price: Number(oi.price ?? 0),
+        note: oi.note ?? null,
+      }))
     : []
 
   const baseUnitPrice = Number(x.menuItemSize?.sellPrice ?? x.unitPrice ?? 0)
@@ -179,16 +179,16 @@ export const useOrdersStore = defineStore('orders', {
     async fetchByInvoice(invoiceId: number) {
       try {
         const res = await http.get(`/api/customer/orders/${invoiceId}`, {
-          skipAuth: true
+          skipAuth: true,
         })
 
         // this.items = Array.isArray(res.data)
         //   ? res.data.map(mapCustomerOrder)
         //   : []
 
-          const newItems = res.data.map(mapCustomerOrder)
+        const newItems = res.data.map(mapCustomerOrder)
 
-          this.items.push(...newItems)
+        this.items.push(...newItems)
       } catch (e) {
         console.error('Fetch by invoice failed', e)
       }

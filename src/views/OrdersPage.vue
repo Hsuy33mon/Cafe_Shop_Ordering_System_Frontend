@@ -68,11 +68,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="order in filteredOrders"
-                  :key="order.id"
-                  class="orders-row"
-                >
+                <tr v-for="order in filteredOrders" :key="order.id" class="orders-row">
                   <td class="cell-id">#{{ order.id }}</td>
                   <td>
                     <div class="cell-main">{{ order.date }}</div>
@@ -145,7 +141,7 @@
 
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
-import { onMounted, computed, ref,onUnmounted } from 'vue'
+import { onMounted, computed, ref, onUnmounted } from 'vue'
 import { useOrdersStore } from '../stores/useOrderStore'
 
 let interval: any = null
@@ -171,7 +167,6 @@ onMounted(async () => {
     }
   }, 5000)
 })
-
 
 onUnmounted(() => {
   if (interval) clearInterval(interval)
@@ -215,13 +210,7 @@ function mapType(type: string): OrderType {
   return 'table'
 }
 
-type OrderStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'PREPARING'
-  | 'READY'
-  | 'COMPLETED'
-  | 'CANCELLED'
+type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED'
 type OrderType = 'room' | 'table' | 'pickup'
 
 type OrderOverview = {
@@ -235,19 +224,12 @@ type OrderOverview = {
   status: OrderStatus
 }
 
-
 const router = useRouter()
 
 const searchText = ref('')
 
 const selectedStatus = ref<
-  'all' |
-  'PENDING' |
-  'CONFIRMED' |
-  'PREPARING' |
-  'READY' |
-  'COMPLETED' |
-  'CANCELLED'
+  'all' | 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED'
 >('all')
 
 const statusTabs = [
@@ -259,7 +241,6 @@ const statusTabs = [
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ]
-
 
 const filteredOrders = computed(() => {
   const text = searchText.value.trim().toLowerCase()

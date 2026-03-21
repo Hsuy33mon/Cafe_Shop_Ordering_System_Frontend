@@ -79,16 +79,16 @@ export const useCartStore = defineStore('cart', () => {
   )
 
   function addItem(item: Omit<CartItem, 'cartId'> & { status?: string }) {
-  if (item.status === 'OUT_OF_STOCK') {
-    console.warn('Cannot add out of stock item')
-    return
-  }
+    if (item.status === 'OUT_OF_STOCK') {
+      console.warn('Cannot add out of stock item')
+      return
+    }
 
-  items.value.push({
-    ...item,
-    cartId: Date.now() + Math.random(),
-  })
-}
+    items.value.push({
+      ...item,
+      cartId: Date.now() + Math.random(),
+    })
+  }
   // function addItem(item: Omit<CartItem, 'cartId'>) {
   //   items.value.push({
   //     ...item,
@@ -106,19 +106,19 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function decreaseQty(cartId: number) {
-  const index = items.value.findIndex((i) => i.cartId === cartId)
+    const index = items.value.findIndex((i) => i.cartId === cartId)
 
-  if (index === -1) return
+    if (index === -1) return
 
-  const item = items.value[index]
+    const item = items.value[index]
 
-  if (item.quantity > 1) {
-    item.quantity--
-  } else {
-    // 🔥 remove item when qty = 1
-    items.value.splice(index, 1)
+    if (item.quantity > 1) {
+      item.quantity--
+    } else {
+      // 🔥 remove item when qty = 1
+      items.value.splice(index, 1)
+    }
   }
-}
   // function decreaseQty(cartId: number) {
   //   const item = items.value.find((i) => i.cartId === cartId)
   //   if (item && item.quantity > 1) item.quantity--

@@ -146,21 +146,21 @@ export const useMenuItemsStore = defineStore('menuItems', {
     //   }
     // },
     async updateStatus(id: number, status: ProductStatus) {
-  const res = await http.put(`/api/admin/menu-items/${id}/status`, {
-    status,
-  })
+      const res = await http.put(`/api/admin/menu-items/${id}/status`, {
+        status,
+      })
 
-  const index = this.items.findIndex(i => i.id === id)
+      const index = this.items.findIndex((i) => i.id === id)
 
-  if (index !== -1) {
-    this.items[index] = {
-      ...this.items[index],
-      status,
-    }
-  }
+      if (index !== -1) {
+        this.items[index] = {
+          ...this.items[index],
+          status,
+        }
+      }
 
-  return res.data
-},
+      return res.data
+    },
 
     async remove(id: number) {
       this.loading = true

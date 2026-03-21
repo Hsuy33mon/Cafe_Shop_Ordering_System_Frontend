@@ -76,6 +76,20 @@ export const useOrderPlacesStore = defineStore('orderPlaces', {
         this.loading = false
       }
     },
+    async fetchByNo(no: string) {
+      this.loading = true
+      this.error = null
+
+      try {
+        const res = await http.get(`/api/admin/order-places/tableNumber/${encodeURIComponent(no)}`)
+        return res.data ? mapFromApi(res.data) : null
+      } catch (e: any) {
+        this.error = axiosErrorMessage(e)
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
 
     async fetchWithCurrentOrders() {
       this.loading = true

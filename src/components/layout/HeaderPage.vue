@@ -58,18 +58,26 @@ function isActiveOrders() {
       </div>
 
       <nav class="nav-links">
-        <RouterLink to="/" class="nav-link" :class="{ 'nav-link--active': isActive('/') }">Home</RouterLink>
+        <RouterLink to="/" class="nav-link" :class="{ 'nav-link--active': isActive('/') }"
+          >Home</RouterLink
+        >
         <RouterLink to="/shop" class="nav-link" :class="{ 'nav-link--active': isActive('/shop') }">
           Menu
         </RouterLink>
-        <RouterLink :to="{ name: 'orders-invoice', params: { invoiceId: currentInvoiceId } }" class="nav-link"
-          :class="{ 'nav-link--active': isActiveOrders() }">
+        <RouterLink
+          :to="{ name: 'orders-invoice', params: { invoiceId: currentInvoiceId } }"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActiveOrders() }"
+        >
           My Orders
         </RouterLink>
-        <RouterLink to="/contact" class="nav-link" :class="{ 'nav-link--active': isActive('/contact') }">
+        <RouterLink
+          to="/contact"
+          class="nav-link"
+          :class="{ 'nav-link--active': isActive('/contact') }"
+        >
           Contact
         </RouterLink>
-
       </nav>
 
       <!-- RIGHT: PURCHASE / BAG + HAMBURGER -->
@@ -80,8 +88,12 @@ function isActiveOrders() {
           <span v-if="cartCount > 0" class="purchase-count">{{ cartCount }}</span>
         </button>
 
-        <button type="button" class="menu-btn" :class="{ 'menu-btn--open': isMobileMenuOpen }"
-          @click="isMobileMenuOpen = !isMobileMenuOpen">
+        <button
+          type="button"
+          class="menu-btn"
+          :class="{ 'menu-btn--open': isMobileMenuOpen }"
+          @click="isMobileMenuOpen = !isMobileMenuOpen"
+        >
           <span class="menu-bar" />
           <span class="menu-bar" />
         </button>
@@ -92,8 +104,14 @@ function isActiveOrders() {
     </div>
     <transition name="fade-down">
       <nav v-if="isMobileMenuOpen" class="mobile-menu">
-        <RouterLink to="/" class="mobile-link" :class="{ 'mobile-link--active': isActive('/') }" @click="closeMobile">
-          Home</RouterLink>
+        <RouterLink
+          to="/"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/') }"
+          @click="closeMobile"
+        >
+          Home</RouterLink
+        >
         <!-- <RouterLink
           to="/about"
           class="mobile-link"
@@ -101,12 +119,27 @@ function isActiveOrders() {
           @click="closeMobile"
           >About</RouterLink
         > -->
-        <RouterLink to="/shop" class="mobile-link" :class="{ 'mobile-link--active': isActive('/shop') }"
-          @click="closeMobile">Menu</RouterLink>
-        <RouterLink to="/contact" class="mobile-link" :class="{ 'mobile-link--active': isActive('/contact') }"
-          @click="closeMobile">Contact</RouterLink>
-        <RouterLink to="/cart" class="mobile-link" :class="{ 'mobile-link--active': isActive('/cart') }"
-          @click="closeMobile">Cart</RouterLink>
+        <RouterLink
+          to="/shop"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/shop') }"
+          @click="closeMobile"
+          >Menu</RouterLink
+        >
+        <RouterLink
+          to="/contact"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/contact') }"
+          @click="closeMobile"
+          >Contact</RouterLink
+        >
+        <RouterLink
+          to="/cart"
+          class="mobile-link"
+          :class="{ 'mobile-link--active': isActive('/cart') }"
+          @click="closeMobile"
+          >Cart</RouterLink
+        >
       </nav>
     </transition>
   </header>

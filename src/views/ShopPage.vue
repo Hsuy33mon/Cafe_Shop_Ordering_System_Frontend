@@ -113,13 +113,13 @@
                   Add to bag
                 </button> -->
                 <button
-  v-if="!getCartItem(item.id)"
-  class="item-btn"
-  @click="addToCart(item)"
-  :disabled="item.status === 'OUT_OF_STOCK'"
->
-  {{ item.status === 'OUT_OF_STOCK' ? 'Out of stock' : 'Add to bag' }}
-</button>
+                  v-if="!getCartItem(item.id)"
+                  class="item-btn"
+                  @click="addToCart(item)"
+                  :disabled="item.status === 'OUT_OF_STOCK'"
+                >
+                  {{ item.status === 'OUT_OF_STOCK' ? 'Out of stock' : 'Add to bag' }}
+                </button>
 
                 <!-- IF IN CART -->
                 <div v-else class="qty-control">

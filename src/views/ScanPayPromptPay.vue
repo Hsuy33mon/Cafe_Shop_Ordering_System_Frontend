@@ -58,35 +58,33 @@
             <hr class="divider" />
 
             <div class="totals">
-  <div class="totals-row">
-    <span>Subtotal</span>
-    <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
-  </div>
+              <div class="totals-row">
+                <span>Subtotal</span>
+                <span>{{ formatMoney(subtotal - totalIngredientPrice) }}</span>
+              </div>
 
-  <div class="totals-row">
-    <span>Ingredients</span>
-    <span>{{ formatMoney(totalIngredientPrice) }}</span>
-  </div>
+              <div class="totals-row">
+                <span>Ingredients</span>
+                <span>{{ formatMoney(totalIngredientPrice) }}</span>
+              </div>
 
-  <!-- ✅ ADD VAT -->
-  <div class="totals-row">
-    <span>
-      VAT
-      <template v-if="vatType === 'PERCENTAGE'">
-        ({{ vatRate }}%)
-      </template>
-    </span>
-    <span>{{ formatMoney(vatAmount) }}</span>
-  </div>
+              <!-- ✅ ADD VAT -->
+              <div class="totals-row">
+                <span>
+                  VAT
+                  <template v-if="vatType === 'PERCENTAGE'"> ({{ vatRate }}%) </template>
+                </span>
+                <span>{{ formatMoney(vatAmount) }}</span>
+              </div>
 
-  <!-- ✅ FIX TOTAL -->
-  <div class="totals-row totals-row--strong">
-    <span>Total</span>
-    <span class="total-highlight">
-      {{ formatMoney(grandTotal) }}
-    </span>
-  </div>
-</div>
+              <!-- ✅ FIX TOTAL -->
+              <div class="totals-row totals-row--strong">
+                <span>Total</span>
+                <span class="total-highlight">
+                  {{ formatMoney(grandTotal) }}
+                </span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -114,9 +112,7 @@
 
                   <p class="scan-text">
                     Use your banking app to scan this QR code. Amount:
-                    <strong>{{
-                      formatMoney(grandTotal)
-                    }}</strong>
+                    <strong>{{ formatMoney(grandTotal) }}</strong>
                   </p>
 
                   <div class="scan-meta">
@@ -191,8 +187,7 @@ const baseTotal = computed(() => subtotal.value)
 const { vatRate, vatType, vatAmount, grandTotal } = useVat(baseTotal)
 
 const customerName = computed(() => session.customerName || 'MIN PYAE HEIN')
-const tableNumber = computed(() => session.placeNumber || '12')
-const orderPlaceId = computed(() => Number(tableNumber.value) || 1)
+const orderPlaceId = computed(() => session.orderPlaceId || 1)
 const promptPayId = computed(() => '0891234567')
 
 const payment = computed(() => paymentStore.payment)

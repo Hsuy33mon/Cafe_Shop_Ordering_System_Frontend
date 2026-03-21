@@ -7,9 +7,7 @@
         <p class="menu-subtitle">Manage VAT configurations for CafeShop.</p>
       </div>
 
-      <button class="menu-btn-primary" @click="goToCreateVat">
-        + Add VAT
-      </button>
+      <button class="menu-btn-primary" @click="goToCreateVat">+ Add VAT</button>
     </section>
 
     <!-- FILTER -->
@@ -31,16 +29,9 @@
     </section>
 
     <!-- TABLE -->
-    <AdminTable
-      :columns="vatColumns"
-      :rows="filteredVats"
-      title="All VAT"
-      :page-size="10"
-    >
+    <AdminTable :columns="vatColumns" :rows="filteredVats" title="All VAT" :page-size="10">
       <!-- Rate -->
-      <template #cell-vatRate="{ value }">
-        {{ value }}%
-      </template>
+      <template #cell-vatRate="{ value }"> {{ value }}% </template>
 
       <!-- Type -->
       <template #cell-taxType="{ value }">
@@ -51,22 +42,14 @@
 
       <!-- Active -->
       <template #cell-isActive="{ value }">
-        <span
-          class="status-pill"
-          :class="value ? 'status-pill--new' : 'status-pill--cancel'"
-        >
+        <span class="status-pill" :class="value ? 'status-pill--new' : 'status-pill--cancel'">
           {{ value ? 'Active' : 'Inactive' }}
         </span>
       </template>
 
       <!-- Default -->
       <template #cell-isDefault="{ value }">
-        <span
-          v-if="value"
-          class="status-pill status-pill--ready"
-        >
-          Default
-        </span>
+        <span v-if="value" class="status-pill status-pill--ready"> Default </span>
       </template>
 
       <!-- Created -->
@@ -77,54 +60,44 @@
       <!-- Actions -->
       <template #cell-actions="{ row }">
         <button class="btn-link" @click="editVat(row)">Edit</button>
-        <button class="btn-link btn-link--danger" @click="deleteVat(row)">
-          Delete
-        </button>
+        <button class="btn-link btn-link--danger" @click="deleteVat(row)">Delete</button>
       </template>
     </AdminTable>
   </main>
   <!-- VAT MODAL -->
-<div v-if="showModal" class="modal-backdrop">
-  <div class="modal">
-    <h2>{{ isEditMode ? 'Update VAT' : 'Create VAT' }}</h2>
+  <div v-if="showModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>{{ isEditMode ? 'Update VAT' : 'Create VAT' }}</h2>
 
-    <input v-model="form.vatCode" type="text" placeholder="VAT Code" class="modal-input" />
-    <input v-model="form.vatName" type="text" placeholder="VAT Name" class="modal-input" />
+      <input v-model="form.vatCode" type="text" placeholder="VAT Code" class="modal-input" />
+      <input v-model="form.vatName" type="text" placeholder="VAT Name" class="modal-input" />
 
-    <select v-model="form.taxType" class="modal-input">
-      <option value="PERCENTAGE">Percentage (%)</option>
-      <option value="FIXED">Fixed (฿)</option>
-    </select>
+      <select v-model="form.taxType" class="modal-input">
+        <option value="PERCENTAGE">Percentage (%)</option>
+        <option value="FIXED">Fixed (฿)</option>
+      </select>
 
-    <input
-      v-model.number="form.vatRate"
-      type="number"
-      placeholder="Rate"
-      class="modal-input"
-    />
+      <input v-model.number="form.vatRate" type="number" placeholder="Rate" class="modal-input" />
 
-    <label class="modal-checkbox">
-      <input type="checkbox" v-model="form.isActive" />
-      Active
-    </label>
+      <label class="modal-checkbox">
+        <input type="checkbox" v-model="form.isActive" />
+        Active
+      </label>
 
-    <label class="modal-checkbox">
-      <input type="checkbox" v-model="form.isDefault" />
-      Default VAT
-    </label>
+      <label class="modal-checkbox">
+        <input type="checkbox" v-model="form.isDefault" />
+        Default VAT
+      </label>
 
-    <div class="modal-actions">
-      <button class="btn-link btn-link--danger" @click="closeModal">Cancel</button>
+      <div class="modal-actions">
+        <button class="btn-link btn-link--danger" @click="closeModal">Cancel</button>
 
-      <button
-        class="menu-btn-primary"
-        @click="saveVat"
-      >
-        {{ isEditMode ? 'Update' : 'Create' }}
-      </button>
+        <button class="menu-btn-primary" @click="saveVat">
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup lang="ts">
@@ -139,7 +112,6 @@ const showModal = ref(false)
 const isEditMode = ref(false)
 const selectedVat = ref<any>(null)
 
-
 const form = ref({
   vatCode: '',
   vatName: '',
@@ -151,7 +123,6 @@ const form = ref({
 onMounted(() => {
   store.fetchAll()
 })
-
 
 /* TABLE COLUMNS */
 const vatColumns: TableColumn[] = [
@@ -174,13 +145,9 @@ const filteredVats = computed(() => {
 
   return vats.value.filter((v) => {
     const matchesSearch =
-      !s ||
-      v.vatCode?.toLowerCase().includes(s) ||
-      v.vatName?.toLowerCase().includes(s)
+      !s || v.vatCode?.toLowerCase().includes(s) || v.vatName?.toLowerCase().includes(s)
 
-    const matchesStatus =
-      !statusFilter.value ||
-      String(v.isActive) === statusFilter.value
+    const matchesStatus = !statusFilter.value || String(v.isActive) === statusFilter.value
 
     return matchesSearch && matchesStatus
   })
@@ -190,7 +157,6 @@ const filteredVats = computed(() => {
 function deleteVat(row: any) {
   store.deleteVat(row.id)
 }
-
 
 async function saveVat() {
   if (isEditMode.value) {

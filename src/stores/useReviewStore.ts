@@ -38,7 +38,7 @@ export const useReviewStore = defineStore('reviews', {
       this.loading = true
       this.error = null
       try {
-        const res = await http.get(`/api/menu-items/${menuItemId}/reviews`,{ skipAuth: true })
+        const res = await http.get(`/api/menu-items/${menuItemId}/reviews`, { skipAuth: true })
         const data = res.data
 
         const list = Array.isArray(data)
@@ -67,7 +67,7 @@ export const useReviewStore = defineStore('reviews', {
     ) {
       this.error = null
       try {
-        await http.post(`/api/menu-items/${menuItemId}/reviews`, payload,{ skipAuth: true })
+        await http.post(`/api/menu-items/${menuItemId}/reviews`, payload, { skipAuth: true })
 
         // refresh after submit
         await this.fetchByMenuItem(menuItemId)

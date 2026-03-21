@@ -43,7 +43,7 @@
 
         <div class="ps-actions">
           <button class="btn btn-ghost" @click="goShop">Back to shop</button>
-           <button class="btn btn-ghost" @click="goOrders">Track Orders</button>
+          <button class="btn btn-ghost" @click="goOrders">Track Orders</button>
         </div>
 
         <p class="ps-note">If you have any issue, please contact our staff and show this screen.</p>
@@ -65,7 +65,7 @@ const customerName = computed(() => session.customerName || 'Customer')
 const placeLabel = computed(() => (session.orderType === 'ROOM' ? 'Room' : 'Table'))
 const placeText = computed(() => {
   const no = session.placeNumber || session.tableNumber || '-'
-  return session.orderType === 'ROOM' ? `${no}` : `T-${no}`
+  return session.orderType === 'ROOM' ? `Room ${no}` : `Table ${no}`
 })
 
 const invoiceId = Number(route.query.invoiceId)
@@ -81,7 +81,6 @@ if (invoiceId) {
 }
 
 function goOrders() {
-
   const invoiceId = Number(route.query.invoiceId)
 
   router.push({

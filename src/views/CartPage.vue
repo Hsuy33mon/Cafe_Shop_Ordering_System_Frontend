@@ -85,9 +85,7 @@
               <div class="totals-row">
                 <span>
                   VAT
-                  <template v-if="vatType === 'PERCENTAGE'">
-                    ({{ vatRate }}%)
-                  </template>
+                  <template v-if="vatType === 'PERCENTAGE'"> ({{ vatRate }}%) </template>
                 </span>
                 <span>{{ formatMoney(vatAmount) }}</span>
               </div>
@@ -152,7 +150,6 @@ const { vatRate, vatType, vatAmount, grandTotal } = useVat(total)
 //     console.error('Failed to load VAT', e)
 //   }
 // })
-
 
 function goToPayment() {
   router.push('/payment')

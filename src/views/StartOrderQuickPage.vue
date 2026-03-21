@@ -35,7 +35,13 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" type="submit" :disabled="!canContinue">Continue</button>
+          <button
+            class="btn btn-primary"
+            type="submit"
+            :disabled="!canContinue || orderPlacesStore.loading"
+          >
+            {{ orderPlacesStore.loading ? 'Loading...' : 'Continue' }}
+          </button>
         </div>
 
         <p v-if="errorMsg" class="error">{{ errorMsg }}</p>
@@ -48,12 +54,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderSessionStore } from '@/stores/orderSession'
+import { useOrderPlacesStore } from '@/stores/useOrderPlaceStore'
 
 type OrderType = 'TABLE' | 'ROOM'
 
 const route = useRoute()
 const router = useRouter()
 const session = useOrderSessionStore()
+const orderPlacesStore = useOrderPlacesStore()
 
 const customerName = ref('')
 const errorMsg = ref('')
@@ -86,7 +94,7 @@ const canContinue = computed(() => {
   return customerName.value.trim().length >= 2 && !!placeNumber.value
 })
 
-function onContinue() {
+async function onContinue() {
   errorMsg.value = ''
 
   if (customerName.value.trim().length < 2) {
@@ -94,14 +102,27 @@ function onContinue() {
     return
   }
 
-  session.setSession({
-    customerName: customerName.value.trim(),
-    orderType: orderType.value,
-    placeNumber: placeNumber.value,
-  })
+  try {
+    const place = await orderPlacesStore.fetchByNo(placeNumber.value)
 
-  const redirect = (route.query.redirect as string) || '/shop'
-  router.replace(redirect)
+    if (!place || !place.id) {
+      errorMsg.value = 'Table or room not found.'
+      return
+    }
+
+    session.setSession({
+      customerName: customerName.value.trim(),
+      orderType: orderType.value,
+      placeNumber: placeNumber.value,
+      tableNumber: placeNumber.value,
+      orderPlaceId: place.id,
+    })
+
+    const redirect = (route.query.redirect as string) || '/shop'
+    router.replace(redirect)
+  } catch (e) {
+    errorMsg.value = orderPlacesStore.error || 'Failed to continue.'
+  }
 }
 </script>
 

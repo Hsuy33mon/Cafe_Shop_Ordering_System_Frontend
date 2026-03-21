@@ -22,20 +22,20 @@ export function useVat(totalRef: any) {
   onMounted(fetchVat)
 
   function round2(n: number) {
-  return Math.round(n * 100) / 100
-}
-
-const vatAmount = computed(() => {
-  if (vatType.value === 'PERCENTAGE') {
-    return round2((totalRef.value * vatRate.value) / 100)
-  } else {
-    return vatRate.value
+    return Math.round(n * 100) / 100
   }
-})
 
-const grandTotal = computed(() => {
-  return round2(totalRef.value + vatAmount.value)
-})
+  const vatAmount = computed(() => {
+    if (vatType.value === 'PERCENTAGE') {
+      return round2((totalRef.value * vatRate.value) / 100)
+    } else {
+      return vatRate.value
+    }
+  })
+
+  const grandTotal = computed(() => {
+    return round2(totalRef.value + vatAmount.value)
+  })
 
   return {
     vatRate,

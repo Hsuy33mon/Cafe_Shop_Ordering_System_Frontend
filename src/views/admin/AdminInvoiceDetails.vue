@@ -71,12 +71,8 @@
             <tr>
               <td></td>
               <td></td>
-              <td class="label">
-                {{ 'VAT' }} ({{ invoice.vatRate || 0 }}%)
-              </td>
-              <td class="value">
-                ฿{{ invoice.tax }}
-              </td>
+              <td class="label">{{ 'VAT' }} ({{ invoice.vatRate || 0 }}%)</td>
+              <td class="value">฿{{ invoice.tax }}</td>
             </tr>
 
             <!-- <tr>
@@ -137,7 +133,11 @@
                 <div class="item-name">{{ item.menuItemName }} ({{ item.sizeName }})</div>
 
                 <div v-if="item.ingredientResponses?.length" class="ingredient-list">
-                  <div v-for="ingredient in item.ingredientResponses" :key="ingredient.id" class="ingredient-row">
+                  <div
+                    v-for="ingredient in item.ingredientResponses"
+                    :key="ingredient.id"
+                    class="ingredient-row"
+                  >
                     • {{ ingredient.name }}
                     <span v-if="ingredient.qty"> x{{ ingredient.qty }}</span>
                     <span v-if="ingredient.price != null">
@@ -193,8 +193,11 @@
                     <option value="REFUNDED">REFUNDED</option>
                   </select>
 
-                  <button class="btn-small" :disabled="saving[p.id] || editStatus[p.id] === p.status"
-                    @click="updatePaymentStatus(p.id)">
+                  <button
+                    class="btn-small"
+                    :disabled="saving[p.id] || editStatus[p.id] === p.status"
+                    @click="updatePaymentStatus(p.id)"
+                  >
                     {{ saving[p.id] ? 'Saving...' : 'Update' }}
                   </button>
                 </div>
@@ -261,8 +264,6 @@ function getOrderDisplayTotal(item: any): number {
   return num(item.lineTotal)
 }
 
-
-
 const computedSubTotal = computed(() => {
   if (!invoice.value?.orders?.length) return 0
 
@@ -303,9 +304,9 @@ function buildReceiptData(invoice: any): ReceiptData {
     const lineTotal = num(item.lineTotal)
     const unitBasePrice = num(item.unitPrice - ingredientUnitPrice)
     const totalUnitPrice = num(item.unitPrice - ingredientUnitPrice) * qty
-    console.log("unitBasePrice-->", unitBasePrice)
-    console.log("totalUnitPrice-->", totalUnitPrice)
-    console.log("lineTotal-->", lineTotal)
+    console.log('unitBasePrice-->', unitBasePrice)
+    console.log('totalUnitPrice-->', totalUnitPrice)
+    console.log('lineTotal-->', lineTotal)
 
     return {
       name: `${item.menuItemName}${item.sizeName ? ` (${item.sizeName})` : ''}`,
@@ -317,13 +318,12 @@ function buildReceiptData(invoice: any): ReceiptData {
     }
   })
   const ingredientTotal = items.reduce((sum, item) => sum + num(item.ingredientPrice), 0)
-  const subtotal =
-    items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0)
-  const total = subtotal + ingredientTotal+ num(invoice?.deliveryFee) + computedVat.value
-  console.log("computeVat->",computedVat.value)
-  const vatAmount=computedVat.value
-  const vatRate=invoice.vatRate
-  console.log("vat rate--->",vatRate)
+  const subtotal = items.reduce((sum, item) => sum + num(item.basePrice) * num(item.qty), 0)
+  const total = subtotal + ingredientTotal + num(invoice?.deliveryFee) + computedVat.value
+  console.log('computeVat->', computedVat.value)
+  const vatAmount = computedVat.value
+  const vatRate = invoice.vatRate
+  console.log('vat rate--->', vatRate)
 
   return {
     shopName: '5:1',

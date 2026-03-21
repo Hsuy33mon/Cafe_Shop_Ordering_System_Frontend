@@ -36,7 +36,6 @@ export const useVatStore = defineStore('vat', {
           isActive: v.isActive ?? v.active,
           isDefault: v.isDefault ?? v.default,
         }))
-
       } catch (err: any) {
         this.error = err.message
       } finally {
@@ -46,7 +45,6 @@ export const useVatStore = defineStore('vat', {
 
     async createVat(payload: Partial<Vat>) {
       try {
-
         console.log('SEND:', payload)
 
         await http.post('/api/admin/vats', payload)
@@ -55,7 +53,6 @@ export const useVatStore = defineStore('vat', {
         console.error('CREATE ERROR:', err.response?.data || err.message)
         this.error = err.message
       }
-
     },
 
     async updateVat(id: number, payload: Partial<Vat>) {

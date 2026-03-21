@@ -131,7 +131,6 @@ const routes = [
       { path: 'tags/table', name: 'tags-table', component: TagsTable },
       { path: 'sizes/table', name: 'size-table', component: SizeTable },
       { path: 'vats', name: 'admin-vat-list', component: AdminVats },
-
     ],
   },
 ]
