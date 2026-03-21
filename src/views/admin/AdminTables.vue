@@ -24,12 +24,13 @@
           placeholder="Search by table, area, note…"
         />
 
-        <select v-model="areaFilter" class="filter-select">
-          <option value="">All areas</option>
-          <option v-for="area in areaOptions" :key="area" :value="area">
-            {{ area }}
-          </option>
-        </select>
+
+<select v-model="areaFilter" class="filter-select">
+  <option value="">All areas</option>
+  <option v-for="area in areaOptionsFixed" :key="area" :value="area">
+    {{ area }}
+  </option>
+</select>
 
         <select v-model="statusFilter" class="filter-select">
           <option value="">All statuses</option>
@@ -86,7 +87,13 @@
 
         <label class="modal-label">
           Area / zone
-          <input v-model="createForm.area" class="modal-input" placeholder="Eg. Garden" />
+          <select v-model="createForm.area" class="modal-select">
+  <option disabled value="">Select area</option>
+  <option v-for="opt in areaOptionsFixed" :key="opt" :value="opt">
+    {{ opt }}
+  </option>
+</select>
+          <!-- <input v-model="createForm.area" class="modal-input" placeholder="Eg. Garden" /> -->
         </label>
 
         <label class="modal-label">
@@ -138,7 +145,12 @@
 
         <label class="modal-label">
           Area / zone
-          <input v-model="editForm!.area" class="modal-input" />
+          <select v-model="editForm!.area" class="modal-select">
+  <option v-for="opt in areaOptionsFixed" :key="opt" :value="opt">
+    {{ opt }}
+  </option>
+</select>
+          <!-- <input v-model="editForm!.area" class="modal-input" /> -->
         </label>
 
         <label class="modal-label">
@@ -266,6 +278,7 @@ import { useOrderPlacesStore, type OrderPlaceStatus } from '@/stores/useOrderPla
 
 type TableStatus = 'Active' | 'Inactive'
 const statusOptions: TableStatus[] = ['Active', 'Inactive']
+const areaOptionsFixed = ['TABLE', 'ROOM']
 
 type TableEditForm = {
   id: number
@@ -278,7 +291,7 @@ type TableEditForm = {
 
 type TableCreateForm = {
   name: string
-  area: string
+  area: 'TABLE',
   capacity: number
   status: TableStatus
   note?: string
