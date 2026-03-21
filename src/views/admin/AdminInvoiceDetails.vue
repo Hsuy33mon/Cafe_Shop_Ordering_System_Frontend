@@ -322,6 +322,8 @@ function buildReceiptData(invoice: any): ReceiptData {
   const total = subtotal + ingredientTotal+ num(invoice?.deliveryFee) + computedVat.value
   console.log("computeVat->",computedVat.value)
   const vatAmount=computedVat.value
+  const vatRate=invoice.vatRate
+  console.log("vat rate--->",vatRate)
 
   return {
     shopName: '5:1',
@@ -338,7 +340,7 @@ function buildReceiptData(invoice: any): ReceiptData {
     ingredientTotal,
     total,
     vatAmount,
-    vatRate: invoice.value?.vatRate,
+    vatRate,
   }
 }
 
