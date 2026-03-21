@@ -23,6 +23,9 @@ export type OrderPlace = {
   seat?: number
   status: OrderPlaceStatus
   activeOrders: Order[]
+  qrValue?: string
+  qrUrl?: string
+  qrPng?: string
 }
 
 function mapFromApi(x: any): OrderPlace {
@@ -34,6 +37,9 @@ function mapFromApi(x: any): OrderPlace {
     seat: x.seat != null ? Number(x.seat) : undefined,
     status: x.status,
     activeOrders: Array.isArray(x.activeOrders) ? x.activeOrders : [],
+    qrValue: x.qrValue,
+    qrUrl: x.qrUrl,
+    qrPng: x.qrPng,
   }
 }
 

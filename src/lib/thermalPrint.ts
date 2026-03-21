@@ -28,6 +28,7 @@ export type ReceiptData = {
   ingredientTotal: number
   total: number
   vatAmount: number
+  vatRate: number
 }
 
 let qzInitialized = false
@@ -121,7 +122,7 @@ function buildEscPosReceipt(data: ReceiptData) {
   out.push(separator())
   out.push(line('Subtotal', money(data.subtotal)))
   out.push(line('Ingredient', money(data.ingredientTotal)))
-  out.push(line('VAT', money(data.vatAmount)))
+  out.push(line(`VAT (${data.vatRate}%)`, money(data.vatAmount)))
   out.push(line('Total', money(data.total)))
   out.push(separator())
 

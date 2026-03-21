@@ -61,14 +61,15 @@
         </span>
       </template>
 
-      <template #cell-actions="{ row }">
-        <div class="table-actions">
-          <button class="btn-link btn-link--primary" @click="openEditDialog(row)">Update</button>
-          <button v-if="row.currentOrder" class="btn-link" @click="goToOrder(row)">
-            View order
-          </button>
-        </div>
-      </template>
+<template #cell-actions="{ row }">
+  <div class="table-actions">
+    <button class="btn-link btn-link--primary" @click="openDetailsDialog(row)">Details</button>
+    <button class="btn-link btn-link--primary" @click="openEditDialog(row)">Update</button>
+    <button v-if="row.currentOrder" class="btn-link" @click="goToOrder(row)">
+      View order
+    </button>
+  </div>
+</template>
     </AdminTable>
 
     <!-- CREATE TABLE DIALOG -->
@@ -174,6 +175,92 @@
       </div>
     </div>
   </main>
+  <!-- DETAILS DIALOG -->
+<div v-if="detailsDialogVisible && selectedTable" class="modal-backdrop">
+  <div class="modal modal--details">
+    <div class="details-header">
+      <div>
+        <h3 class="modal-title">Table details</h3>
+        <p class="details-subtitle">Scan QR to open this order place.</p>
+      </div>
+      <button class="modal-close-btn" @click="closeDetailsDialog">✕</button>
+    </div>
+
+    <div class="details-grid">
+      <div class="details-info">
+        <div class="details-row">
+          <span class="details-label">Table No</span>
+          <span class="details-value">{{ selectedTable.name }}</span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Area / Zone</span>
+          <span class="details-value">{{ selectedTable.area }}</span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Seats</span>
+          <span class="details-value">{{ selectedTable.capacity }}</span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Status</span>
+          <span class="details-value">
+            <span class="status-pill" :class="statusClass(selectedTable.status)">
+              {{ selectedTable.status }}
+            </span>
+          </span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Current Order</span>
+          <span class="details-value">{{ selectedTable.currentOrder || '-' }}</span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Note</span>
+          <span class="details-value">{{ selectedTable.note || '-' }}</span>
+        </div>
+
+        <div class="details-row">
+          <span class="details-label">Scan URL</span>
+          <a
+            v-if="selectedTable.qrUrl"
+            :href="selectedTable.qrUrl"
+            target="_blank"
+            class="details-link"
+          >
+            Open scan page
+          </a>
+          <span v-else class="details-value">-</span>
+        </div>
+      </div>
+
+      <div class="details-qr-panel">
+        <div class="details-qr-box">
+          <img
+            v-if="selectedTable.qrPng"
+            :src="selectedTable.qrPng"
+            :alt="`QR for ${selectedTable.name}`"
+            class="details-qr-image"
+          />
+          <div v-else class="details-qr-empty">
+            QR not available
+          </div>
+        </div>
+
+        <div class="details-qr-meta">
+          <div class="details-qr-title">{{ selectedTable.name }}</div>
+          <div class="details-qr-text">{{ selectedTable.area }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn--primary" @click="closeDetailsDialog">Close</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -211,7 +298,22 @@ type TableRow = {
   currentOrder?: number | null
   since: string
   note?: string
+  qrPng?: string
+  qrUrl?: string
 }
+const detailsDialogVisible = ref(false)
+const selectedTable = ref<TableRow | null>(null)
+
+function openDetailsDialog(row: TableRow) {
+  selectedTable.value = row
+  detailsDialogVisible.value = true
+}
+
+function closeDetailsDialog() {
+  detailsDialogVisible.value = false
+  selectedTable.value = null
+}
+
 
 /* =======================
    Router & Store
@@ -349,6 +451,9 @@ const tables = computed<TableRow[]>(() =>
         ? new Date(p.activeOrders[0].createdAt).toTimeString().slice(0, 5)
         : '-',
       note: p.description,
+      qrValue: p.qrValue,
+      qrUrl: p.qrUrl,
+      qrPng: p.qrPng,
     })),
 )
 

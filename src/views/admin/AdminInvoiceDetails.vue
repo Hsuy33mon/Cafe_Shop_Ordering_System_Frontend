@@ -337,7 +337,8 @@ function buildReceiptData(invoice: any): ReceiptData {
     subtotal,
     ingredientTotal,
     total,
-    vatAmount
+    vatAmount,
+    vatRate: invoice.value?.vatRate,
   }
 }
 
